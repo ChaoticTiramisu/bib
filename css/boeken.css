@@ -7,7 +7,7 @@ body {
 
 
 .hoofdbalk {
-    background-color: blue;
+    background-color: lightgray;
     height: 100px;
     display: flex;
     
@@ -17,7 +17,7 @@ body {
 
 .logo {
     height: 100px;
-    flex: 1;
+    flex:1;
     padding-right: 3cm;
 
     
@@ -26,16 +26,41 @@ body {
 
 .categorie {
     height: 100px;
+    display: flex;
     flex: 2;
+    align-items: center;
+    justify-content:right;
     
 
 }
 
 .knop_categorie {
-    height: 80px;
+    display: flex;
+    height: 70px;
     width:100px;
     background-color: blueviolet;
-    transform: translateY(10px);
     border-radius: 12px;
+    margin: 30px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 3px 3px;
+    font-family: 'Roboto', sans-serif;
+    text-size-adjust: 12px;
     
+    
+}
+
+.search_knop {
+    border-radius: 100%;
+    box-shadow: 3px 3px;
+
+    
+
+}
+
+.search_knop img{
+    height: 40px;
+    
+    
+
 }
