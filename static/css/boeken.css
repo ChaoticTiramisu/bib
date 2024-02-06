@@ -43,7 +43,7 @@ body {
     margin: 30px;
     justify-content: center;
     align-items: center;
-    box-shadow: 3px 3px;
+    box-shadow: 1px 1px;
     font-family: 'Roboto', sans-serif;
     text-size-adjust: 12px;
     
@@ -52,7 +52,7 @@ body {
 
 .search_knop {
     border-radius: 100%;
-    box-shadow: 3px 3px;
+    box-shadow: 1px 1px;
 
     
 
@@ -63,4 +63,8 @@ body {
     
     
 
+}
+
+.widget {
+    
 }
