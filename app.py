@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session
+from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
 from database import Gebruiker, Rol, Boeken
@@ -42,11 +42,11 @@ def login():
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method == "POST":
+
         register_name = request.form["name"]
         register_email = request.form["register_email"]
         register_password = request.form["register_paswoord"]
 
-       
         new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password)
         db.session.add(new_gebruiker)
         db.session.commit()
@@ -61,6 +61,22 @@ def register():
 def logout():
     session["email"] = None
     return redirect("/")
+
+@app.route("/boeken")
+def boeken():
+    return render_template("boeken.html")
+
+@app.route("/boeken/add",methods = ["POST,GET"])
+def boeken_add():
+
+    if request.method == "POST":
+        test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+
+        if test.rol == "Bibliothecaris":
+            admin = True
+            return render_template("boeken_toev.html")
+    else:
+        abort(404)
 
 
 if __name__ == "__main__":

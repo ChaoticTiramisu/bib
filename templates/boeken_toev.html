@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %} Boeken {% endblock title %} 
+
+{% block body %}
+<center>
+    <form action="/boeken/add" method="post">
+        <h2>Titel</h2>
+        <input type="text" name="titel" placeholder="titel" required><br><br>
+
+        <h2>auteur</h2>
+        <input type="text" name="auteur" placeholder="auteur" required><br><br>
+
+        <h2>ISBN</h2>
+        <input type="password" name="ISBN" placeholder="ISBN" required><br><br>
+
+        <input type="submit" value="Register">
+    </form>
+</center>
+{% endblock body %}
