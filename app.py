@@ -44,6 +44,7 @@ def register():
     if request.method == "POST":
 
         register_name = request.form["name"]
+        register_achternaam = request.form["achternaam"]
         register_email = request.form["register_email"]
         register_password = request.form["register_paswoord"]
 
