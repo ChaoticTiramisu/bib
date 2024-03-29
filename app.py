@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import os
-from database import Bibliothecaris, Ontlener, Boeken, Login
+from database import Gebruiker, Rol, Boeken
 
 dirname = os.path.dirname(__file__)
 app = Flask(__name__, instance_path=dirname)
@@ -28,8 +28,8 @@ def login():
     if request.method == "POST":
         email = request.form["login_email"]
         password = request.form["login_paswoord"]
-        user = db.session.query(Login).filter_by(user_email=email).first()
-        if user is not None and user.user_paswoord == password:
+        user = db.session.query(Gebruiker).filter_by(email=email).first()
+        if user is not None and user.paswoord == password:
             session["email"] = email
             flash("Login succesvol")
             return redirect("/")
@@ -42,25 +42,19 @@ def login():
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["register_email"]
-        password = request.form["register_paswoord"]
+        register_name = request.form["name"]
+        register_email = request.form["register_email"]
+        register_password = request.form["register_paswoord"]
 
        
-        new_ontlener = Ontlener(lln_naam=name)
-        db.session.add(new_ontlener)
+        new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password)
+        db.session.add(new_gebruiker)
         db.session.commit()
 
-        
-        new_login = Login(lln_id=new_ontlener.lln_id, user_email=email, user_paswoord=password)
-        db.session.add(new_login)
-        db.session.commit()
-
-        session["email"] = email
         flash("Registratie succesvol")
         return redirect(url_for("login"))
-
-    return render_template("register.html")
+    else:
+        return render_template("register.html")
 
 
 @app.route("/logout")
