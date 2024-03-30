@@ -73,10 +73,12 @@ def boeken():
 def add():
     if request.method == "POST":
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-        print("loop")
-        if test.rol == "Bibliothecaris":
+        print(test.rol)
 
-            if "genre" and not "ISBN" in request.form:
+        if str(test.rol) == "Bibliothecaris":
+
+            print(request.form)
+            if request.form["genre"]:
                 genre = Genre(genre = request.form["genre"])
                 db.session.add(genre)
                 db.session.commit()
@@ -113,9 +115,10 @@ def add():
                 flash("Boek succesvol toegevoegd.")
             else:
                 abort(404)
-    else:
-        genres = db.session.query(Genre.genre)
-        return render_template("boeken_control.html", genres = genres)
+        
+    
+    genres = db.session.query(Genre.genre).all()
+    return render_template("boeken_control.html", genres = genres)
             
     
 

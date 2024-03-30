@@ -4,7 +4,7 @@
 
 {% block body %}
 <center>
-    <form action="/add" method="post" name="boek">
+    <form action="{{ url_for('add') }}" method="post" name="boek">
 
         <h2>ISBN</h2>
         <input type="text" name="ISBN" placeholder="ISBN" required><br><br>
@@ -18,12 +18,12 @@
             <option value="{{genre}}">{{genre}}</option>
             {% endfor %}
         </select>
-
-        
-        
-
         <input type="submit" value="Register">
     </form>
-    <form action="/"></form>
+    <form action="{{ url_for('add') }}" method="post">
+        <h1>Voeg een genre toe</h1>
+        <input type="text" name="genre" placeholder="genre">
+        <input type="submit" placeholder="voeg toe">
+    </form>
 </center>
 {% endblock body %}
