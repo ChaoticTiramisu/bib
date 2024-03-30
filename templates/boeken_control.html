@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} Boeken {% endblock title %} 
+
+{% block body %}
+<center>
+    <form action="/add" method="post" name="boek">
+
+        <h2>ISBN</h2>
+        <input type="text" name="ISBN" placeholder="ISBN" required><br><br>
+
+        <h2>Titel</h2>
+        <input type="text" name="titel" placeholder="titel" required><br><br>
+
+        <h2>Auteur</h2>
+        <select name="genre" id="genre">
+            {% for genre in genres %}
+            <option value="{{genre}}">{{genre}}</option>
+            {% endfor %}
+        </select>
+
+        
+        
+
+        <input type="submit" value="Register">
+    </form>
+    <form action="/"></form>
+</center>
+{% endblock body %}

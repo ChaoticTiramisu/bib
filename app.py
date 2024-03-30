@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
-from database import Gebruiker, Rol, Boeken
+from database import Gebruiker, Rol, Boek, Genre, Auteur, Thema
 
 dirname = os.path.dirname(__file__)
 app = Flask(__name__, instance_path=dirname)
@@ -47,37 +47,81 @@ def register():
         register_achternaam = request.form["achternaam"]
         register_email = request.form["register_email"]
         register_password = request.form["register_paswoord"]
+        rol = request.form["recht"]
 
-        new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password)
+        new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
         db.session.add(new_gebruiker)
         db.session.commit()
 
         flash("Registratie succesvol")
         return redirect(url_for("login"))
     else:
-        return render_template("register.html")
+        rol_choices = [(value, label) for value, label in Gebruiker.rol_list]
+        return render_template("register.html",rol_choices=rol_choices)
 
 
 @app.route("/logout")
 def logout():
-    session["email"] = None
+    session.clear()
     return redirect("/")
 
 @app.route("/boeken")
 def boeken():
     return render_template("boeken.html")
 
-@app.route("/boeken/add",methods = ["POST,GET"])
-def boeken_add():
-
+@app.route("/add",methods = ["POST","GET"])
+def add():
     if request.method == "POST":
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-
+        print("loop")
         if test.rol == "Bibliothecaris":
-            admin = True
-            return render_template("boeken_toev.html")
+
+            if "genre" and not "ISBN" in request.form:
+                genre = Genre(genre = request.form["genre"])
+                db.session.add(genre)
+                db.session.commit()
+                flash("genre succesvol toegevoegd")
+
+            elif "thema" and not "ISBN" in request.form:
+                thema = Thema(thema = request.form["thema"])
+                db.session.add(thema)
+                db.session.commit()
+                flash("thema succesvol toegevoegd")
+
+            elif "auteur" and not "ISBN" in request.form:
+                auteur = Auteur(auteur = request.form["auteur"])
+                db.session.add(auteur)
+                db.session.commit()
+                flash("auteur succesvol toegevoegd")
+
+            elif "ISBN" in request.form:
+                ISBN = request.form["ISBN"]
+                titel = request.form["titel"]
+                form_genre = request.form["genre"]
+                form_auteur = request.form["auteur"]
+                form_thema = request.form["thema"]
+
+                genre = db.session.query(Genre).filter_by(genre=form_genre).first()
+                auteur = db.session.query(Auteur).filter_by(auteur=form_auteur).first()
+                thema = db.session.query(Thema).filter_by(thema=form_thema).first()
+
+                boek = Boek(genre_id = genre.id, titel = titel, auteur_id = auteur.id, ISBN = ISBN, thema_id = thema.id)
+
+                db.session.add(boek)
+                db.session.commit()
+
+                flash("Boek succesvol toegevoegd.")
+            else:
+                abort(404)
     else:
-        abort(404)
+        genres = db.session.query(Genre.genre)
+        return render_template("boeken_control.html", genres = genres)
+            
+    
+
+
+
+
 
 
 if __name__ == "__main__":

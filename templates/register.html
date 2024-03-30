@@ -9,13 +9,19 @@
         <input type="text" name="name" placeholder="Name" required><br><br>
 
         <h2>achternaam</h2>
-        <input type="text" name="name" placeholder="achternaam" required><br><br>
+        <input type="text" name="achternaam" placeholder="achternaam" required><br><br>
 
         <h2>Email</h2>
         <input type="text" name="register_email" placeholder="Email" required><br><br>
 
         <h2>Password</h2>
         <input type="password" name="register_paswoord" placeholder="Password" required><br><br>
+
+        <select name="recht" id="recht">
+            {% for choice,label in rol_choices %}
+                    <option value="{{ choice }}">{{ label }}</option>
+            {% endfor %}
+        </select>
 
         <input type="submit" value="Register">
     </form>

@@ -11,7 +11,7 @@ Base = declarative_base()
 
 class Gebruiker(Base):
 
-    rol = [
+    rol_list = [
             ('bibliothecaris','Bibliothecaris'),
             ('ontlener','Ontlener')
            ]
@@ -25,7 +25,7 @@ class Gebruiker(Base):
     paswoord = mapped_column(String)
     geboortedtm = mapped_column(String)
     tel_nr = mapped_column(Integer)
-    rol = mapped_column(ChoiceType(rol,impl=String()))
+    rol = mapped_column(ChoiceType(rol_list,impl=String()))
    
 class Rol(Base):
     __tablename__ = "Rol"
@@ -40,13 +40,44 @@ class Gebruiker_rol(Base):
     gebruiker_id = mapped_column(Integer, ForeignKey('Rol.id'), primary_key=True)
 
 
-class Boeken(Base):
-    __tablename__ = "Boeken"
+class Boek(Base):
+    __tablename__ = "boek"
 
-    bkn_ISBN = mapped_column(String, primary_key=True)
-    bkn_genre = mapped_column(String)
-    bkn_thema = mapped_column(String)
-    bkn_auteur = mapped_column(String)
+    ISBN = mapped_column(String, primary_key=True)
+    titel = mapped_column(String, unique=True, nullable=False)
+    thema_id = mapped_column(Integer, ForeignKey('thema.id'), nullable=False)
+    auteur_id = mapped_column(Integer, ForeignKey('auteur.id'), nullable=False)
+    genre_id = mapped_column(Integer, ForeignKey('genre.id'), nullable=False)
+   
+    #relaties
+    genre = relationship('Genre', back_populates='boek')
+    thema = relationship('Thema', back_populates='boek')
+    auteur = relationship('Auteur', back_populates='boek')
+class Genre(Base):
+    __tablename__ = "genre"
 
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    genre = mapped_column(String)
+   
+    #relaties
+    boek = relationship('Boek', back_populates='genre')
+
+class Thema(Base):
+    __tablename__ = "thema"
+
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    thema = mapped_column(String)
+   
+    #relaties
+    boek = relationship('Boek', back_populates='thema')
+
+class Auteur(Base):
+    __tablename__ = "auteur"
+
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    auteur = mapped_column(String)
+  
+    #relaties
+    boek = relationship('Boek', back_populates='auteur')
 
 Base.metadata.create_all(bind=engine)
