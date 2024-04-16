@@ -7,14 +7,7 @@
 
     {% block body %}
     <center>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    {{ message }}
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
+        
         <h1>Login</h1>
         <H2>Naam</H2>
         <form action="/login" method="post" class="mb-3">
