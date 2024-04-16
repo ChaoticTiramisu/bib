@@ -4,25 +4,25 @@ import os
 
 def create_venv(venv_name):
     """
-    Create a virtual environment.
+    Creëer een virtual environment.
     """
     try:
         subprocess.check_call([sys.executable, '-m', 'venv', venv_name])
-        print(f"Virtual environment {venv_name} created successfully.")
+        print(f"Virtual environment {venv_name} succesvol gecreëerd.")
     except subprocess.CalledProcessError:
         print(f"Error creating virtual environment {venv_name}.")
         sys.exit(1)
 
 def activate_venv(venv_name):
     """
-    Activate the virtual environment on Windows.
+    Activeerd de virtual environment op Windows.
     """
     venv_path = os.path.join(venv_name, 'Scripts')
     activate_script = os.path.join(venv_path, 'activate.bat')
 
     try:
         subprocess.check_call([activate_script], shell=True)
-        print(f"Virtual environment {venv_name} activated.")
+        print(f"Virtual environment {venv_name} geactiveerd.")
     except subprocess.CalledProcessError:
         print(f"Error activating virtual environment {venv_name}.")
         sys.exit(1)
@@ -30,7 +30,7 @@ def activate_venv(venv_name):
 
 def install_dependencies(venv_name, requirements_file):
     """
-    Install dependencies from requirements.txt file.
+    Installeert dependencies van de requirements.txt file.
     """
     venv_path = os.path.join(venv_name, 'bin' if os.name != 'nt' else 'Scripts')
     pip_path = os.path.join(venv_path, 'pip')
@@ -43,14 +43,14 @@ def install_dependencies(venv_name, requirements_file):
         sys.exit(1)
 
 if __name__ == '__main__':
-    # Define the virtual environment name
+    
     venv_name = 'env'
 
-    # Create virtual environment
+    
     create_venv(venv_name)
 
-    # Activate virtual environment
+    
     activate_venv(venv_name)
 
-    # Install dependencies from requirements.txt
+    
     install_dependencies(venv_name, 'requirements.txt')
