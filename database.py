@@ -57,7 +57,7 @@ class Genre(Base):
     __tablename__ = "genre"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    genre = mapped_column(String)
+    naam = mapped_column(String)
    
     #relaties
     boek = relationship('Boek', back_populates='genre')
@@ -66,7 +66,7 @@ class Thema(Base):
     __tablename__ = "thema"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    thema = mapped_column(String)
+    naam = mapped_column(String)
    
     #relaties
     boek = relationship('Boek', back_populates='thema')
@@ -75,7 +75,7 @@ class Auteur(Base):
     __tablename__ = "auteur"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    auteur = mapped_column(String)
+    naam = mapped_column(String)
   
     #relaties
     boek = relationship('Boek', back_populates='auteur')

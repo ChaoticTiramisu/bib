@@ -12,10 +12,10 @@
         <h2>Titel</h2>
         <input type="text" name="titel" placeholder="titel" required><br><br>
 
-        <h2>Auteur</h2>
+        <h2>Genre</h2>
         <select name="genre" id="genre">
             {% for genre in genres %}
-            <option value="{{genre}}">{{genre}}</option>
+                    <option value="{{ genre[0] }}">{{ genre[0] }}</option>
             {% endfor %}
         </select>
         <input type="submit" value="Register">

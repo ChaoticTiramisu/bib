@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
-from database import Gebruiker, Rol, Boek, Genre, Auteur, Thema
+from database import Gebruiker, Boek, Genre, Auteur, Thema
 
 dirname = os.path.dirname(__file__)
 app = Flask(__name__, instance_path=dirname)
@@ -13,6 +13,21 @@ app.secret_key = "Arno_augu_Cairo"
 db = SQLAlchemy(app)
 with app.app_context():
     db.create_all()
+
+def checkContains(table, column, item):
+    
+    result = db.session.query(table).filter(column == item).first()
+    
+    if result == None:
+        return False
+    else:
+
+        return True
+
+def getValue(table, column, item):
+    result = db.session.query(table).filter(column == item).first()
+
+    return result
 
 
 @app.route("/")
@@ -68,33 +83,41 @@ def logout():
 @app.route("/boeken")
 def boeken():
     return render_template("boeken.html")
-
+#boeken toevoegen
 @app.route("/add",methods = ["POST","GET"])
 def add():
     if request.method == "POST":
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-        print(test.rol)
 
         if str(test.rol) == "Bibliothecaris":
 
-            print(request.form)
-            if request.form["genre"]:
-                genre = Genre(genre = request.form["genre"])
-                db.session.add(genre)
-                db.session.commit()
-                flash("genre succesvol toegevoegd")
+            if "genre" in request.form and "ISBN" not in request.form:
+                genre_naam = Genre(naam = request.form["genre"].lower())
+                if not checkContains(Genre,"naam",genre_naam):
+                    db.session.add(genre_naam)
+                    db.session.commit()
+                    flash("genre succesvol toegevoegd")
+                else:
+                    flash("Genre zit al in database.")
+                
 
-            elif "thema" and not "ISBN" in request.form:
-                thema = Thema(thema = request.form["thema"])
-                db.session.add(thema)
-                db.session.commit()
-                flash("thema succesvol toegevoegd")
+            elif "thema" in request.form and "ISBN" not in request.form:
+                thema_naam = Thema(naam = request.form["genre"].lower())
+                if not checkContains(Thema,"naam",thema_naam):
+                    db.session.add(thema_naam)
+                    db.session.commit()
+                    flash("Thema succesvol toegevoegd")
+                else:
+                    flash("Thema zit al in database.")
 
-            elif "auteur" and not "ISBN" in request.form:
-                auteur = Auteur(auteur = request.form["auteur"])
-                db.session.add(auteur)
-                db.session.commit()
-                flash("auteur succesvol toegevoegd")
+            elif "auteur" in request.form and "ISBN" not in request.form:
+                auteur_naam = Thema(naam = request.form["auteur"].lower())
+                if not checkContains(Thema,"naam",thema_naam):
+                    db.session.add(thema_naam)
+                    db.session.commit()
+                    flash("Auteur succesvol toegevoegd")
+                else:
+                    flash("De auteur zit al in database.")
 
             elif "ISBN" in request.form:
                 ISBN = request.form["ISBN"]
@@ -115,12 +138,103 @@ def add():
                 flash("Boek succesvol toegevoegd.")
             else:
                 abort(404)
-        
-    
-    genres = db.session.query(Genre.genre).all()
-    return render_template("boeken_control.html", genres = genres)
+      
+    genres = db.session.query(Genre.naam).all()
+    thema = db.session.query(Thema.naam).all()
+    auteur = db.session.query(Auteur.naam).all()
+    return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+
+#boeken verwijderen
+@app.route("/delete",methods = ["POST","GET"])
+def delete():
+    if request.method == "POST":
+        test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+        print(test.rol)
+
+        if str(test.rol) == "Bibliothecaris":
+            if "boek" in request.form:
+                boek_naam = Boek(naam = request.form["boek"].lower())
+                if checkContains(Boek,"Titel",boek_naam):
+                    ISBN = request.form["ISBN"].lower()
+                    boek = db.session.query(Boek).filter_by(ISBN = ISBN)
+                    db.session.delete(boek)
+                    db.session.commit()
+                    flash("Boek succesvol verwijderd")
+                else:
+                    flash("Boek zit niet in de database.")
+            elif "Auteur" in request.form:
+                auteur_naam = Auteur( naam = request.form["auteur"].lower())
+                if checkContains(Boek,"naam",auteur_naam):
+                    naam = request.form["auteur"].lower()
+                    auteur = db.session.query(Auteur).filter_by(naam = naam)
+                    db.session.delete(auteur)
+                    db.session.commit()
+                    flash("Auteur succesvol verwijderd")
+                else:
+                    flash("Auteur zit niet in de database.")
+            elif "Genre" in request.form:
+                genre_naam = Genre(naam = request.form["genre"].lower())
+                if checkContains(Genre,"naam",genre_naam):
+                    naam = request.form["genre"].lower()
+                    genre = db.session.query(Genre).filter_by(naam = naam)
+                    db.session.delete(genre)
+                    db.session.commit()
+                    flash("Genre succesvol verwijderd")
+                else:
+                    flash("Genre zit niet in de database.")
+            elif "Thema" in request.form:
+                thema_naam = Thema(naam = request.form["thema"].lower())
+                if checkContains(Thema,"naam",thema_naam):
+                    naam = request.form["thema"].lower()
+                    thema = db.session.query(Thema).filter_by(naam = naam)
+                    db.session.delete(thema)
+                    db.session.commit()
+                    flash("Thema succesvol verwijderd")
+                else:
+                    flash("Thema zit niet in de database.")
+
+    genres = db.session.query(Genre.naam).all()
+    thema = db.session.query(Thema.naam).all()
+    auteur = db.session.query(Auteur.naam).all()
+    return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+
+#data aanpassen 
+@app.route("/change",methods = ["POST","GET"])
+def change():
+    if request.method == "POST":
+        test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+
+        if str(test.rol) == "Bibliothecaris":
+            if "ISBN" in request.form:
+                boek = Boek(Titel = request.form["boek"].lower())
+                if checkContains(Boek,"naam",boek):
+                    
+                    
+                    boek = db.session.query(Boek).filter_by(ISBN = request.form["ISBN"]).first()
+                    genre = db.session.query(Genre).filter_by(naam = request.form["Genre"]).first()
+                    auteur = db.session.query(Auteur).filter_by(naam = request.form["auteur"]).first()
+                    thema = db.session.query(Thema).filter_by(naam = request.form["thema"]).first()
+                    boek.ISBN = request.form["ISBN"].lower()
+                    boek.titel = request.form["Titel"].lower()
+                    boek.genre_id = genre.id
+                    boek.auteur_id = auteur.id
+                    boek.thema_id = auteur.id
+
+                    db.session.commit()
+                   
+                    flash("Boek succesvol veranderd")
+                else:
+                    flash("Boek zit niet in de database.")
+            else:
+                flash("Er is een fout opgetreden.")
             
-    
+
+    genres = db.session.query(Genre.naam).all()
+    thema = db.session.query(Thema.naam).all()
+    auteur = db.session.query(Auteur.naam).all()
+    return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+
+
 
 
 
