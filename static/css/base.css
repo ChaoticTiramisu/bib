@@ -50,3 +50,24 @@ h2 {
     height: auto;
     border-radius: 50%; 
 }
+
+.aanpassen{
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    width:600px;
+}
+
+.toevoegen{
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    width:600px;
+}
+
+.verwijderen{
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    width: 600px;
+}
