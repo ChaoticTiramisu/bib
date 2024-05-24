@@ -1,6 +1,9 @@
 {% extends "base.html"%}
 
 {% block body %}
+<div class="email">
+{{email}}
+</div>
 <center>
 <h2>Welkom op de bib site!</h2>
 <h2>Gemaakt door 5ICW</h2><br><br>
@@ -12,6 +15,7 @@
 <div class="box">
     <h2>Nieuwe boeken!</h2>
 </div>
+
 <div class="zijbalk">
     <a href="https://glorieuxsecundair.smartschool.be/login?s=2"><img src="/static/afbeeldingen/ss.jpg" alt="Logo" title="Smartschool"></a>
     <a href="{{url_for('PICT')}}"><img src="/static/afbeeldingen/pict.png" alt="Logo" title="PICT"></a>
@@ -19,4 +23,5 @@
 
 </div>
 </center>
+
 {% endblock %}

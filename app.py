@@ -32,10 +32,12 @@ def getValue(table, column, item):
 
 @app.route("/")
 def index():
-    name = session.get('email')
-    if name is not None:
+    email = session.get('email')
+    if email == None:
         return redirect(url_for("login"))
-    return render_template("index.html")
+    user = db.session.query(Gebruiker).filter_by(email=email).first()
+    return render_template("index.html", email = email)
+    
 
 
 @app.route("/login", methods=["POST", "GET"])
