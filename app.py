@@ -238,9 +238,13 @@ def change():
     return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
 
 
+@app.route("/PICT")
+def PICT():
+    return render_template("PICT.html")
 
-
-
+@app.route("/taal")
+def taal():
+    return render_template("taal.html")
 
 
 
