@@ -1,0 +1,17 @@
+{% extends "base.html"%}
+
+{% block body %}
+
+<body>
+    <center>
+        <img src="/static/afbeeldingen/under_construction.jpg" alt="Logo" title=" Under_Construction">
+    </center>
+</body>
+<div class="zijbalk">
+    <a href="https://glorieuxsecundair.smartschool.be/login?s=2"><img src="/static/afbeeldingen/ss.jpg" alt="Logo" title="Smartschool"></a>
+    <a href="{{url_for('index')}}"><img src="/static/afbeeldingen/bib.png" alt="Logo" title="Index"></a>
+    <a href="{{url_for('taal')}}"><img src="/static/afbeeldingen/taal.png" alt="Logo" title="taal remediëren"></a>
+
+</div>
+
+{% endblock %}

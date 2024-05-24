@@ -3,11 +3,9 @@
 {% block title %} Boeken {% endblock title %} 
 
 {% block body %}
-<div class="toevoegen">
 <center>
-    <head>
-        <link rel="icon" type="image/x-icon" href="static\afbeeldingen\logo.svg">
-    </head>
+<div class="toevoegen">
+    <h2>Toevoegen</h2>
     <form action="{{ url_for('add') }}" method="post" name="boek">
 
         <h2>ISBN</h2>
@@ -17,7 +15,6 @@
         <input type="text" name="titel" placeholder="titel" required><br><br>
 
         <h2>Genre</h2>
-        <h2>genre</h2>
         <select name="genre" id="genre">
             {% for genre in genres %}
                     <option value="{{ genre[0] }}">{{ genre[0] }}</option>
@@ -26,13 +23,19 @@
         <input type="submit" value="Register">
     </form>
     <form action="{{ url_for('add') }}" method="post">
-        <h1>Voeg een genre toe</h1>
+        <h2>Voeg een genre toe</h2>
         <input type="text" name="genre" placeholder="genre">
         <input type="submit" placeholder="voeg toe">
     </form>
-</center>
+    <br>
+    
+
 </div>
+</center>
+<br><br><br>
+<center>
 <div class="aanpassen">
+    <h2>Aanpassen</h2>
     <form action="{{ url_for('change') }}" method="post" name="change">
 
         <h2>ISBN</h2>
@@ -66,6 +69,8 @@
         <input type="submit" value="Register">
     </form>
 </div>
+</center>
+<br><br><br><br>
 <div class="verwijderen">
     
 </div>

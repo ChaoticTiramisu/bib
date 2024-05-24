@@ -35,7 +35,9 @@ def index():
     email = session.get('email')
     if email == None:
         return redirect(url_for("login"))
-    return render_template("index.html")
+    user = db.session.query(Gebruiker).filter_by(email=email).first()
+    return render_template("index.html", email = email)
+    
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -249,9 +251,13 @@ def change():
     return redirect("adminworkspace")
 
 
+@app.route("/PICT")
+def PICT():
+    return render_template("PICT.html")
 
-
-
+@app.route("/taal")
+def taal():
+    return render_template("taal.html")
 
 
 
