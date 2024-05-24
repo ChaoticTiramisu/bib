@@ -156,8 +156,8 @@ def delete():
 
         if str(test.rol) == "Bibliothecaris":
             if "boek" in request.form:
-                boek_naam = Boek(naam = request.form["boek"].lower())
-                if checkContains(Boek,"Titel",boek_naam):
+                ISBN_nummer = Boek(ISBN = request.form["ISBN"].lower())
+                if checkContains(Boek,"ISBN",boek):
                     ISBN = request.form["ISBN"].lower()
                     boek = db.session.query(Boek).filter_by(ISBN = ISBN)
                     db.session.delete(boek)
