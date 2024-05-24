@@ -83,6 +83,9 @@ def logout():
 @app.route("/boeken")
 def boeken():
     return render_template("boeken.html")
+
+
+
 #boeken toevoegen
 @app.route("/add",methods = ["POST","GET"])
 def add():
