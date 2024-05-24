@@ -32,8 +32,8 @@ def getValue(table, column, item):
 
 @app.route("/")
 def index():
-    name = session.get('email')
-    if name is not None:
+    email = session.get('email')
+    if email == None:
         return redirect(url_for("login"))
     return render_template("index.html")
 
@@ -84,12 +84,32 @@ def logout():
 def boeken():
     return render_template("boeken.html")
 
+@app.route("/adminworkspace",methods = ["GET"])
+def adminworkspace():
+    if request.method == "GET":
+        print(session.get('email'))
+        if session.get('email') == None:
+            return redirect(url_for("login"))
+        else:
+            test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
+            if str(test.rol) == "Bibliothecaris":
+                genres = db.session.query(Genre.naam).all()
+                thema = db.session.query(Thema.naam).all()
+                auteur = db.session.query(Auteur.naam).all()
+                
+                return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+            else:
+                abort(404)
+    else:
+        abort(404)
+
 
 
 #boeken toevoegen
-@app.route("/add",methods = ["POST","GET"])
+@app.route("/add",methods = ["POST"])
 def add():
     if request.method == "POST":
+        
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
 
         if str(test.rol) == "Bibliothecaris":
@@ -142,13 +162,10 @@ def add():
             else:
                 abort(404)
       
-    genres = db.session.query(Genre.naam).all()
-    thema = db.session.query(Thema.naam).all()
-    auteur = db.session.query(Auteur.naam).all()
-    return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+    return redirect(url_for("adminworkspace"))
 
 #boeken verwijderen
-@app.route("/delete",methods = ["POST","GET"])
+@app.route("/delete",methods = ["POST"])
 def delete():
     if request.method == "POST":
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
@@ -196,13 +213,10 @@ def delete():
                 else:
                     flash("Thema zit niet in de database.")
 
-    genres = db.session.query(Genre.naam).all()
-    thema = db.session.query(Thema.naam).all()
-    auteur = db.session.query(Auteur.naam).all()
-    return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+    return redirect("adminworkspace")
 
 #data aanpassen 
-@app.route("/change",methods = ["POST","GET"])
+@app.route("/change",methods = ["POST"])
 def change():
     if request.method == "POST":
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
@@ -232,10 +246,7 @@ def change():
                 flash("Er is een fout opgetreden.")
             
 
-    genres = db.session.query(Genre.naam).all()
-    thema = db.session.query(Thema.naam).all()
-    auteur = db.session.query(Auteur.naam).all()
-    return render_template("boeken_control.html", genres = genres, thema = thema , auteur = auteur)
+    return redirect("adminworkspace")
 
 
 
