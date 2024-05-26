@@ -27,17 +27,7 @@ class Gebruiker(Base):
     tel_nr = mapped_column(Integer)
     rol = mapped_column(ChoiceType(rol_list,impl=String()))
    
-class Rol(Base):
-    __tablename__ = "Rol"
 
-    id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    naam = mapped_column(String)
-
-class Gebruiker_rol(Base):
-    __tablename__ = "Gerbuiker_rol"
-
-    rol_id = mapped_column(Integer, ForeignKey('Gebruiker.id'), primary_key=True)
-    gebruiker_id = mapped_column(Integer, ForeignKey('Rol.id'), primary_key=True)
 
 
 class Boek(Base):

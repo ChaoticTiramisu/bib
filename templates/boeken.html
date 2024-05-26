@@ -1,6 +1,14 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 
 {% block body %}
+<H2>Boeken</H2>
+{% for boek in boeken %}
+    <Div class="boek">
+        <img src="https://covers.openlibrary.org/b/isbn/{{ boek.ISBN }}-S.jpg" />
 
-
+        <h3>Titel: {{ boek.titel }}</h3>
+        <p>Auteur: {{ boek.auteur.naam}}</p>
+    </Div>
+    
+{% endfor %}
 {% endblock %}

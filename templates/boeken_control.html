@@ -5,8 +5,8 @@
 {% block body %}
 <center>
 <div class="toevoegen">
-    <h2>Toevoegen</h2>
-    <form action="{{ url_for('add') }}" method="post" name="boek">
+    <h2>Boek Toevoegen</h2>
+    <form action="{{ url_for('add')}}" method="post" name="boek">
 
         <h2>ISBN</h2>
         <input type="text" name="ISBN" placeholder="ISBN" required><br><br>
@@ -20,41 +20,11 @@
                     <option value="{{ genre[0] }}">{{ genre[0] }}</option>
             {% endfor %}
         </select>
-        <input type="submit" value="Register">
-    </form>
-    <form action="{{ url_for('add') }}" method="post">
-        <h2>Voeg een genre toe</h2>
-        <input type="text" name="genre" placeholder="genre">
-        <input type="submit" placeholder="voeg toe">
-    </form>
-    <br>
-    
-
-</div>
-</center>
-<br><br><br>
-<center>
-<div class="aanpassen">
-    <h2>Aanpassen</h2>
-    <form action="{{ url_for('change') }}" method="post" name="change">
-
-        <h2>ISBN</h2>
-        <input type="text" name="ISBN" placeholder="ISBN" required><br><br>
-
-        <h2>Titel</h2>
-        <input type="text" name="titel" placeholder="titel" required><br><br>
 
         <h2>Thema</h2>
         <select name="thema" id="thema">
             {% for thema in themas %}
                     <option value="{{ thema[0] }}">{{ thema[0] }}</option>
-            {% endfor %}
-        </select>
-
-        <h2>Genre</h2>
-        <select name="genre" id="genre">
-            {% for genre in genres %}
-                    <option value="{{ genre[0] }}">{{ genre[0] }}</option>
             {% endfor %}
         </select>
 
@@ -65,13 +35,37 @@
             {% endfor %}
         </select>
 
-
         <input type="submit" value="Register">
     </form>
+    <form action="{{ url_for('add') }}" method="post">
+        <h2>Voeg een genre toe</h2>
+        <input type="text" name="genre" placeholder="genre">
+        <input type="submit" placeholder="voeg toe">
+    </form>
+    <br>
+
+    <form action="{{ url_for('add') }}" method="post">
+        <h2>Voeg een thema toe</h2>
+        <input type="text" name="thema" placeholder="thema">
+        <input type="submit" placeholder="voeg toe">
+    </form>
+    <br>
+
+    <form action="{{ url_for('add') }}" method="post">
+        <h2>Voeg een auteur toe</h2>
+        <input type="text" name="auteur" placeholder="auteur">
+        <input type="submit" placeholder="voeg toe">
+    </form>
+    <br>
+    
+
 </div>
 </center>
+<br><br><br>
+
 <br><br><br><br>
 <div class="verwijderen">
+    <h2>Boek verwijderen</h2>
     
 </div>
 {% endblock body %}

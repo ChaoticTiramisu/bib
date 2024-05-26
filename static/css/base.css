@@ -77,3 +77,12 @@ h2 {
     width: fit-content;
     height: auto;
 }
+
+.boek {
+    border: black;
+    border-style:solid;
+    border-width: 5px;
+    width: max-content;
+    border-radius: 12px;
+    background-color: white;
+}

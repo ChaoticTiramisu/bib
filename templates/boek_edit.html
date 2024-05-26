@@ -1,0 +1,43 @@
+{% extends "base.html"%}
+
+{% block body %}
+
+<center>
+    <div class="aanpassen">
+        <h2>Aanpassen</h2>
+        <form action="{{ url_for('change', ISBN = def_ISBN) }}" method="post" name="change">
+    
+            <h2>ISBN</h2>
+            <input type="text" name="ISBN" value="{{def_ISBN}}" required><br><br>
+    
+            <h2>Titel</h2>
+            <input type="text" name="titel" value="{{def_titel}}" required><br><br>
+    
+            <h2>Thema</h2>
+            <select name="thema" id="thema">
+                {% for thema in themas %}
+                        <option value="{{ thema[0] }}" {%if thema[0] == def_thema %} selected {% endif %}>{{ thema[0] }}</option>
+                {% endfor %}
+            </select>
+    
+            <h2>Genre</h2>
+            <select name="genre" id="genre">
+                {% for genre in genres %}
+                        <option value="{{ genre[0] }}" {%if genre[0] == def_genre %} selected {% endif %}>{{ genre[0] }}</option>
+                {% endfor %}
+            </select>
+    
+            <h2>Auteur</h2>
+            <select name="auteur" id="auteur">
+                {% for auteur in auteurs %}
+                        <option value="{{ auteur[0] }}"{%if auteur[0] == def_auteur %} selected {% endif %}>{{ auteur[0] }}</option>
+                {% endfor %}
+            </select>
+    
+    
+            <input type="submit" value="Register">
+        </form>
+    </div>
+    </center>
+
+{% endblock %}
