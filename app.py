@@ -94,7 +94,14 @@ def search():
     q = request.args.get("q")
     print(q)
     if q:
-        results = db.session.query(Boek).join(Auteur).filter(or_(Boek.titel.ilike(f"%{q}%"), Auteur.naam.ilike(f"%{q}%"))).limit(20).all()
+        
+        q = request.args.get('q')
+        results = db.session.query(Boek).join(Boek.auteurs).filter(
+        or_(
+            Boek.titel.ilike(f"%{q}%"),
+            Auteur.naam.ilike(f"%{q}%")
+        )
+        ).limit(20).all()
     else:
         results = []
     user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
@@ -277,9 +284,9 @@ def change(ISBN):
             return render_template("boek_edit.html"
                                    , def_ISBN = boek.ISBN
                                    , def_titel = boek.titel
-                                   , def_genre = boek.genre.naam
-                                   , def_thema = boek.thema.naam
-                                   , def_auteur = boek.auteur.naam
+                                   , def_genres = [Genre.naam for genre in boek.genres]
+                                   , def_themas = [Thema.naam for thema in boek.themas]
+                                   , def_auteurs = [Auteur.naam for auteur in boek.auteurs]
                                    ,genres = genres
                                    ,themas = themas
                                    ,auteurs = auteurs
