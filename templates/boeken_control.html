@@ -16,25 +16,28 @@
         <input type="text" name="titel" placeholder="titel" required><br><br>
 
         <h2>Genre</h2>
-        <select name="genre" id="genre">
+        <div class="scrollable-checkboxes">
             {% for genre in genres %}
-                    <option value="{{ genre[0] }}">{{ genre[0] }}</option>
+                <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}">
+                <label for="genre_{{ genre[0] }}">{{ genre[0] }}</label><br>
             {% endfor %}
-        </select>
+        </div>
 
         <h2>Thema</h2>
-        <select name="thema" id="thema">
+        <div class="scrollable-checkboxes">
             {% for thema in themas %}
-                    <option value="{{ thema[0] }}">{{ thema[0] }}</option>
+                <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}">
+                <label for="thema_{{ thema[0] }}">{{ thema[0] }}</label><br>
             {% endfor %}
-        </select>
+        </div>
 
         <h2>Auteur</h2>
-        <select name="auteur" id="auteur">
+        <div class="scrollable-checkboxes">
             {% for auteur in auteurs %}
-                    <option value="{{ auteur[0] }}">{{ auteur[0] }}</option>
+                <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}">
+                <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
             {% endfor %}
-        </select>
+        </div>
 
         <input type="submit" value="Register">
     </form>

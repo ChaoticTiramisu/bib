@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 
 {% block body %}
-<H2>Boeken</H2>
-{% for boek in boeken %}
-    <Div class="boek">
-        <img src="https://covers.openlibrary.org/b/isbn/{{ boek.ISBN }}-S.jpg" />
-
-        <h3>Titel: {{ boek.titel }}</h3>
-        <p>Auteur: {{ boek.auteur.naam}}</p>
-    </Div>
-    
-{% endfor %}
+<h2>Boeken</h2>
+<div class="search-container">
+    <input type="text" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+</div>
+<div class="boek">
+    <table>
+        <thead>
+            <tr>
+                <td>Title</td>
+                <td>Auteur</td>
+                <td>Thema</td>
+                <td>Genre</td>
+                <td>ISBN</td>
+                <td>{% if user and user.rol == "bibliothecaris" %} Edit {% endif %}</td>
+            </tr>
+        </thead>
+        <tbody id="results">
+            <!-- Results will be inserted here by HTMX -->
+        </tbody>
+    </table>
+</div>
 {% endblock %}

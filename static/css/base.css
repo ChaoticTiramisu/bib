@@ -11,7 +11,7 @@ body {
     padding: 10px 20px;
     background-color: #44746c; 
     box-sizing: border-box;
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     width: 100%;
@@ -23,10 +23,8 @@ body {
     height: 50px;
 }
 
-.menu .button {
-    text-decoration: none;
-    padding: 10px 20px
-}
+
+
 
 h2 {
     font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
@@ -91,4 +89,96 @@ h2 {
     width: max-content;
     border-radius: 12px;
     background-color: white;
+}
+
+.button {
+    font: bold 11px Arial;
+    text-decoration: none;
+    background-color: #EEEEEE;
+    color: #333333;
+    padding: 2px 6px 2px 6px;
+    border-top: 1px solid #CCCCCC;
+    border-right: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    border-left: 1px solid #CCCCCC;
+    border-radius: 12px;
+  }
+
+  .button:hover {
+    background-color: lightgray;
+  }
+
+/* CSS for table */
+.boek {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.boek table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.boek th, .boek td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.boek th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.boek tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.boek tr:hover {
+    background-color: #ddd;
+}
+
+/* CSS for search input */
+.search-container input[type="text"] {
+    width: calc(100% - 4px); /* Adjust for border width */
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+/* Placeholder styling */
+.search-container input[type="text"]::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Focus state styling */
+.search-container input[type="text"]:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Add some padding around the input field */
+.search-container {
+    padding: 16px;
+    background-color: #f9f9f9;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.scrollable-checkboxes {
+    max-height: 200px; /* Set the maximum height of the container */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 5px; /* Optional: add padding for better appearance */
+    border: none; /* Remove borders */
+    outline: none; /* Remove outline */
 }

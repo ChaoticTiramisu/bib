@@ -1,6 +1,6 @@
-from sqlalchemy import String, Integer, ForeignKey, create_engine
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
 from sqlalchemy.orm import relationship, declarative_base, mapped_column
-from sqlalchemy_utils import database_exists, create_database,ChoiceType
+from sqlalchemy_utils import database_exists, create_database, ChoiceType
 
 engine = create_engine("sqlite:///instance/bib.db", echo=True)
 
@@ -8,6 +8,24 @@ if not database_exists("sqlite:///instance/bib.db"):
     create_database(engine.url)
 
 Base = declarative_base()
+
+boek_thema_association = Table(
+    'boek_thema_association', Base.metadata,
+    Column('boek_id', Integer, ForeignKey('boek.ISBN')),
+    Column('thema_id', Integer, ForeignKey('thema.id'))
+)
+
+boek_genre_association = Table(
+    'boek_genre_association', Base.metadata,
+    Column('boek_id', Integer, ForeignKey('boek.ISBN')),
+    Column('genre_id', Integer, ForeignKey('genre.id'))
+)
+
+boek_auteur_association = Table(
+    'boek_auteur_association', Base.metadata,
+    Column('boek_id', Integer, ForeignKey('boek.ISBN')),
+    Column('auteur_id', Integer, ForeignKey('auteur.id'))
+)
 
 class Gebruiker(Base):
 
@@ -35,39 +53,33 @@ class Boek(Base):
 
     ISBN = mapped_column(String, primary_key=True)
     titel = mapped_column(String, unique=True, nullable=False)
-    thema_id = mapped_column(Integer, ForeignKey('thema.id'), nullable=False)
-    auteur_id = mapped_column(Integer, ForeignKey('auteur.id'), nullable=False)
-    genre_id = mapped_column(Integer, ForeignKey('genre.id'), nullable=False)
-   
-    #relaties
-    genre = relationship('Genre', back_populates='boek')
-    thema = relationship('Thema', back_populates='boek')
-    auteur = relationship('Auteur', back_populates='boek')
+
+    themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
+    genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')
+    auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken')
+
 class Genre(Base):
     __tablename__ = "genre"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     naam = mapped_column(String)
-   
-    #relaties
-    boek = relationship('Boek', back_populates='genre')
+
+    boeken = relationship('Boek', secondary=boek_genre_association, back_populates='genres')
 
 class Thema(Base):
     __tablename__ = "thema"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     naam = mapped_column(String)
-   
-    #relaties
-    boek = relationship('Boek', back_populates='thema')
+
+    boeken = relationship('Boek', secondary=boek_thema_association, back_populates='themas')
 
 class Auteur(Base):
     __tablename__ = "auteur"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     naam = mapped_column(String)
-  
-    #relaties
-    boek = relationship('Boek', back_populates='auteur')
+
+    boeken = relationship('Boek', secondary=boek_auteur_association, back_populates='auteurs')
 
 Base.metadata.create_all(bind=engine)

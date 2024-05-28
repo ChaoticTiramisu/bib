@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
 
@@ -36,7 +37,7 @@ def index():
     if email == None:
         return redirect(url_for("login"))
     user = db.session.query(Gebruiker).filter_by(email=email).first()
-    return render_template("index.html", email = email)
+    return render_template("index.html", user = user)
     
 
 
@@ -85,18 +86,28 @@ def logout():
 @app.route("/boeken")
 def boeken():
     boeken = db.session.query(Boek).all()
-    print(boeken)
-    return render_template("boeken.html", boeken = boeken)
+    user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
+    return render_template("boeken.html", boeken = boeken, user = user)
+
+@app.route("/search")
+def search():
+    q = request.args.get("q")
+    print(q)
+    if q:
+        results = db.session.query(Boek).join(Auteur).filter(or_(Boek.titel.ilike(f"%{q}%"), Auteur.naam.ilike(f"%{q}%"))).limit(20).all()
+    else:
+        results = []
+    user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
+    return render_template("search_result.html", results = results , user = user)
 
 @app.route("/adminworkspace",methods = ["GET"])
 def adminworkspace():
     if request.method == "GET":
-        print(session.get('email'))
         if session.get('email') == None:
             return redirect(url_for("login"))
         else:
             test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-            if str(test.rol) == "Bibliothecaris":
+            if test.rol == "bibliothecaris":
                 genres = db.session.query(Genre.naam).all()
                 themas = db.session.query(Thema.naam).all()
                 auteurs = db.session.query(Auteur.naam).all()
@@ -114,8 +125,9 @@ def adminworkspace():
 def add():
     if request.method == "POST":
         
-        test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-
+        if session.get('email') == None:
+            return redirect(url_for("login"))
+        test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
         if str(test.rol) == "Bibliothecaris":
 
             if "genre" in request.form and "ISBN" not in request.form:
@@ -149,16 +161,24 @@ def add():
             elif "ISBN" in request.form:
                 ISBN = request.form["ISBN"]
                 titel = request.form["titel"]
-                form_genre = request.form["genre"]
-                form_auteur = request.form["auteur"]
-                form_thema = request.form["thema"]
+                selected_genres = request.form.getlist("genres")
+                selected_auteurs = request.form.getlist("auteurs")
+                selected_themas = request.form.getlist("themas")
 
-                genre = db.session.query(Genre).filter_by(naam=form_genre).first()
-                auteur = db.session.query(Auteur).filter_by(naam=form_auteur).first()
-                thema = db.session.query(Thema).filter_by(naam=form_thema).first()
 
-                boek = Boek(genre_id = genre.id, titel = titel, auteur_id = auteur.id, ISBN = ISBN, thema_id = thema.id)
+                genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) for genre_name in selected_genres]
+                auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
+                themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
 
+               
+                boek = Boek(titel=titel, ISBN=ISBN)
+
+                
+                boek.genres.extend(genres)
+                boek.auteurs.extend(auteurs)
+                boek.themas.extend(themas)
+
+                
                 db.session.add(boek)
                 db.session.commit()
 
@@ -220,7 +240,7 @@ def delete():
     return redirect("adminworkspace")
 
 #data aanpassen 
-@app.route("/adminworkspace/books/<int:ISBN>/change",methods = ["POST","GET"])
+@app.route("/adminworkspace/tools/change/<int:ISBN>",methods = ["POST","GET"])
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
     if str(test.rol) == "Bibliothecaris":
