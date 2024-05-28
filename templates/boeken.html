@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block body %}
+<center>
 <h2>Boeken</h2>
+</center>
 <div class="search-container">
     <input type="text" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
 </div>

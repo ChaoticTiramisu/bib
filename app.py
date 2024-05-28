@@ -246,7 +246,7 @@ def delete():
 
     return redirect("adminworkspace")
 
-#data aanpassen 
+
 @app.route("/adminworkspace/tools/change/<int:ISBN>",methods = ["POST","GET"])
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()

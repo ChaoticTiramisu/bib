@@ -101,14 +101,13 @@ h2 {
     border-right: 1px solid #333333;
     border-bottom: 1px solid #333333;
     border-left: 1px solid #CCCCCC;
-    border-radius: 12px;
+    border-radius: 12px;µ
   }
 
   .button:hover {
     background-color: lightgray;
   }
 
-/* CSS for table */
 .boek {
     margin-top: 20px;
     border-collapse: collapse;
@@ -139,9 +138,9 @@ h2 {
     background-color: #ddd;
 }
 
-/* CSS for search input */
+
 .search-container input[type="text"] {
-    width: calc(100% - 4px); /* Adjust for border width */
+    width: calc(100% - 4px); 
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
@@ -151,20 +150,20 @@ h2 {
     transition: border-color 0.3s ease-in-out;
 }
 
-/* Placeholder styling */
+
 .search-container input[type="text"]::placeholder {
     color: #999;
     font-style: italic;
 }
 
-/* Focus state styling */
+
 .search-container input[type="text"]:focus {
     border-color: #007BFF;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-/* Add some padding around the input field */
+
 .search-container {
     padding: 16px;
     background-color: #f9f9f9;
@@ -176,9 +175,9 @@ h2 {
 }
 
 .scrollable-checkboxes {
-    max-height: 200px; /* Set the maximum height of the container */
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding: 5px; /* Optional: add padding for better appearance */
-    border: none; /* Remove borders */
-    outline: none; /* Remove outline */
+    max-height: 200px; 
+    overflow-y: auto; 
+    padding: 5px; 
+    border: none; 
+    outline: none; 
 }
