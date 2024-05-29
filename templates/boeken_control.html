@@ -10,7 +10,8 @@
     <form action="{{ url_for('add')}}" method="post" name="boek">
 
         <h2>ISBN</h2>
-        <input type="text" name="ISBN" placeholder="ISBN" required><br><br>
+        <label for="ISBN"></label>
+        <input type="number" name="ISBN" placeholder="ISBN" required ><br><br>
 
         <h2>Titel</h2>
         <input type="text" name="titel" placeholder="titel" required><br><br>
@@ -69,8 +70,30 @@
 <center>
 <br><br><br><br>
 <div class="verwijderen">
-    <h2>Boek verwijderen</h2>
-    
+    <h2>Delete Items</h2>
+<div>
+    <form action="{{url_for('delete', table = 'boek')}}" method="GET">
+        <button type="submit">Verwijder Boeken</button>
+    </form>
 </div>
+<div>
+    <form action="{{url_for('delete', table = 'genre')}}" method="GET">
+        <button type="submit">Verwijder Genres</button>
+    </form>
+</div>
+<div>
+    <form action="{{url_for('delete', table = 'thema')}}" method="GET">
+        <button type="submit">Verwijder Thema's</button>
+    </form>
+</div>
+<div>
+    <form action="{{url_for('delete', table = 'auteur')}}" method="GET">
+        <button type="submit">Verwijder Auteurs</button>
+    </form>
+</div>
+</div>
+
 </center>
+
+<br><br><br>
 {% endblock body %}

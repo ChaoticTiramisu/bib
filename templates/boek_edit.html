@@ -8,7 +8,8 @@
         <form action="{{ url_for('change', ISBN = def_ISBN) }}" method="post" name="change">
     
             <h2>ISBN</h2>
-            <input type="text" name="ISBN" value="{{def_ISBN}}" required><br><br>
+            <label for="ISBN"></label>
+            <input type="number" name="ISBN" value="{{def_ISBN}}" required><br><br>
     
             <h2>Titel</h2>
             <input type="text" name="titel" value="{{def_titel}}" required><br><br>

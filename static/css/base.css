@@ -74,7 +74,9 @@ h2 {
     border-style: solid;
     border-color: black;
     width: 600px;
+
 }
+
 
 .email {
     background-color: rgb(159, 183, 204);
@@ -181,3 +183,66 @@ h2 {
     border: none; 
     outline: none; 
 }
+
+.entity-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.entity-list th, .entity-list td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+}
+
+.entity-list th {
+    background-color: #f2f2f2;
+}
+
+.entity-list tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+.entity-list button[type="submit"] {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.entity-list button[type="submit"]:hover {
+    color: red;
+}
+
+.verwijderen {
+    text-align: center;
+}
+
+.verwijderen h2 {
+    margin-bottom: 20px;
+}
+
+.verwijderen form {
+    margin-bottom: 10px;
+}
+
+.verwijderen button {
+    background-color: white; 
+    color: black;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.verwijderen button:hover {
+    background-color: lightgray; 
+}
+
+.verwijderen button:focus {
+    outline: none;
+}
+

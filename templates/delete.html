@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block body %}
+<center>
+    <h2>Delete {{ table.capitalize() }}</h2>
+</center>
+<div class="search-container">
+    <input type="text" placeholder="Search" name="q" hx-get="{{url_for('searchdelete', table = table)}}" hx-trigger="keyup changed delay:250ms" hx-target="#results">
+</div>
+<div class="entity-list">
+    <table>
+        <thead>
+            
+            <tr>
+            <th>Title</th>
+            <th>ID</th>
+            <th>Action</th>
+            </tr>
+        </thead>
+        
+        <tbody id="results" hx-get="{{url_for('searchdelete', table = table)}}" hx-trigger="load" hx-target="#results">
+            
+        </tbody>
+    </table>
+</div>
+{% endblock %}

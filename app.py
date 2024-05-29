@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
@@ -15,15 +16,14 @@ db = SQLAlchemy(app)
 with app.app_context():
     db.create_all()
 
-def checkContains(table, column, item):
-    
-    result = db.session.query(table).filter(column == item).first()
-    
-    if result == None:
-        return False
-    else:
+def checkContains(table_naam,column_naam,item):
 
-        return True
+    column = getattr(table_naam, column_naam)
+    result = db.session.query(db.session.query(table_naam).filter(column == item).exists()).scalar()
+
+    print(result)
+    return result
+
 
 def getValue(table, column, item):
     result = db.session.query(table).filter(column == item).first()
@@ -81,31 +81,29 @@ def register():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("/")
+    return redirect(url_for("login"))
 
 @app.route("/boeken")
 def boeken():
     boeken = db.session.query(Boek).all()
     user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-    return render_template("boeken.html", boeken = boeken, user = user)
+    return render_template("boeken.html", user = user)
 
 @app.route("/search")
 def search():
     q = request.args.get("q")
-    print(q)
     if q:
-        
-        q = request.args.get('q')
         results = db.session.query(Boek).join(Boek.auteurs).filter(
-        or_(
-            Boek.titel.ilike(f"%{q}%"),
-            Auteur.naam.ilike(f"%{q}%")
-        )
+            or_(
+                Boek.titel.ilike(f"%{q}%"),
+                Auteur.naam.ilike(f"%{q}%")
+            )
         ).limit(20).all()
     else:
-        results = []
-    user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-    return render_template("search_result.html", results = results , user = user)
+        results = db.session.query(Boek).limit(20).all()
+        
+    user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    return render_template("search_result.html", results=results, user=user)
 
 @app.route("/adminworkspace",methods = ["GET"])
 def adminworkspace():
@@ -138,8 +136,9 @@ def add():
         if str(test.rol) == "Bibliothecaris":
 
             if "genre" in request.form and "ISBN" not in request.form:
-                genre_naam = Genre(naam = request.form["genre"].lower())
-                if not checkContains(Genre,"naam",genre_naam):
+                genre_naam = request.form["genre"].lower()
+                if checkContains(Genre,"naam",genre_naam) != True:
+                    genre_naam = Genre(naam = genre_naam)
                     db.session.add(genre_naam)
                     db.session.commit()
                     flash("genre succesvol toegevoegd")
@@ -148,8 +147,9 @@ def add():
                 
 
             elif "thema" in request.form and "ISBN" not in request.form:
-                thema_naam = Thema(naam = request.form["thema"].lower())
-                if not checkContains(Thema,"naam",thema_naam):
+                thema_naam = request.form["thema"].lower()
+                if checkContains(Thema,"naam",thema_naam) != True:
+                    thema_naam = Thema(naam = thema_naam)
                     db.session.add(thema_naam)
                     db.session.commit()
                     flash("Thema succesvol toegevoegd")
@@ -157,8 +157,9 @@ def add():
                     flash("Thema zit al in database.")
 
             elif "auteur" in request.form and "ISBN" not in request.form:
-                auteur_naam = Auteur(naam = request.form["auteur"].lower())
-                if not checkContains(Auteur,"naam",auteur_naam):
+                auteur_naam = request.form["auteur"].lower()
+                if checkContains(Auteur,"naam",auteur_naam) != True:
+                    auteur_naam = Auteur(naam = request.form["auteur"].lower())
                     db.session.add(auteur_naam)
                     db.session.commit()
                     flash("Auteur succesvol toegevoegd")
@@ -197,7 +198,7 @@ def add():
 
 #boeken verwijderen
 @app.route("/adminworkspace/tools/delete",methods = ["POST"])
-def delete():
+def delete__():
     if request.method == "POST":
         test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
         print(test.rol)
@@ -243,33 +244,83 @@ def delete():
                     flash("Thema succesvol verwijderd")
                 else:
                     flash("Thema zit niet in de database.")
+                
 
     return redirect("adminworkspace")
+@app.route("/adminworkspace/tools/delete/<string:table>/search", methods=["GET"])
+def searchdelete(table):
+    if table not in ["boek", "genre", "auteur", "thema"]:
+        abort(404)
+    table_temp = globals()[table.capitalize()]
+    q = request.args.get("q")
+    if q:
+        if table == "boek":
+            results = db.session.query(table_temp).filter(table_temp.titel.ilike(f"%{q}%")).all()
+        else:
+            results = db.session.query(table_temp).filter(table_temp.naam.ilike(f"%{q}%")).all()
+    else:
+        results = db.session.query(table_temp).all()
+
+    return render_template("search_delete.html", table=table, results=results)
+
+ 
+ 
+@app.route("/adminworkspace/tools/delete/<string:table>", methods=["GET"])
+def delete(table):
+    return render_template("delete.html",table=table)
+
+@app.route("/adminworkspace/tools/delete/<string:table>/<int:voorwerp_id>", methods=["POST","GET"])
+def delete_voorwerp(table, voorwerp_id):
+        print(table)
+        print(voorwerp_id)
+        if table not in ["boek", "genre", "auteur", "thema"]:
+            abort(404)  
+ 
+        if not voorwerp_id:
+            abort(400)  
+    
+        if table == "boek":
+            instance = db.session.query(globals()[table.capitalize()]).filter_by(ISBN = voorwerp_id).first()
+            
+        else:
+            instance = db.session.query(globals()[table.capitalize()]).filter_by(id = voorwerp_id).first()
+        print("test1")
+        if instance is None:
+            abort(404)  
+        print("test")
+        db.session.delete(instance)
+        db.session.commit()
+
+        flash(f"{table.capitalize()} with {'ISBN' if table == 'ISBN' else 'id'}  {voorwerp_id} succesvol verwijderd")
+        return redirect(url_for("delete", table = table)) 
 
 
-@app.route("/adminworkspace/tools/change/<int:ISBN>",methods = ["POST","GET"])
+@app.route("/adminworkspace/tools/change/<int:ISBN>", methods=["POST", "GET"])
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
     if str(test.rol) == "Bibliothecaris":
         if request.method == "POST":
             if "ISBN" in request.form:
-                
-                if checkContains(Boek, Boek.ISBN , ISBN):
-                    
-                    boek = db.session.query(Boek).filter_by(ISBN = ISBN).first()
-                    genre = db.session.query(Genre).filter_by(naam = request.form["genre"]).first()
-                    auteur = db.session.query(Auteur).filter_by(naam = request.form["auteur"]).first()
-                    thema = db.session.query(Thema).filter_by(naam = request.form["thema"]).first()
-                    boek.ISBN = request.form["ISBN"].lower()
-                    boek.titel = request.form["titel"].lower()
-                    boek.genre = genre
-                    boek.auteur = auteur
-                    boek.thema = thema
+                if checkContains(Boek, "ISBN", ISBN):
+                    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
+                    new_ISBN = request.form["ISBN"]
+                    titel = request.form["titel"]
+                    genre_names = request.form.getlist("genres")
+                    thema_names = request.form.getlist("themas")
+                    auteur_names = request.form.getlist("auteurs")
+
+                    genres = [db.session.query(Genre).filter_by(naam=name).first() for name in genre_names]
+                    themas = [db.session.query(Thema).filter_by(naam=name).first() for name in thema_names]
+                    auteurs = [db.session.query(Auteur).filter_by(naam=name).first() for name in auteur_names]
+                    boek.ISBN = new_ISBN
+                    boek.titel = titel
+                    boek.genres = genres
+                    boek.themas = themas
+                    boek.auteurs = auteurs
 
                     db.session.commit()
                     flash("Boek succesvol veranderd")
-                    return redirect(url_for("index"))
-                    
+                    return redirect(url_for("boeken"))
                 else:
                     flash("Boek zit niet in de database.")
                     return redirect(url_for("index"))
@@ -280,19 +331,21 @@ def change(ISBN):
             genres = db.session.query(Genre.naam).all()
             themas = db.session.query(Thema.naam).all()
             auteurs = db.session.query(Auteur.naam).all()
-            boek = db.session.query(Boek).filter_by(ISBN = ISBN).first()
-            return render_template("boek_edit.html"
-                                   , def_ISBN = boek.ISBN
-                                   , def_titel = boek.titel
-                                   , def_genres = [Genre.naam for genre in boek.genres]
-                                   , def_themas = [Thema.naam for thema in boek.themas]
-                                   , def_auteurs = [Auteur.naam for auteur in boek.auteurs]
-                                   ,genres = genres
-                                   ,themas = themas
-                                   ,auteurs = auteurs
-                                     )
+            boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
+            return render_template(
+                "boek_edit.html",
+                def_ISBN=boek.ISBN,
+                def_titel=boek.titel,
+                def_genres=[genre.naam for genre in boek.genres],
+                def_themas=[thema.naam for thema in boek.themas],
+                def_auteurs=[auteur.naam for auteur in boek.auteurs],
+                genres=genres,
+                themas=themas,
+                auteurs=auteurs
+            )
     else:
         abort(404)
+
             
 
     
