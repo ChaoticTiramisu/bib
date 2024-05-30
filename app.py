@@ -171,30 +171,35 @@ def add():
                     flash("De auteur zit al in database.")
 
             elif "ISBN" in request.form:
-                ISBN = request.form["ISBN"]
-                titel = request.form["titel"]
-                selected_genres = request.form.getlist("genres")
-                selected_auteurs = request.form.getlist("auteurs")
-                selected_themas = request.form.getlist("themas")
+                ISBN_nr = request.form["ISBN"].lower()
+                if checkContains(Boek,"ISBN",ISBN_nr) != True:
+                    ISBN = request.form["ISBN"]
+                    titel = request.form["titel"]
+                    selected_genres = request.form.getlist("genres")
+                    selected_auteurs = request.form.getlist("auteurs")
+                    selected_themas = request.form.getlist("themas")
 
 
-                genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) for genre_name in selected_genres]
-                auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
-                themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
+                    genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) for genre_name in selected_genres]
+                    auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
+                    themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
+                    boek = Boek(titel=titel, ISBN=ISBN)
+                    boek.genres.extend(genres)
+                    boek.auteurs.extend(auteurs)
+                    boek.themas.extend(themas)
 
+                    
+                    db.session.add(boek)
+                    db.session.commit()
+
+                    flash("Boek succesvol toegevoegd.")
+                else:
+                    flash("Deze ISBN is al eens gebruikt.")
                
-                boek = Boek(titel=titel, ISBN=ISBN)
+                
 
                 
-                boek.genres.extend(genres)
-                boek.auteurs.extend(auteurs)
-                boek.themas.extend(themas)
-
                 
-                db.session.add(boek)
-                db.session.commit()
-
-                flash("Boek succesvol toegevoegd.")
             else:
                 abort(404)
       
@@ -219,7 +224,7 @@ def searchdelete(table):
     return render_template("search_delete.html", table=table, results=results)
 
  
- 
+
 @app.route("/adminworkspace/tools/delete/<string:table>", methods=["GET"])
 def delete(table):
     return render_template("delete.html",table=table)
