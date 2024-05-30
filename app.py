@@ -110,7 +110,9 @@ def adminworkspace():
     if request.method == "GET":
         if session.get('email') == None:
             return redirect(url_for("login"))
-        else:
+        
+        test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+        if str(test.rol) == "Bibliothecaris":
             test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
             if test.rol == "bibliothecaris":
                 genres = db.session.query(Genre.naam).all()
@@ -120,6 +122,8 @@ def adminworkspace():
                 return render_template("boeken_control.html", genres = genres, themas = themas , auteurs = auteurs)
             else:
                 abort(404)
+        else:
+            return redirect(url_for("index"))
     else:
         abort(404)
 
@@ -197,56 +201,7 @@ def add():
     return redirect(url_for("adminworkspace"))
 
 #boeken verwijderen
-@app.route("/adminworkspace/tools/delete",methods = ["POST"])
-def delete__():
-    if request.method == "POST":
-        test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-        print(test.rol)
 
-        if str(test.rol) == "Bibliothecaris":
-            if "boek" in request.form:
-                ISBN_nummer = Boek(ISBN = request.form["ISBN"].lower())
-                if checkContains(Boek,"ISBN",boek):
-                    ISBN = request.form["ISBN"].lower()
-                    boek = db.session.query(Boek).filter_by(ISBN = ISBN)
-                    db.session.delete(boek)
-                    db.session.commit()
-                    flash("Boek succesvol verwijderd")
-                else:
-                    flash("Boek zit niet in de database.")
-            elif "Auteur" in request.form:
-                auteur_naam = Auteur( naam = request.form["auteur"].lower())
-                if checkContains(Boek,"naam",auteur_naam):
-                    naam = request.form["auteur"].lower()
-                    auteur = db.session.query(Auteur).filter_by(naam = naam)
-                    db.session.delete(auteur)
-                    db.session.commit()
-                    flash("Auteur succesvol verwijderd")
-                else:
-                    flash("Auteur zit niet in de database.")
-            elif "Genre" in request.form:
-                genre_naam = Genre(naam = request.form["genre"].lower())
-                if checkContains(Genre,"naam",genre_naam):
-                    naam = request.form["genre"].lower()
-                    genre = db.session.query(Genre).filter_by(naam = naam)
-                    db.session.delete(genre)
-                    db.session.commit()
-                    flash("Genre succesvol verwijderd")
-                else:
-                    flash("Genre zit niet in de database.")
-            elif "Thema" in request.form:
-                thema_naam = Thema(naam = request.form["thema"].lower())
-                if checkContains(Thema,"naam",thema_naam):
-                    naam = request.form["thema"].lower()
-                    thema = db.session.query(Thema).filter_by(naam = naam)
-                    db.session.delete(thema)
-                    db.session.commit()
-                    flash("Thema succesvol verwijderd")
-                else:
-                    flash("Thema zit niet in de database.")
-                
-
-    return redirect("adminworkspace")
 @app.route("/adminworkspace/tools/delete/<string:table>/search", methods=["GET"])
 def searchdelete(table):
     if table not in ["boek", "genre", "auteur", "thema"]:
