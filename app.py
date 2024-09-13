@@ -1,10 +1,13 @@
 # de nodige zaken importeren
+from audioop import rms
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
+
+
 
 # dirname, is de weg naar dit bestand. 
 dirname = os.path.dirname(__file__)
@@ -86,19 +89,37 @@ def register():
         register_email = request.form["register_email"]
         register_password = request.form["register_paswoord"]
         rol = request.form["recht"]
+        
+        if len(register_password) < 8:
+            flash("Passwoord moet meer dan 8 karakters bevatten")
+        if any(ele.isupper() for ele in register_password) == False:
+            flash("Passwoord moet een Uppercase bevatten")
+        if any(map(str.isdigit, register_password)) == False:
+            flash("Passwoord moet een getal bevatten")
+        if any(not c.isalnum() for c in register_password) == False:
+            flash("Passwoord moet een speciaal karakter bevatten.")
+        else:
 # een nieuwe gebruiker toevoegen aan de database met volgende velden.
-        new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
-        #database voert dit uit
-        db.session.add(new_gebruiker)
-        # het opslaan van de veranderingen
-        db.session.commit()
+            new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
+            #database voert dit uit
+            db.session.add(new_gebruiker)
+            # het opslaan van de veranderingen
+            db.session.commit()
 
-        flash("Registratie succesvol")
+            flash("Registratie succesvol")
         return redirect(url_for("login"))
     else:
         #als het geen post is maar een get, steekt hij de rollen die hij uit de database haalt in een variabele en dan geeft hij deze weer in de rendertemplate om weer te geven.
         rol_choices = [(value, label) for value, label in Gebruiker.rol_list]
         return render_template("register.html",rol_choices=rol_choices)
+
+
+
+
+
+
+
+
 
 # als je uitlogt stopt de sessie, en zal je nadien opnieuw moeten inloggen
 @app.route("/logout")
