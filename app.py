@@ -78,26 +78,33 @@ def login():
 # methodes post en get
 @app.route("/register", methods=["POST", "GET"])
 def register():
+    rol_choices = [(value, label) for value, label in Gebruiker.rol_list]
     #als de methode post is runt hij onderstaande commando's
     if request.method == "POST":
-# alle velden die de gebruiker heeft ingevuld eruit halen (post)
-        register_name = request.form["name"]
-        register_achternaam = request.form["achternaam"]
         register_email = request.form["register_email"]
-        register_password = request.form["register_paswoord"]
-        rol = request.form["recht"]
-# een nieuwe gebruiker toevoegen aan de database met volgende velden.
-        new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
-        #database voert dit uit
-        db.session.add(new_gebruiker)
-        # het opslaan van de veranderingen
-        db.session.commit()
+        if checkContains(Gebruiker,"email",register_email) == False:
 
-        flash("Registratie succesvol")
-        return redirect(url_for("login"))
+    # alle velden die de gebruiker heeft ingevuld eruit halen (post)
+            register_name = request.form["name"]
+            register_achternaam = request.form["achternaam"]
+            
+            register_password = request.form["register_paswoord"]
+            rol = request.form["recht"]
+    # een nieuwe gebruiker toevoegen aan de database met volgende velden.
+            new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
+            #database voert dit uit
+            db.session.add(new_gebruiker)
+            # het opslaan van de veranderingen
+            db.session.commit()
+
+            flash("Registratie succesvol")
+            return redirect(url_for("login"))
+        else:
+            flash("Er bestaat al een account.")
+            return render_template("register.html",rol_choices=rol_choices)
     else:
         #als het geen post is maar een get, steekt hij de rollen die hij uit de database haalt in een variabele en dan geeft hij deze weer in de rendertemplate om weer te geven.
-        rol_choices = [(value, label) for value, label in Gebruiker.rol_list]
+        
         return render_template("register.html",rol_choices=rol_choices)
 
 # als je uitlogt stopt de sessie, en zal je nadien opnieuw moeten inloggen
