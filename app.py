@@ -5,6 +5,9 @@ from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
+from werkzeug.utils import secure_filename
+
+
 
 # dirname, is de weg naar dit bestand. 
 dirname = os.path.dirname(__file__)
@@ -17,6 +20,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/bib.db"
+app.config['UPLOAD_FOLDER'] = 'static/upload'
 # de beveillingssleutel voor rededenen
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
@@ -40,6 +44,14 @@ def getValue(table, column, item):
 
     return result
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+    
 # brengt je naar de hoofdpagina
 @app.route("/")
 def index():
@@ -78,27 +90,49 @@ def login():
 # methodes post en get
 @app.route("/register", methods=["POST", "GET"])
 def register():
+    rol_choices = [(value, label) for value, label in Gebruiker.rol_list]
     #als de methode post is runt hij onderstaande commando's
     if request.method == "POST":
-# alle velden die de gebruiker heeft ingevuld eruit halen (post)
-        register_name = request.form["name"]
-        register_achternaam = request.form["achternaam"]
         register_email = request.form["register_email"]
-        register_password = request.form["register_paswoord"]
-        rol = request.form["recht"]
-# een nieuwe gebruiker toevoegen aan de database met volgende velden.
-        new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
-        #database voert dit uit
-        db.session.add(new_gebruiker)
-        # het opslaan van de veranderingen
-        db.session.commit()
+        if checkContains(Gebruiker,"email",register_email) == False:
 
-        flash("Registratie succesvol")
+    # alle velden die de gebruiker heeft ingevuld eruit halen (post)
+            register_name = request.form["name"]
+            register_achternaam = request.form["achternaam"]
+            register_email = request.form["register_email"]
+            register_password = request.form["register_paswoord"]
+            rol = request.form["recht"]
+        
+            if len(register_password) < 8:
+                flash("Passwoord moet meer dan 8 karakters bevatten")
+            if any(ele.isupper() for ele in register_password) == False:
+                flash("Passwoord moet een Uppercase bevatten")
+            if any(map(str.isdigit, register_password)) == False:
+                flash("Passwoord moet een getal bevatten")
+            if any(not c.isalnum() for c in register_password) == False:
+                flash("Passwoord moet een speciaal karakter bevatten.")
+            else:
+# een nieuwe gebruiker toevoegen aan de database met volgende velden.
+                new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
+            #database voert dit uit
+                db.session.add(new_gebruiker)
+            # het opslaan van de veranderingen
+                db.session.commit()
+
+                flash("Registratie succesvol")
         return redirect(url_for("login"))
     else:
         #als het geen post is maar een get, steekt hij de rollen die hij uit de database haalt in een variabele en dan geeft hij deze weer in de rendertemplate om weer te geven.
-        rol_choices = [(value, label) for value, label in Gebruiker.rol_list]
+        
         return render_template("register.html",rol_choices=rol_choices)
+
+
+
+
+
+
+
+
 
 # als je uitlogt stopt de sessie, en zal je nadien opnieuw moeten inloggen
 @app.route("/logout")
@@ -319,7 +353,13 @@ def change(ISBN):
                     genre_names = request.form.getlist("genres")
                     thema_names = request.form.getlist("themas")
                     auteur_names = request.form.getlist("auteurs")
-# meerdere genres aan een variable toekenne , indien nodig met for lus
+                    if 'file' in request.files:
+                        file = request.files['file']
+                        if file and allowed_file(file.filename):
+                            filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
+                            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                    # meerdere genres aan een variable toe kenne , indien nodig met for lus
                     genres = [db.session.query(Genre).filter_by(naam=name).first() for name in genre_names]
                     themas = [db.session.query(Thema).filter_by(naam=name).first() for name in thema_names]
                     auteurs = [db.session.query(Auteur).filter_by(naam=name).first() for name in auteur_names]
