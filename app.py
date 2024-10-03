@@ -161,7 +161,9 @@ def search():
         results = db.session.query(Boek).join(Boek.auteurs).filter(
             or_(
                 Boek.titel.ilike(f"%{q}%"),
-                Auteur.naam.ilike(f"%{q}%")
+                Auteur.naam.ilike(f"%{q}%"),
+                Boek.ISBN.ilike(f"%{q}%")
+                
             )
             # er is een limit van max 2O items uit de database te halen (max 20 prints)
         ).limit(20).all()
