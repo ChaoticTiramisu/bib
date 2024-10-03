@@ -1,249 +1,312 @@
+/* Base Styles */
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: rgb(120, 172, 173);
+    font-family: Arial, sans-serif; /* General font for the site */
+    line-height: 1.6; /* Improved readability */
+    background-color: #f8f8f8; /* Light background */
+    color: #333; /* Dark text color */
+    margin: 0; /* Remove default margin */
+    padding: 20px; /* Padding around the page */
+    padding-top: 100px; /* Adjust this based on the height of the header (header height + some padding) */
 }
 
-.hoofdbalk {
-    display:flex;
+/* Centered Title */
+h2 {
+    text-align: center; /* Center align headings */
+    color: #2c3e50; /* Darker color for headings */
+}
+
+/* Form Styles */
+form {
+    background-color: #ffffff; /* White background for forms */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    margin: 20px auto; /* Margin for spacing */
+    width: 80%; /* Full width for forms */
+    max-width: 600px; /* Limit maximum width */
+}
+
+/* Input and Button Styles */
+input[type="text"],
+input[type="number"],
+input[type="password"],
+select {
+    width: 100%; /* Full width for inputs */
+    padding: 10px; /* Inner padding */
+    margin: 10px 0; /* Margin for spacing */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 4px; /* Rounded corners */
+}
+
+/* Button Styles */
+input[type="submit"],
+button {
+    background-color: #3498db; /* Blue background */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 15px; /* Padding for buttons */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+}
+
+/* Table Row Styles */
+.entity-list table {
+    width: 100%; /* Full width for tables */
+    border-collapse: collapse; /* Collapse borders */
+}
+
+.entity-list td {
+    padding: 12px 15px; /* Padding for cells */
+    vertical-align: top; /* Align items to the top */
+    border-bottom: 1px solid #e0e0e0; /* Bottom border for separation */
+}
+
+.entity-list img {
+    width: 50px; /* Set a fixed width for images */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 10px; /* Space between image and title */
+}
+
+/* Lists inside table cells */
+td ul {
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+    list-style-type: none; /* Remove bullet points */
+}
+
+td ul li {
+    background-color: #f5f5f5; /* Light gray background for list items */
+    padding: 5px; /* Padding for list items */
+    border-radius: 4px; /* Rounded corners */
+    margin-bottom: 5px; /* Space between list items */
+}
+
+/* Action Button Styles */
+td a {
+    text-decoration: none; /* Remove underline from links */
+}
+
+td a svg {
+    fill: #ff6600; /* Icon color */
+    transition: fill 0.2s; /* Smooth fill transition */
+}
+
+td a:hover svg {
+    fill: #e65c00; /* Darker orange on hover */
+}
+
+/* Sidebar Styles */
+.zijbalk {
+    margin-top: 20px; /* Space above sidebar */
+}
+
+.zijbalk a {
+    display: inline-block; /* Inline block for sidebar links */
+    margin: 5px; /* Margin around links */
+}
+
+/* Email display */
+.email {
+    text-align: center; /* Center align email */
+    font-weight: bold; /* Bold email text */
+}
+
+/* Scrollable Checkbox Container */
+.scrollable-checkboxes {
+    max-height: 150px; /* Maximum height for checkboxes */
+    overflow-y: auto; /* Vertical scroll if necessary */
+}
+
+/* Header Styling */
+header.hoofdbalk {
+    background-color: #ffffff; /* Light background color */
+    padding: 20px 0;
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #44746c; 
-    box-sizing: border-box;
-    position: sticky;
+    color: white;
+    position: fixed; /* Keep header fixed at the top */
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000;
-    
+    z-index: 1000; /* Ensures the header stays on top of other content */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a shadow for better visibility */
 }
 
-.logo img {
-    height: 50px;
+header .logo img {
+    height: 60px; /* Adjust the size of the logo */
 }
 
-
-
-
-h2 {
-    font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-}
-
-.box {
-    padding: 12px;
-    background-color: rgb(219, 170, 170) ;
-    width: fit-content;
-}
-
-.zijbalk {
-    width: 225px;
-    padding: 20px;
-    background-color: #6870b8;
-    position:fixed;
-    top: 70px;
-    right: 0;
-    height: calc(100% - 70px);
+header .menu {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    gap: 20px; /* Space between the menu buttons */
 }
 
-.zijbalk img {
-    max-width: 100%; 
-    height: auto;
-    border-radius: 50%; 
-}
-
-.aanpassen{
-    border: 3px;
-    border-style: solid;
-    border-color: black;
-    width:600px;
-}
-
-.toevoegen{
-    border: 3px;
-    border-style: solid;
-    border-color: black;
-    width:600px;
-}
-
-.verwijderen{
-    border: 3px;
-    border-style: solid;
-    border-color: black;
-    width: 600px;
-
-}
-
-
-.email {
-    background-color: rgb(159, 183, 204);
-    width: fit-content;
-    height: auto;
-}
-
-.boek {
-    border: black;
-    border-style:solid;
-    border-width: 5px;
-    width: max-content;
-    border-radius: 12px;
-    background-color: white;
-}
-
-.button {
-    font: bold 11px Arial;
+header .menu .button {
+    background-color: #00a19a; /* Custom color */
+    color: white;
     text-decoration: none;
-    background-color: #EEEEEE;
-    color: #333333;
-    padding: 2px 6px 2px 6px;
-    border-top: 1px solid #CCCCCC;
-    border-right: 1px solid #333333;
-    border-bottom: 1px solid #333333;
-    border-left: 1px solid #CCCCCC;
-    border-radius: 12px;µ
-  }
-
-  .button:hover {
-    background-color: lightgray;
-  }
-
-.boek {
-    margin-top: 20px;
-    border-collapse: collapse;
-    width: 100%;
-}
-
-.boek table {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-.boek th, .boek td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-.boek th {
-    background-color: #f2f2f2;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
     font-weight: bold;
 }
 
-.boek tr:nth-child(even) {
-    background-color: #f2f2f2;
+header .menu .button:hover {
+    background-color: #312783; /* Darker shade on hover */
 }
 
-.boek tr:hover {
-    background-color: #ddd;
+/* Responsive Design */
+@media (max-width: 768px) {
+    header.hoofdbalk {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    header .menu {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    header .menu .button {
+        width: 100%; /* Full width for buttons on mobile */
+    }
 }
 
+/* Responsive Design for Table */
+@media (max-width: 768px) {
+    .entity-list td {
+        display: block; /* Stack table cells */
+        width: 100%; /* Full width */
+    }
 
-.search-container input[type="text"] {
-    width: calc(100% - 4px); 
-    padding: 12px 20px;
-    margin: 8px 0;
-    box-sizing: border-box;
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s ease-in-out;
+    .entity-list img {
+        width: 30px; /* Smaller images for mobile */
+    }
+
+    td ul li {
+        padding: 3px; /* Smaller padding for list items */
+    }
+
+    /* Form styles for smaller devices */
+    form {
+        width: 95%; /* Increase width for small screens */
+    }
+
+    /* Centering h2 for mobile */
+    h2 {
+        font-size: 1.5em; /* Smaller font size on mobile */
+    }
+}
+/* Book Widget Container */
+.book-widget {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px; /* Add spacing below other content */
 }
 
-
-.search-container input[type="text"]::placeholder {
-    color: #999;
-    font-style: italic;
-}
-
-
-.search-container input[type="text"]:focus {
-    border-color: #007BFF;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-
-.search-container {
-    padding: 16px;
-    background-color: #f9f9f9;
-    border: 1px solid #e1e1e1;
+/* Individual Book Card */
+.book-card {
+    background-color: #ffffff; /* Match with form and base background */
+    border: 1px solid #ddd;
     border-radius: 8px;
-    max-width: 600px;
-    margin: 20px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 280px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.3s ease;
+    font-family: Arial, sans-serif; /* Ensure consistency with base styles */
 }
 
-.scrollable-checkboxes {
-    max-height: 200px; 
-    overflow-y: auto; 
-    padding: 5px; 
-    border: none; 
-    outline: none; 
+/* Hover Effect on the Book Card */
+.book-card:hover {
+    transform: translateY(-10px); /* Lift effect on hover */
 }
 
-.entity-list table {
+/* Book Image Styling */
+.book-image img {
     width: 100%;
-    border-collapse: collapse;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
 
-.entity-list th, .entity-list td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ccc;
-}
-
-.entity-list th {
-    background-color: #f2f2f2;
-}
-
-.entity-list tbody tr:hover {
-    background-color: #f2f2f2;
-}
-
-.entity-list button[type="submit"] {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.entity-list button[type="submit"]:hover {
-    color: red;
-}
-
-.verwijderen {
-    text-align: center;
-}
-
-.verwijderen h2 {
-    margin-bottom: 20px;
-}
-
-.verwijderen form {
+/* Book Title */
+.book-title {
+    font-size: 1.25em;
+    color: #2c3e50; /* Use same color as <h2> */
     margin-bottom: 10px;
 }
 
-.verwijderen button {
-    background-color: white; 
-    color: black;
-    padding: 10px 20px;
-    text-align: center;
+/* Book Details (Lists of Authors, Themes, Genres) */
+.book-details ul {
+    list-style-type: none; /* Remove bullets */
+    padding: 0;
+    margin: 0;
+}
+
+.book-details ul li {
+    background-color: #f5f5f5; /* Same light gray background */
+    padding: 5px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+/* Section Titles (Authors, Themes, Genres) */
+.book-details strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: #3498db; /* Match with the button color */
+}
+
+/* ISBN Section */
+.book-isbn {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #7f8c8d; /* Slightly lighter for secondary text */
+}
+
+/* Librarian Edit Button */
+.book-actions {
+    margin-top: 15px;
+}
+
+.book-actions a {
+    color: #ff6600;
     text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
 }
 
-.verwijderen button:hover {
-    background-color: lightgray; 
+.book-actions a svg {
+    margin-right: 5px;
 }
 
-.verwijderen button:focus {
-    outline: none;
+.book-actions a:hover svg {
+    fill: #e65c00; /* Darker orange on hover */
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .book-card {
+        width: 100%; /* Full width for smaller screens */
+        margin-bottom: 20px; /* Add spacing between cards */
+    }
 
+    .book-title {
+        font-size: 1.1em; /* Slightly smaller font on mobile */
+    }
+
+    .book-image img {
+        width: 100%;
+        height: auto;
+    }
+}

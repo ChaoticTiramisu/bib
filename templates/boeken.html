@@ -10,14 +10,7 @@
 <div class="boek">
     <table>
         <thead>
-            <tr>
-                <td>Title</td>
-                <td>Auteur</td>
-                <td>Thema</td>
-                <td>Genre</td>
-                <td>ISBN</td>
-                <td>{% if user and user.rol == "bibliothecaris" %} Edit {% endif %}</td>
-            </tr>
+            
         </thead>
         <tbody id="results" hx-get="/search" hx-trigger="load">
             
