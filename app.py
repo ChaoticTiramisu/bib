@@ -93,7 +93,8 @@ def register():
             register_email = request.form["register_email"]
             register_password = request.form["register_paswoord"]
             rol = request.form["recht"]
-        
+
+            #zorgt ervoor dat het wachwoord de juiste vereisten heeft
             if len(register_password) < 8:
                 flash("Passwoord moet meer dan 8 karakters bevatten")
             if any(ele.isupper() for ele in register_password) == False:
