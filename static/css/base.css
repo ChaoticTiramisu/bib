@@ -1,7 +1,7 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: rgb(120, 172, 173);
+    background-color: #007BFF;
 }
 
 .hoofdbalk {
@@ -9,7 +9,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #44746c; 
+    background-color: cyan;
     box-sizing: border-box;
     position: sticky;
     top: 0;
