@@ -1,11 +1,11 @@
 # de nodige zaken importeren
-from audioop import rms
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
+from werkzeug.utils import secure_filename
 
 
 
@@ -20,6 +20,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/bib.db"
+app.config['UPLOAD_FOLDER'] = 'static/upload'
 # de beveillingssleutel voor rededenen
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
@@ -43,6 +44,14 @@ def getValue(table, column, item):
 
     return result
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+    
 # brengt je naar de hoofdpagina
 @app.route("/")
 def index():
@@ -345,7 +354,13 @@ def change(ISBN):
                     genre_names = request.form.getlist("genres")
                     thema_names = request.form.getlist("themas")
                     auteur_names = request.form.getlist("auteurs")
-# meerdere genres aan een variable toekenne , indien nodig met for lus
+                    if 'file' in request.files:
+                        file = request.files['file']
+                        if file and allowed_file(file.filename):
+                            filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
+                            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                    # meerdere genres aan een variable toe kenne , indien nodig met for lus
                     genres = [db.session.query(Genre).filter_by(naam=name).first() for name in genre_names]
                     themas = [db.session.query(Thema).filter_by(naam=name).first() for name in thema_names]
                     auteurs = [db.session.query(Auteur).filter_by(naam=name).first() for name in auteur_names]

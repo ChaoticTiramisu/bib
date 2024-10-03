@@ -4,9 +4,10 @@
 
 <center>
     <div class="aanpassen">
+        
         <h2>Aanpassen</h2>
-        <form action="{{ url_for('change', ISBN = def_ISBN) }}" method="post" name="change">
-    
+        <form action="{{ url_for('change', ISBN = def_ISBN) }}" method="post" name="change" enctype = "multipart/form-data">
+            <input type = "file" name = "file" />
             <h2>ISBN</h2>
             <label for="ISBN"></label>
             <input type="number" name="ISBN" value="{{def_ISBN}}" required><br><br>
@@ -41,7 +42,7 @@
             {% endfor %}
             </div>
     
-    
+            
             <input type="submit" value="Register">
         </form>
     </div>
