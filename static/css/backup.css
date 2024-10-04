@@ -56,11 +56,7 @@ h2 {
     width: 600px;
 }
 
-.email {
-    background-color: rgb(159, 183, 204);
-    width: fit-content;
-    height: auto;
-}
+
 
 .boek {
     border: 5px solid black;
