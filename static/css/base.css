@@ -232,10 +232,11 @@ header .menu .button:hover {
 
 /* Book Image Styling */
 .book-image img {
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: 200px;
     border-radius: 8px;
     margin-bottom: 15px;
+    position: fixed;
 }
 
 /* Book Title */
@@ -311,6 +312,25 @@ header .menu .button:hover {
     }
 }
 
+.container {
+    margin: 10px 0 0 0px;
+    width: 10%;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.container img{
+    width: 150%;
+    height: 150%;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0);
+    transition: all ease-in-out 0.5s;
+}
+.container img:hover {
+    width: 200%;
+}
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap");
 
 * {
