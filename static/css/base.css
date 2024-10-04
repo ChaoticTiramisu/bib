@@ -232,10 +232,11 @@ header .menu .button:hover {
 
 /* Book Image Styling */
 .book-image img {
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: 200px;
     border-radius: 8px;
     margin-bottom: 15px;
+    position: fixed;
 }
 
 /* Book Title */
