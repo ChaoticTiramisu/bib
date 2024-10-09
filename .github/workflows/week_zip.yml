@@ -1,0 +1,34 @@
+name: Weekly Zip Project
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Run at midnight every Sunday
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set school year week number for the previous week
+        run: |
+          SCHOOL_YEAR_START="2024-09-01" # Set the start of the school year
+          CURRENT_DATE=$(date +%Y-%m-%d)
+          # Calculate the difference in days between the current date and school year start
+          DAYS_DIFF=$(( ($(date -d "$CURRENT_DATE" +%s) - $(date -d "$SCHOOL_YEAR_START" +%s)) / 86400 ))
+          SCHOOL_YEAR_WEEK=$(( ($DAYS_DIFF / 7) )) # Subtract 1 week to reflect the previous week
+          echo "SCHOOL_YEAR_WEEK=$SCHOOL_YEAR_WEEK" >> $GITHUB_ENV # Export as environment variable
+
+      - name: Create zip file
+        run: |
+          ZIP_FILE="project-school-year-week-${SCHOOL_YEAR_WEEK}.zip"
+          zip -r $ZIP_FILE . # Create the zip file
+
+      - name: Upload zip file
+        uses: actions/upload-artifact@v3
+        with:
+          name: project-school-year-week-${{ env.SCHOOL_YEAR_WEEK }}.zip
+          path: project-school-year-week-${{ env.SCHOOL_YEAR_WEEK }}.zip
