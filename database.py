@@ -1,5 +1,5 @@
 # het importen van verschilde zaken voor sqlalchemy (database)
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean
 from sqlalchemy.orm import relationship, declarative_base, mapped_column
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 
@@ -59,8 +59,8 @@ class Boek(Base):
 
     ISBN = mapped_column(String, primary_key=True)
     titel = mapped_column(String, unique=True, nullable=False)
-    gereserveerd = mapped_column(bool, primary_key=False)
-    beschikbaar = mapped_column(bool, primary_key=True)
+    gereserveerd = mapped_column(Boolean,default=False)
+    beschikbaar = mapped_column(Boolean, default=True)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')
