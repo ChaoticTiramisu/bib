@@ -205,12 +205,13 @@ header .menu .button:hover {
     }
 }
 /* Book Widget Container */
+/* Book Widget Container */
 .book-widget {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    margin-top: 20px; /* Add spacing below other content */
+    margin-top: 20px;
 }
 
 /* Individual Book Card */
@@ -223,6 +224,7 @@ header .menu .button:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     transition: transform 0.3s ease;
     font-family: Arial, sans-serif; /* Ensure consistency with base styles */
+    text-align: center; /* Center align the content */
 }
 
 /* Hover Effect on the Book Card */
@@ -232,11 +234,12 @@ header .menu .button:hover {
 
 /* Book Image Styling */
 .book-image img {
-    width: auto;
-    height: 200px;
+    width: 100%;                /* Make sure the image fits the container */
+    height: auto;                /* Maintain aspect ratio */
     border-radius: 8px;
     margin-bottom: 15px;
-    position: fixed;
+    object-fit: cover;           /* Scale and crop the image if necessary */
+    transition: transform 0.3s ease; /* Smooth scaling on hover */
 }
 
 /* Book Title */
@@ -295,11 +298,16 @@ header .menu .button:hover {
     fill: #e65c00; /* Darker orange on hover */
 }
 
+/* Hover Effect on the Book Image */
+.book-image img:hover {
+    transform: scale(1.1); /* Slightly zoom the image on hover */
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .book-card {
         width: 100%; /* Full width for smaller screens */
-        margin-bottom: 20px; /* Add spacing between cards */
+        margin-bottom: 20px;
     }
 
     .book-title {
@@ -307,29 +315,31 @@ header .menu .button:hover {
     }
 
     .book-image img {
-        width: 100%;
+        width: 100%; /* Ensure full width on smaller screens */
         height: auto;
     }
 }
 
+/* Centered Image Container with Hover Effect */
 .container {
-    margin: 10px 0 0 0px;
-    width: 10%;
-    height: 10%;
     display: flex;
     justify-content: center;
-    gap: 10px;
-}
-.container img{
-    width: 150%;
-    height: 150%;
-    object-fit: cover;
+    align-items: center;
+    margin: 10px 0;
+    width: 100%;
+    overflow: hidden; /* Ensures no overflow when hovering */
     border-radius: 10px;
-    border: 2px solid rgba(255,255,255,0);
-    transition: all ease-in-out 0.5s;
 }
+
+.container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.5s ease-in-out; /* Smooth scaling effect */
+}
+
 .container img:hover {
-    width: 200%;
+    transform: scale(1.2); /* Scale up on hover */
 }
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap");
 
