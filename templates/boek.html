@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %} Boeken {% endblock title %} 
+
+{% block body %}
+    <div class="book-container">
+        <div class="book-details">
+            <img class="book-cover" src="../static/upload/{{boek.ISBN}}.png" alt="Book Cover">
+            <div class="book-info">
+                <h1>{{boek.title}}</h1>
+                <h2>door {% for auteur in boek.auteurs %} {{auteur.naam}} {% endfor %}</h2>
+                <p><strong>Genre:</strong> {% for genre in boek.genres %} {{genre.naam}} {% endfor %}</p>
+                <p><strong>ISBN:</strong> {{boek.ISBN}}</p>
+                <div class="book-description">
+                    <p>{{boek.beschrijving}}</p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+{% endblock body %}
