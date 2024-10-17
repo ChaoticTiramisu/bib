@@ -58,13 +58,15 @@ class Boek(Base):
     __tablename__ = "boek"
 
     ISBN = mapped_column(String, primary_key=True)
-    titel = mapped_column(String, unique=True, nullable=False)
+    titel = mapped_column(String, nullable=False)
     gereserveerd = mapped_column(Boolean,default=False)
     beschikbaar = mapped_column(Boolean, default=True)
+    beschrijving = mapped_column(String, nullable=False )
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')
     auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken')
+    
     
 
 class Genre(Base):
