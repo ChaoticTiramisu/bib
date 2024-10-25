@@ -103,17 +103,13 @@ def register():
             register_password = request.form["register_paswoord"]
             rol = request.form["recht"]
 
-            #zorgt ervoor dat het wachwoord de juiste vereisten heeft
-            if len(register_password) < 8:
-                flash("Passwoord moet meer dan 8 karakters bevatten")
-            if any(ele.isupper() for ele in register_password) == False:
-                flash("Passwoord moet een Uppercase bevatten")
-            if any(map(str.isdigit, register_password)) == False:
-                flash("Passwoord moet een getal bevatten")
-            if any(not c.isalnum() for c in register_password) == False:
-                flash("Passwoord moet een speciaal karakter bevatten.")
+            if "@" not in register_email:
+                flash("Deze email bestaat niet")
             else:
-# een nieuwe gebruiker toevoegen aan de database met volgende velden.
+
+            
+            
+            # een nieuwe gebruiker toevoegen aan de database met volgende velden.
                 new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
             #database voert dit uit
                 db.session.add(new_gebruiker)
@@ -121,7 +117,7 @@ def register():
                 db.session.commit()
 
                 flash("Registratie succesvol")
-        return redirect(url_for("login"))
+            return redirect(url_for("login"))
     else:
         #als het geen post is maar een get, steekt hij de rollen die hij uit de database haalt in een variabele en dan geeft hij deze weer in de rendertemplate om weer te geven.
         
@@ -403,7 +399,7 @@ def change(ISBN):
         abort(404)
 
             
-
+ 
     
 
 
