@@ -2,7 +2,7 @@
     {% for result in results %}
     <div class="book-card">
         <div class="book-image">
-            <img src="../static/upload/{{result.ISBN}}.png" alt="Afbeelding">
+            <a href="{{url_for('boek', ISBN = result.ISBN)}}"><img src="../static/upload/{{result.ISBN}}.png" alt="Afbeelding"></a>
         </div>
         <div class="book-details">
             <h3 class="book-title">{{ result.titel }}</h3>
