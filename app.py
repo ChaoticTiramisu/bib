@@ -44,7 +44,7 @@ def getValue(table, column, item):
 
     return result
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -314,8 +314,7 @@ def delete(table):
 # het effectief verwijderen van een boek 
 @app.route("/adminworkspace/tools/delete/<string:table>/<int:voorwerp_id>", methods=["POST","GET"])
 def delete_voorwerp(table, voorwerp_id):
-        print(table)
-        print(voorwerp_id)
+        
         if table not in ["boek", "genre", "auteur", "thema"]:
             abort(404)  
  
@@ -354,11 +353,24 @@ def change(ISBN):
                     genre_names = request.form.getlist("genres")
                     thema_names = request.form.getlist("themas")
                     auteur_names = request.form.getlist("auteurs")
-                    if 'file' in request.files:
-                        file = request.files['file']
-                        if file and allowed_file(file.filename):
-                            filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
-                            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    file = request.files['file']
+                    if file and allowed_file(file.filename):
+                    
+                        old_filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
+                        new_filename = f"{new_ISBN}{os.path.splitext(file.filename)[1]}"
+                        old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], old_filename)
+                        new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+
+                        
+                        if new_ISBN != ISBN:
+                            if os.path.exists(old_file_path):
+                                os.rename(old_file_path, new_file_path)
+                            else:
+                                file.save(new_file_path)
+                        else:
+                            file.save(old_file_path)
+                    
+                    
 
                     # meerdere genres aan een variable toe kenne , indien nodig met for lus
                     genres = [db.session.query(Genre).filter_by(naam=name).first() for name in genre_names]
@@ -395,7 +407,8 @@ def change(ISBN):
                 def_auteurs=[auteur.naam for auteur in boek.auteurs],
                 genres=genres,
                 themas=themas,
-                auteurs=auteurs
+                auteurs=auteurs,
+                
             )
     else:
         abort(404)

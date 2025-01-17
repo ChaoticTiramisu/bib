@@ -7,16 +7,16 @@
 <center>
 <div class="toevoegen">
     <h2>Boek Toevoegen</h2>
-    <form action="{{ url_for('add')}}" method="post" name="boek">
+    <form action="{{ url_for('add')}}" method="post" name="boek" id="boekForm">
 
         <h2>ISBN</h2>
         <label for="ISBN"></label>
-        <input type="number" name="ISBN" placeholder="ISBN" required ><br><br>
+        <input type="number" name="ISBN" placeholder="ISBN" id="ISBN" required ><br><br>
 
         <h2>Titel</h2>
-        <input type="text" name="titel" placeholder="titel" required><br><br>
+        <input type="text" name="titel" placeholder="titel" id="titel" required><br><br>
 
-        h2>Beschrijving</h2>
+        <h2>Beschrijving</h2>
         <input type="text" name="beschrijving" placeholder="beschrijving" required><br><br>
 
         <h2>Genre</h2>
@@ -99,4 +99,52 @@
 </center>
 
 <br><br><br>
+<script>
+// Save form data to localStorage on input
+document.getElementById('boekForm').addEventListener('input', () => {
+    const formData = {
+        ISBN: document.getElementById('ISBN').value,
+        titel: document.getElementById('titel').value,
+        beschrijving: document.getElementById('beschrijving').value,
+        genres: Array.from(document.querySelectorAll('input[name="genres"]:checked')).map(cb => cb.value),
+        themas: Array.from(document.querySelectorAll('input[name="themas"]:checked')).map(cb => cb.value),
+        auteurs: Array.from(document.querySelectorAll('input[name="auteurs"]:checked')).map(cb => cb.value)
+    };
+    localStorage.setItem('boekForm', JSON.stringify(formData));
+});
+
+// Retrieve form data from localStorage on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedData = JSON.parse(localStorage.getItem('boekForm') || '{}');
+
+    if (savedData.ISBN) document.getElementById('ISBN').value = savedData.ISBN;
+    if (savedData.titel) document.getElementById('titel').value = savedData.titel;
+    if (savedData.beschrijving) document.getElementById('beschrijving').value = savedData.beschrijving;
+
+    // Restore checkbox selections for genres, themas, and auteurs
+    if (savedData.genres) {
+        savedData.genres.forEach(value => {
+            const checkbox = document.querySelector(`input[name="genres"][value="${value}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    }
+    if (savedData.themas) {
+        savedData.themas.forEach(value => {
+            const checkbox = document.querySelector(`input[name="themas"][value="${value}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    }
+    if (savedData.auteurs) {
+        savedData.auteurs.forEach(value => {
+            const checkbox = document.querySelector(`input[name="auteurs"][value="${value}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    }
+});
+
+// Clear form data from localStorage on successful submission
+document.getElementById('boekForm').addEventListener('submit', () => {
+    localStorage.removeItem('boekForm');
+});
+</script>
 {% endblock body %}

@@ -68,6 +68,7 @@ class Boek(Base):
     auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken')
     
     
+    
 
 class Genre(Base):
     __tablename__ = "genre"
