@@ -3,6 +3,19 @@
 {% block title %} Register {% endblock title %} 
 
 {% block body %}
+<style>
+    #passwordFeedback {
+        font-weight: bold;
+        margin-top: 5px;
+        display: none; /* Initially hidden */
+    }
+    #passwordFeedback.red {
+        color: red;
+    }
+    #passwordFeedback.green {
+        color: green;
+    }
+</style>
 <center>
     <form action="/register" method="post">
         <h2>Naam</h2>
@@ -16,7 +29,14 @@
     
         
         <h2>Password</h2>
+<<<<<<< HEAD
         <input type="password" name="register_paswoord" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required><br><br>
+=======
+        
+        <input type="password" id="register_paswoord" name="register_paswoord" placeholder="Password" required oninput="validatePassword()"><br>
+        <span id="passwordFeedback" style="display:none;"></span>
+        <br>
+>>>>>>> ca5949c1ac6b9d54b76bf7b69154a3e3641e96f5
 
         <select name="recht" id="recht">
             {% for choice,label in rol_choices %}
@@ -24,7 +44,37 @@
             {% endfor %}
         </select>
 
-        <input type="submit" value="Register">
+        <input type="submit" id="submitButton" value="Register" disabled>
     </form>
 </center>
+
+<script>
+    function validatePassword() {
+        const password = document.getElementById('register_paswoord').value;
+        const feedback = document.getElementById('passwordFeedback');
+        const submitButton = document.getElementById('submitButton');
+        
+        
+        //wachtwoord vereisten
+        const minLength = 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        
+        // Checken of de vereisten behaald zijn
+        if (password.length < minLength || !hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+            feedback.style.color = 'red';
+            feedback.textContent = 'Password must be at least 8 characters long, contain upper and lower case letters, numbers, and special characters.';
+            feedback.style.display = 'block';
+            submitButton.disabled = true;
+        } else {
+            feedback.style.color = 'green';
+            feedback.textContent = 'Passwoord is goed.';
+            feedback.style.display = 'block';
+            submitButton.disabled = false;
+        }
+    }
+</script>
+
 {% endblock body %}
