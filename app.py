@@ -62,8 +62,9 @@ def index():
         return redirect(url_for("login"))
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
     user = db.session.query(Gebruiker).filter_by(email=email).first()
+    if str(user.rol) == "Bibliothecaris":
+        return render_template("index.html", rol=user.rol)
     return render_template("index.html", user = user)
-    
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
@@ -422,6 +423,24 @@ def PICT():
 def taal():
     return render_template("taal.html")
 
+#admin page
+@app.route("/admin", methods=["POST", "GET"])
+
+def admin():
+    test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    if str(test.rol) == "Bibliothecaris":
+        return render_template("admin.html", rol=test.rol)
+    else:
+        return redirect(url_for("index"))
+
+@app.route("/admin/gebruikers", methods=["GET"])
+def gebruikers():
+    # Haal alle gebruikers op uit de database
+    gebruikers = db.session.query(Gebruiker).all()
+    if not gebruikers:
+        flash("Geen gebruikers gevonden.")
+        return redirect(url_for("admin"))
+    return render_template("gebruikers.html", gebruikers=gebruikers)
 
 # je hebt het nodig voor het programma te runnen.
 if __name__ == "__main__":

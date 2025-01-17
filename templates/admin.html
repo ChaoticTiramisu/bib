@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+
+{% block title %} admin {% endblock title %} 
+
+{% block body %}
+<h2>Welkom op de admin</h2>
+<body>
+  <div class="sidenav">
+    <a href="{{url_for('adminworkspace')}}">Aanpassen</a>
+    <a href="{{url_for('gebruikers')}}">Gebruikers</a>
+    <a href="#contact">Contact</a>
+  </div>
+</body>
+{% endblock body %}

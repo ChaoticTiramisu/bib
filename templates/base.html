@@ -18,10 +18,11 @@
                 <a href="{{url_for('index')}}"><img src="/static/afbeeldingen/logo.svg" alt="Logo"></a>
             </div>
             <div class="menu">
-                <a href="{{url_for('boeken')}}" class="button">Boeken</a>
-                <a href="{{url_for('login')}}" class="button">Login</a>
-                <a href="{{url_for('adminworkspace')}}" class="button">Boeken Aanpassen</a>
-                <a href="{{url_for('logout')}}" class="button">logout</a>
+                    <a href="{{url_for('boeken')}}" class="button">Boeken</a>
+                    {% if rol == "bibliothecaris" %}
+                         <a href="{{ url_for('admin') }}" class="button">admin</a>
+                    {% endif %}
+                    <a href="{{url_for('logout')}}" class="button">logout</a>
             </div>
         </header>
         

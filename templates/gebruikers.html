@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %} Gebruikers {% endblock title %} 
+
+{% block body %}
+    <div class="sidenav">
+        <a href="{{url_for('adminworkspace')}}">Aanpassen</a>
+        <a href="{{url_for('gebruikers')}}">Gebruikers</a>
+        <a href="#about">Over ons</a>
+        <a href="#contact">Contact</a>
+    </div>
+    <div class="gebruikers-container">
+        <h1>Gebruikerslijst</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Voornaam</th>
+                    <th>Achternaam</th>
+                    <th>E-mailadres</th>
+                    <th>Telefoonnummer</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gebruiker in gebruikers %}
+                    <tr>
+                        <td>{{ gebruiker.id}}</td>
+                        <td>{{ gebruiker.naam }}</td>
+                        <td>{{ gebruiker.achternaam}}</td>
+                        <td>{{ gebruiker.email }}</td>
+                        <td>{{gebruiker.tl_nr}}</td>
+                        <td>{{gebruiker.rol}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+{% endblock body %}

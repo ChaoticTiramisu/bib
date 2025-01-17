@@ -474,3 +474,82 @@ header .menu .button:hover {
     border-radius: 50%;
     padding: 20px; 
 }
+
+.sidenav {
+    height: 100%; /* Volledige hoogte van het scherm */
+    width: 200px; /* Breedte van de zijbalk */
+    position: fixed; /* Blijft altijd zichtbaar */
+    top: 15%;
+    left: 0;
+    background-color: #2980b9; /* Blauwe kleur */
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+/* Stijl voor de links in de zijbalk */
+.sidenav a {
+    padding: 15px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    color: white; /* Witte tekstkleur */
+    display: block;
+}
+
+/* Stijl voor hover-effect */
+.sidenav a:hover {
+    background-color: #1f6390; /* Iets donkerdere blauwe kleur */
+    color: #f1f1f1; /* Lichte tekstkleur */
+}
+
+/* Hoofdinhoud, met marge links zodat het niet overlapt met de zijbalk */
+.main-content {
+    margin-left: 220px; /* Ruimte aan de linkerkant om de zijbalk te accommoderen */
+    padding: 20px;
+}
+
+
+
+/* Gebruikerscontainerstijl */
+.gebruikers-container {
+    flex: 1; /* Laat de gebruikerscontainer de resterende ruimte vullen */
+    margin: 20px;
+    padding-left: 180px;
+    background-color: #fff; /* Witte achtergrond voor contrast */
+    overflow-y: auto; /* Zorg ervoor dat de inhoud kan scrollen als deze te groot wordt */
+}
+
+/* Optionele extra's voor de gebruikerslijst */
+.gebruikers-container h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.gebruikers-container ul {
+    list-style-type: none; /* Verwijder standaard opsommingstekens */
+    padding: 0;
+}
+
+.gebruikers-container li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.gebruikers-container th, .gebruikers-container td {
+    border: 1px solid #ddd; /* Rand om cellen */
+    padding: 8px; /* Ruimte binnen cellen */
+    text-align: left; /* Tekst uitlijnen aan de linkerkant */
+}
+
+.gebruikers-container th {
+    background-color: #f4f4f4; /* Lichte achtergrondkleur voor kopteksten */
+    font-weight: bold; /* Vetgedrukte tekst voor kopteksten */
+}
+
+.gebruikers-container tr:nth-child(even) {
+    background-color: #f9f9f9; /* Alternatieve achtergrondkleur voor rijen */
+}
+
+.gebruikers-container tr:hover {
+    background-color: #f1f1f1; /* Hoogtepunt wanneer je over een rij zweeft */
+}
