@@ -29,15 +29,9 @@
     
         
         <h2>Password</h2>
-<<<<<<< HEAD
-        <input type="password" name="register_paswoord" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required><br><br>
-=======
-        
         <input type="password" id="register_paswoord" name="register_paswoord" placeholder="Password" required oninput="validatePassword()"><br>
         <span id="passwordFeedback" style="display:none;"></span>
         <br>
->>>>>>> ca5949c1ac6b9d54b76bf7b69154a3e3641e96f5
-
         <select name="recht" id="recht">
             {% for choice,label in rol_choices %}
                     <option value="{{ choice }}">{{ label }}</option>

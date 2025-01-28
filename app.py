@@ -248,6 +248,7 @@ def add():
                     ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
                     beschrijving = request.form["beschrijving"]
+                    status = request.form.get("status", "Afwezig")
                     # meerdere genres voer een boek mogelijk daarom is dit een lijst
                     selected_genres = request.form.getlist("genres")
                     selected_auteurs = request.form.getlist("auteurs")
@@ -258,7 +259,7 @@ def add():
                     auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
                     themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
                     # titel en isbn toevoegen aan variabele boek
-                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving)
+                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving, status=status)
                     # meerdere genres verlengen met nieuwe genres
                     boek.genres.extend(genres)
                     boek.auteurs.extend(auteurs)
@@ -350,6 +351,7 @@ def change(ISBN):
                     boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
                     new_ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
+                    status = request.form.get("status") == "Aanwezig"
                     genre_names = request.form.getlist("genres")
                     thema_names = request.form.getlist("themas")
                     auteur_names = request.form.getlist("auteurs")
@@ -382,7 +384,8 @@ def change(ISBN):
                     boek.genres = genres
                     boek.themas = themas
                     boek.auteurs = auteurs
-
+                    boek.status = status
+                    
                     db.session.commit()
                     flash("Boek succesvol veranderd")
                     return redirect(url_for("boeken"))
@@ -396,6 +399,9 @@ def change(ISBN):
             genres = db.session.query(Genre.naam).all()
             themas = db.session.query(Thema.naam).all()
             auteurs = db.session.query(Auteur.naam).all()
+            
+                
+            
             boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
             return render_template(
                 "boek_edit.html",
@@ -408,6 +414,7 @@ def change(ISBN):
                 genres=genres,
                 themas=themas,
                 auteurs=auteurs,
+                def_status = boek.status,
                 
             )
     else:

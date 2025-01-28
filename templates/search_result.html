@@ -33,16 +33,8 @@
                 </ul>
             </div>
             <div>
-                <strong>Gereserveer?</strong>
-                {% if result.gereserveerd == 1 %}
-                <img src="/static/afbeeldingen/check.svg">
-                {% else %}
-                <img src="/static/afbeeldingen/block.svg">
-                {% endif %}
-            </div>
-            <div>
                 <strong>Beschikbaar?</strong>
-                {% if result.gereserveerd == 0 %}
+                {% if result.status == 1 %}
                 <img src="/static/afbeeldingen/check.svg">
                 {% else %}
                 <img src="/static/afbeeldingen/block.svg">

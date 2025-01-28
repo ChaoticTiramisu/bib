@@ -19,6 +19,10 @@
         <h2>Beschrijving</h2>
         <input type="text" name="beschrijving" placeholder="beschrijving" required><br><br>
 
+        <h2>Beschikbaarheid</h2>
+        <input type="checkbox" value="Aanwezig" name="status" id="status">
+        <label for="Aanwezig">Aanwezig</label> 
+        <br>
         <h2>Genre</h2>
         <div class="scrollable-checkboxes">
             {% for genre in genres %}
