@@ -62,9 +62,12 @@ def index():
         return redirect(url_for("login"))
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
     user = db.session.query(Gebruiker).filter_by(email=email).first()
+    boek = db.session.query(Boek).filter_by(bvdm=1).first()
+    bvdm = boek.bvdm
+    isbn = boek.ISBN
     if str(user.rol) == "Bibliothecaris":
-        return render_template("index.html", rol=user.rol)
-    return render_template("index.html", user = user)
+        return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
+    return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
@@ -352,6 +355,7 @@ def change(ISBN):
                     new_ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
                     status = request.form.get("status") == "Aanwezig"
+                    bvdm = request.form.get("bvdm") == "Ja"
                     genre_names = request.form.getlist("genres")
                     thema_names = request.form.getlist("themas")
                     auteur_names = request.form.getlist("auteurs")
@@ -385,6 +389,7 @@ def change(ISBN):
                     boek.themas = themas
                     boek.auteurs = auteurs
                     boek.status = status
+                    boek.bvdm = bvdm
                     
                     db.session.commit()
                     flash("Boek succesvol veranderd")
@@ -415,6 +420,7 @@ def change(ISBN):
                 themas=themas,
                 auteurs=auteurs,
                 def_status = boek.status,
+                def_bvdm = boek.bvdm,
                 
             )
     else:
