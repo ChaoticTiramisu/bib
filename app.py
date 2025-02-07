@@ -62,9 +62,12 @@ def index():
         return redirect(url_for("login"))
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
     user = db.session.query(Gebruiker).filter_by(email=email).first()
+    boek = db.session.query(Boek).filter_by(bvdm=1).first()
+    bvdm = boek.bvdm
+    isbn = boek.ISBN
     if str(user.rol) == "Bibliothecaris":
-        return render_template("index.html", rol=user.rol)
-    return render_template("index.html", user = user)
+        return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
+    return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
@@ -248,6 +251,7 @@ def add():
                     ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
                     beschrijving = request.form["beschrijving"]
+                    status = request.form.get("status", "Afwezig")
                     # meerdere genres voer een boek mogelijk daarom is dit een lijst
                     selected_genres = request.form.getlist("genres")
                     selected_auteurs = request.form.getlist("auteurs")
@@ -258,7 +262,7 @@ def add():
                     auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
                     themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
                     # titel en isbn toevoegen aan variabele boek
-                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving)
+                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving, status=status)
                     # meerdere genres verlengen met nieuwe genres
                     boek.genres.extend(genres)
                     boek.auteurs.extend(auteurs)
@@ -350,6 +354,8 @@ def change(ISBN):
                     boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
                     new_ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
+                    status = request.form.get("status") == "Aanwezig"
+                    bvdm = request.form.get("bvdm") == "Ja"
                     genre_names = request.form.getlist("genres")
                     thema_names = request.form.getlist("themas")
                     auteur_names = request.form.getlist("auteurs")
@@ -382,7 +388,9 @@ def change(ISBN):
                     boek.genres = genres
                     boek.themas = themas
                     boek.auteurs = auteurs
-
+                    boek.status = status
+                    boek.bvdm = bvdm
+                    
                     db.session.commit()
                     flash("Boek succesvol veranderd")
                     return redirect(url_for("boeken"))
@@ -396,6 +404,9 @@ def change(ISBN):
             genres = db.session.query(Genre.naam).all()
             themas = db.session.query(Thema.naam).all()
             auteurs = db.session.query(Auteur.naam).all()
+            
+                
+            
             boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
             return render_template(
                 "boek_edit.html",
@@ -408,6 +419,8 @@ def change(ISBN):
                 genres=genres,
                 themas=themas,
                 auteurs=auteurs,
+                def_status = boek.status,
+                def_bvdm = boek.bvdm,
                 
             )
     else:

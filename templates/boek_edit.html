@@ -43,10 +43,21 @@
                 <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
             {% endfor %}
             </div>
-    
-            
+            <h2>Beschikbaarheid</h2>
+            <input type="checkbox" id="status" name="status" value="Aanwezig" 
+                 {% if def_status %} checked {% endif %}>
+            <label for="status">Aanwezig</label>
+            <br>
+            <br>
+            <h2>Boek van de maand?</h2>
+            <input type="checkbox" id="bvdm" name="bvdm" value="Ja"
+                {% if def_bvdm %} checked {% endif %}>
+            <label for="bvdm">Boek van de maand</label>
+            <br>
+            <br>
             <input type="submit" value="Register">
         </form>
+       
     </div>
     </center>
 
