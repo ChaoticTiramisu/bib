@@ -1,66 +1,64 @@
-# Importeren van subprocess(bestanden laten uitvoeren), sys(systeem) en os(operating system(routes))
 import subprocess
 import sys
 import os
 
-# maken van virtuele omgeving, proberen met try and except voor error op te vangen.
 def create_venv(venv_name):
     """
-    Creëer een virtual environment.
+    Create a virtual environment.
     """
     try:
-        # voert dit commando uit voor jou, voor het aanmaken van een virtuele omgeving en print message met naam van venv
         subprocess.check_call([sys.executable, '-m', 'venv', venv_name])
-        print(f"Virtual environment {venv_name} succesvol gecreëerd.")
-        # bij error print hij, dat er een error is gebeurd, sys.exit, hij gaat uit dit proces
+        print(f"Virtual environment '{venv_name}' successfully created.")
     except subprocess.CalledProcessError:
-        print(f"Error creating virtual environment {venv_name}.")
+        print(f"Error creating virtual environment '{venv_name}'.")
         sys.exit(1)
-# activeren van je virtuele omgeving
+
 def activate_venv(venv_name):
     """
-    Activeerd de virtual environment op Windows.
+    "Activate" the virtual environment.
+    Note: Activating a venv in a subprocess does not change the parent shell’s environment.
+    For our purposes, we only simulate activation. The install_dependencies function uses the correct venv path.
     """
-    # het zoekt het pad voor de venv en dan gaat hij in de script
-    venv_path = os.path.join(venv_name, 'Scripts')
-    # in script folder, zoekt hij de route naar activate.bat in een variable
-    activate_script = os.path.join(venv_path, 'activate.bat')
-# runt bestand activate script, print nadien als het geactiveerd is, indien errror sys.exit
+    if os.name == 'nt':
+        # Windows: use the activate.bat script
+        activate_script = os.path.join(venv_name, 'Scripts', 'activate.bat')
+        command = [activate_script]
+    else:
+        # POSIX (Linux, macOS): use the activate script inside bin
+        activate_script = os.path.join(venv_name, 'bin', 'activate')
+        # Running 'source' in a subprocess won't affect the parent process.
+        # We can run it just to check if the script exists.
+        command = ['bash', '-c', f'source {activate_script} && echo "Activated"']
     try:
-        subprocess.check_call([activate_script], shell=True)
-        print(f"Virtual environment {venv_name} geactiveerd.")
+        output = subprocess.check_output(command, shell=False)
+        print(f"Virtual environment '{venv_name}' activation simulated: {output.decode().strip()}")
     except subprocess.CalledProcessError:
-        print(f"Error activating virtual environment {venv_name}.")
+        print(f"Error activating virtual environment '{venv_name}'.")
         sys.exit(1)
 
-# alle dependencies(afhankelijk als het programma gaat runnen bv. random is een dependecie) installeren
 def install_dependencies(venv_name, requirements_file):
     """
-    Installeert dependencies van de requirements.txt file.
+    Install dependencies from the requirements.txt file.
     """
-    # zelfde als script zie hierboven, als name niet gelijk is aan nt gaat hij naar script folder
-    venv_path = os.path.join(venv_name, 'bin' if os.name != 'nt' else 'Scripts')
-    #pip is package installeren voor python en de route naar het bestand
-    pip_path = os.path.join(venv_path, 'pip')
+    # Determine the correct folder (Windows: Scripts, Linux: bin)
+    venv_dir = 'Scripts' if os.name == 'nt' else 'bin'
+    pip_path = os.path.join(venv_name, venv_dir, 'pip')
     
-    # hij runt de pip en installeert alle depencendies indien error stop hij weer en print code
     try:
         subprocess.check_call([pip_path, 'install', '-r', requirements_file])
-        print(f"Dependencies installed successfully.")
+        print("Dependencies installed successfully.")
     except subprocess.CalledProcessError:
-        print(f"Error installing dependencies.")
+        print("Error installing dependencies.")
         sys.exit(1)
 
-# altijd nodig voor bestand te runnen.
 if __name__ == '__main__':
-    
     venv_name = 'env'
-
-    # alle definities worden hier uitgevoerd.
+    
+    # Create the virtual environment.
     create_venv(venv_name)
-
     
+    # "Activate" the virtual environment (for demonstration only).
     activate_venv(venv_name)
-
     
+    # Install dependencies using the venv's pip.
     install_dependencies(venv_name, 'requirements.txt')
