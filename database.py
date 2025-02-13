@@ -60,9 +60,9 @@ class Boek(Base):
     ISBN = mapped_column(String, primary_key=True)
     titel = mapped_column(String, nullable=False)
     gereserveerd = mapped_column(Boolean,default=False)
-    status = mapped_column(String, nullable=False)
+    status = mapped_column(Boolean, nullable=False)
     beschrijving = mapped_column(String, nullable=False )
-    bvdm = mapped_column(String, nullable=False)
+    bvdm = mapped_column(Boolean, nullable=True)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')

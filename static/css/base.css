@@ -554,3 +554,8 @@ header .menu .button:hover {
     background-color: #f1f1f1; /* Hoogtepunt wanneer je over een rij zweeft */
 }
 
+.box img {
+    width: 200px;        /* Breedte van de afbeelding */
+    height: 300px;       /* Hoogte van de afbeelding */
+    object-fit: cover;   /* Zorgt ervoor dat de afbeelding goed wordt bijgesneden */
+}

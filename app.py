@@ -255,7 +255,8 @@ def add():
                     ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
                     beschrijving = request.form["beschrijving"]
-                    status = request.form.get("status", "Afwezig")
+                    status = request.form.get("status") == "Afwezig"
+                    bvdm = request.form.get("bvdm") == "Ja"
                     # meerdere genres voer een boek mogelijk daarom is dit een lijst
                     selected_genres = request.form.getlist("genres")
                     selected_auteurs = request.form.getlist("auteurs")
@@ -266,7 +267,7 @@ def add():
                     auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
                     themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
                     # titel en isbn toevoegen aan variabele boek
-                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving, status=status)
+                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving, status=status, bvdm=bvdm)
                     # meerdere genres verlengen met nieuwe genres
                     boek.genres.extend(genres)
                     boek.auteurs.extend(auteurs)
