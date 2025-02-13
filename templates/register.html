@@ -19,28 +19,28 @@
 <center>
     <form action="/register" method="post">
         <h2>Naam</h2>
-        <input type="text" name="name" placeholder="Name" required><br><br>
+        <input type="text" name="name" placeholder="Naam" required><br><br>
 
         <h2>achternaam</h2>
-        <input type="text" name="achternaam" placeholder="achternaam" required><br><br>
+        <input type="text" name="achternaam" placeholder="Achternaam" required><br><br>
 
         <h2>Email</h2>
-        <input type="text" name="register_email" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Dit is geen gekend email." required><br><br>
+        <input type="text" name="register_email" placeholder="E-mail" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Dit is geen gekend email." required><br><br>
     
         
         <h2>Password</h2>
-        <input type="password" id="register_paswoord" name="register_paswoord" placeholder="Password" required oninput="validatePassword()"><br>
+        <input type="password" id="register_paswoord" name="register_paswoord" placeholder="Wachtwoord" required oninput="validatePassword()"><br>
         <span id="passwordFeedback" style="display:none;"></span>
         <br>
->>>>>>> ca5949c1ac6b9d54b76bf7b69154a3e3641e96f5
 
+        <h2>Rol</h2>
         <select name="recht" id="recht">
             {% for choice,label in rol_choices %}
                     <option value="{{ choice }}">{{ label }}</option>
             {% endfor %}
         </select>
 
-        <input type="submit" id="submitButton" value="Register" disabled>
+        <input type="submit" id="submitButton" value="Registreer" disabled>
     </form>
 </center>
 
