@@ -60,7 +60,7 @@ class Boek(Base):
     ISBN = mapped_column(String, primary_key=True)
     titel = mapped_column(String, nullable=False)
     gereserveerd = mapped_column(Boolean,default=False)
-    status = mapped_column(Boolean, nullable=False)
+    status = mapped_column(Boolean, nullable=True)
     beschrijving = mapped_column(String, nullable=False )
     bvdm = mapped_column(Boolean, nullable=True)
 

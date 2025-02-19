@@ -215,7 +215,7 @@ def add():
             return redirect(url_for("login"))
         test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
         if str(test.rol) == "Bibliothecaris":
-# hij kijkt als genr in je request form zit en niet een isbn, dus gaat ervan uit dat je enkle genre wilt toevoegen
+            #hij kijkt als genr in je request form zit en niet een isbn, dus gaat ervan uit dat je enkle genre wilt toevoegen
             if "genre" in request.form and "ISBN" not in request.form:
                 genre_naam = request.form["genre"].lower()
                 #checkt als genre nog niet in database zit, indien niet voegt hij deze toe
@@ -247,7 +247,7 @@ def add():
                     flash("Auteur succesvol toegevoegd")
                 else:
                     flash("De auteur zit al in database.")
-# indien ISBN wel in je form zit, gaat ervan uit dat je boekt wilt toevoegen
+            #indien ISBN wel in je form zit, gaat ervan uit dat je boekt wilt toevoegen
             elif "ISBN" in request.form:
                 ISBN_nr = request.form["ISBN"].lower()
                 # controleren als hij nog niet in database zit
@@ -262,7 +262,7 @@ def add():
                     selected_auteurs = request.form.getlist("auteurs")
                     selected_themas = request.form.getlist("themas")
 
-# genres zoeken in database en indien er meerdere genres voor een boek zijn zal hij in een for lus elk genre toevoegen voor dit boek.
+                    #genres zoeken in database en indien er meerdere genres voor een boek zijn zal hij in een for lus elk genre toevoegen voor dit boek.
                     genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) for genre_name in selected_genres]
                     auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
                     themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
@@ -409,6 +409,7 @@ def change(ISBN):
             genres = db.session.query(Genre.naam).all()
             themas = db.session.query(Thema.naam).all()
             auteurs = db.session.query(Auteur.naam).all()
+            
             
                 
             
