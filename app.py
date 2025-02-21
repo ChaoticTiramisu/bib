@@ -10,17 +10,22 @@ from werkzeug.utils import secure_filename
 
 
 # dirname, is de weg naar dit bestand. 
-dirname = os.path.dirname(__file__)
-# zo weet het main bestand waar de instance zich bevinden, zodat het bestand zelf weet waar hij staat op de computer
+dirname = os.path.abspath('instance')
 app = Flask(__name__, instance_path=dirname)
 
 # configugeren van de sessie
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
 app.config["SESSION_PERMANENT"] = False
 # je hebt verschillende soort databases dus vandaar het type nog eens toelichten.
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/bib.db"
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'instance', 'bib.db')}"
 app.config['UPLOAD_FOLDER'] = 'static/upload'
+
 # de beveillingssleutel voor rededenen
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
