@@ -6,6 +6,9 @@ from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
 from werkzeug.utils import secure_filename
+from flask_migrate import Migrate
+
+
 
 
 
@@ -22,7 +25,7 @@ app.config["SESSION_PERMANENT"] = False
 # je hebt verschillende soort databases dus vandaar het type nog eens toelichten.
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
-basedir = os.path.abspath(os.path.dirname(__file__))
+basedir = os.path.abspath(os.path.dirname(__file__)) 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'instance', 'bib.db')}"
 app.config['UPLOAD_FOLDER'] = 'static/upload'
 
@@ -30,9 +33,9 @@ app.config['UPLOAD_FOLDER'] = 'static/upload'
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 # hier worden alle tabellen aangemaakt
-with app.app_context():
-    db.create_all()
+
 # definitie om te checken als een bepaalde waarde in een tabel zit in een bepaalde kolom
 def checkContains(table_naam,column_naam,item):
  # getattr een string waarde omvormen naar een databasesyntax
