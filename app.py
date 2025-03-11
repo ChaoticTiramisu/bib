@@ -78,7 +78,7 @@ def index():
         else:
             bvdm = None
             isbn = None
-        if str(user.rol) == "Bibliothecaris":
+        if str(user.rol) == "Bibliothecaris" or str(user.rol) =="Admin":
             return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
     return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
 
