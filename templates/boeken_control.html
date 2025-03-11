@@ -7,8 +7,10 @@
 <center>
 <div class="toevoegen">
     <h2>Boek Toevoegen</h2>
-    <form action="{{ url_for('add')}}" method="post" name="boek" id="boekForm">
+    <form action="{{ url_for('add')}}" method="post" name="boek" id="boekForm" enctype = "multipart/form-data">
 
+        <input type = "file" name = "file" />
+        <br>
         <h2>ISBN</h2>
         <label for="ISBN"></label>
         <input type="number" name="ISBN" placeholder="ISBN" id="ISBN" required ><br><br>
