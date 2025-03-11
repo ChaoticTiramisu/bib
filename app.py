@@ -6,28 +6,36 @@ from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
 from werkzeug.utils import secure_filename
+from flask_migrate import Migrate
+
+
 from sqlalchemy_utils import ChoiceType
 
 
 # dirname, is de weg naar dit bestand. 
-dirname = os.path.dirname(__file__)
-# zo weet het main bestand waar de instance zich bevinden, zodat het bestand zelf weet waar hij staat op de computer
+dirname = os.path.abspath('instance')
 app = Flask(__name__, instance_path=dirname)
 
 # configugeren van de sessie
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
 app.config["SESSION_PERMANENT"] = False
 # je hebt verschillende soort databases dus vandaar het type nog eens toelichten.
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/bib.db"
+basedir = os.path.abspath(os.path.dirname(__file__)) 
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'instance', 'bib.db')}"
 app.config['UPLOAD_FOLDER'] = 'static/upload'
+
 # de beveillingssleutel voor rededenen
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 # hier worden alle tabellen aangemaakt
-with app.app_context():
-    db.create_all()
+
 # definitie om te checken als een bepaalde waarde in een tabel zit in een bepaalde kolom
 def checkContains(table_naam,column_naam,item):
  # getattr een string waarde omvormen naar een databasesyntax
@@ -60,6 +68,7 @@ def index():
     #indien er geen email is, wordt je terug gestuurd naar de inlogpagina
     if email == None:
         return redirect(url_for("login"))
+    else:
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
     user = db.session.query(Gebruiker).filter_by(email=email).first()
     if db.session.query(Boek).filter_by(bvdm=1).first():
@@ -69,7 +78,7 @@ def index():
     else:
         bvdm = None
         isbn = None
-    if str(user.rol) == "Bibliothecaris" or str(user.rol) == "Admin":
+    if str(user.rol) == "Bibliothecaris":
         return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
     return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
 
@@ -215,7 +224,7 @@ def add():
             return redirect(url_for("login"))
         test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
         if str(test.rol) == "Bibliothecaris":
-# hij kijkt als genr in je request form zit en niet een isbn, dus gaat ervan uit dat je enkle genre wilt toevoegen
+            #hij kijkt als genr in je request form zit en niet een isbn, dus gaat ervan uit dat je enkle genre wilt toevoegen
             if "genre" in request.form and "ISBN" not in request.form:
                 genre_naam = request.form["genre"].lower()
                 #checkt als genre nog niet in database zit, indien niet voegt hij deze toe
@@ -247,7 +256,7 @@ def add():
                     flash("Auteur succesvol toegevoegd")
                 else:
                     flash("De auteur zit al in database.")
-# indien ISBN wel in je form zit, gaat ervan uit dat je boekt wilt toevoegen
+            #indien ISBN wel in je form zit, gaat ervan uit dat je boekt wilt toevoegen
             elif "ISBN" in request.form:
                 ISBN_nr = request.form["ISBN"].lower()
                 # controleren als hij nog niet in database zit
@@ -262,7 +271,7 @@ def add():
                     selected_auteurs = request.form.getlist("auteurs")
                     selected_themas = request.form.getlist("themas")
 
-# genres zoeken in database en indien er meerdere genres voor een boek zijn zal hij in een for lus elk genre toevoegen voor dit boek.
+                    #genres zoeken in database en indien er meerdere genres voor een boek zijn zal hij in een for lus elk genre toevoegen voor dit boek.
                     genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) for genre_name in selected_genres]
                     auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
                     themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
@@ -409,6 +418,7 @@ def change(ISBN):
             genres = db.session.query(Genre.naam).all()
             themas = db.session.query(Thema.naam).all()
             auteurs = db.session.query(Auteur.naam).all()
+            
             
                 
             
