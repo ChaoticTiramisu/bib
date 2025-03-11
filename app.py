@@ -137,6 +137,9 @@ def register():
 
                 flash("Registratie succesvol")
             return redirect(url_for("login"))
+        else:
+             flash("Deze email adress is al in gebruik.")
+             return render_template("register.html",rol_choices=rol_choices)
     else:
         #als het geen post is maar een get, steekt hij de rollen die hij uit de database haalt in een variabele en dan geeft hij deze weer in de rendertemplate om weer te geven.
         
