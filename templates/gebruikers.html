@@ -3,12 +3,13 @@
 {% block title %} Gebruikers {% endblock title %} 
 
 {% block body %}
+<body>
     <div class="sidenav">
-        <a href="{{url_for('adminworkspace')}}">Aanpassen</a>
-        <a href="{{url_for('gebruikers')}}">Gebruikers</a>
-        <a href="#about">Over ons</a>
-        <a href="#contact">Contact</a>
+      <a href="{{url_for('adminworkspace')}}">Aanpassen</a>
+      <a href="{{url_for('gebruikers')}}">Gebruikers</a>
+      <a href="#contact">Contact</a>
     </div>
+  </body>
     <div class="gebruikers-container">
         <h1>Gebruikerslijst</h1>
         <table>
@@ -31,6 +32,10 @@
                         <td>{{ gebruiker.email }}</td>
                         <td>{{gebruiker.tl_nr}}</td>
                         <td>{{gebruiker.rol}}</td>
+                        <td>
+                            <a href="{{ url_for('bewerk_gebruiker', gebruiker_id=gebruiker.id) }}">
+                                <button>Wijzig</button>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

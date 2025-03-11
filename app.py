@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema
 from werkzeug.utils import secure_filename
-
+from sqlalchemy_utils import ChoiceType
 
 
 # dirname, is de weg naar dit bestand. 
@@ -69,7 +69,7 @@ def index():
     else:
         bvdm = None
         isbn = None
-    if str(user.rol) == "Bibliothecaris":
+    if str(user.rol) == "Bibliothecaris" or str(user.rol) == "Admin":
         return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
     return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
 
@@ -461,6 +461,8 @@ def admin():
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
     if str(test.rol) == "Bibliothecaris":
         return render_template("admin.html", rol=test.rol)
+    elif str(test.rol) == "Admin":
+        return render_template("admin.html", rol=test.rol)
     else:
         return redirect(url_for("index"))
 
@@ -472,6 +474,26 @@ def gebruikers():
         flash("Geen gebruikers gevonden.")
         return redirect(url_for("admin"))
     return render_template("gebruikers.html", gebruikers=gebruikers)
+
+@app.route('/bewerk_gebruiker/<int:gebruiker_id>', methods=['GET', 'POST'])
+def bewerk_gebruiker(gebruiker_id):
+    gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
+    rol_choices = [
+        ('admin', 'Admin'),
+        ('bibliothecaris', 'Bibliothecaris'),
+        ('ontlener', 'Ontlener')
+    ]
+    if request.method == 'POST':
+        gebruiker.naam = request.form['naam']
+        gebruiker.achternaam = request.form['achternaam']
+        gebruiker.email = request.form['email']
+        gebruiker.tl_nr = request.form['tl_nr']
+        gebruiker.rol = request.form.get('recht')
+        
+        db.session.commit()
+        return redirect(url_for('gebruikers'))  # Terug naar de gebruikerslijst
+
+    return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices)
 
 # je hebt het nodig voor het programma te runnen.
 if __name__ == "__main__":
