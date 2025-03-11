@@ -71,8 +71,8 @@ def index():
     else:
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
         user = db.session.query(Gebruiker).filter_by(email=email).first()
-        if db.session.query(Boek).filter_by(bvdm=1).first():
-            boek = db.session.query(Boek).filter_by(bvdm=1).first()
+        if db.session.query(Boek).filter_by(bvdm=True).first():
+            boek = db.session.query(Boek).filter_by(bvdm=True).first()
             bvdm = boek.bvdm
             isbn = boek.ISBN
         else:
@@ -92,9 +92,11 @@ def login():
         password = request.form["login_paswoord"]
         # hier zal hij zoeken in de database op basis van email naar een gebruiker.
         user = db.session.query(Gebruiker).filter_by(email=email).first()
+        
         # als er een gebruiker bestaat en het password klopt, zet hij de email in de sessie en is de login succesvol en hij brengt je terug naar de hoofdpagina
         if user is not None and user.paswoord == password:
             session["email"] = email
+            session["rol"] = str(user.rol)
             flash("Login succesvol")
             return redirect("/")
         # als er een gebruiker nog niet bestaat of het wachtwoord oncorrect. toont(flash), de melding en brengt hij je terug naar de login pagina(loop)
@@ -266,6 +268,12 @@ def add():
                     beschrijving = request.form["beschrijving"]
                     status = request.form.get("status") == "Afwezig"
                     bvdm = request.form.get("bvdm") == "Ja"
+                    file = request.files['file']
+                    if file and allowed_file(file.filename):
+                    
+                        filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(file_path)
                     # meerdere genres voer een boek mogelijk daarom is dit een lijst
                     selected_genres = request.form.getlist("genres")
                     selected_auteurs = request.form.getlist("auteurs")
