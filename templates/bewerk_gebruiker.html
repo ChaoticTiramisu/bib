@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %} Bewerk Gebruiker {% endblock title %}
+
+{% block body %}
+<h2>Gebruiker Bewerken</h2>
+<form method="POST">
+    <label>Voornaam:</label>
+    <input type="text" name="naam" value="{{ gebruiker.naam }}" required><br>
+
+    <label>Achternaam:</label>
+    <input type="text" name="achternaam" value="{{ gebruiker.achternaam }}" required><br>
+
+    <label>E-mail:</label>
+    <input type="email" name="email" value="{{ gebruiker.email }}" required><br>
+
+    <label>Telefoonnummer:</label>
+    <input type="text" name="tl_nr" value="{{ gebruiker.tl_nr }}" required><br>
+
+
+    <label>Rol:</label>
+    <select name="recht" id="recht">
+        {% for choice, label in rol_choices %}
+                <option value="{{ choice }}">{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Opslaan</button>
+    <a href="{{ url_for('gebruikers') }}"><button type="button">Annuleren</button></a>
+</form>
+{% endblock body %}

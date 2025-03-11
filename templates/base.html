@@ -22,6 +22,9 @@
                     {% if rol == "bibliothecaris" %}
                          <a href="{{ url_for('admin') }}" class="button">admin</a>
                     {% endif %}
+                    {% if rol == "admin" %}
+                        <a href="{{ url_for('admin') }}" class="button">admin</a>
+                    {% endif %}
                     <a href="{{url_for('logout')}}" class="button">logout</a>
             </div>
         </header>

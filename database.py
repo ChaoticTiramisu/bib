@@ -36,6 +36,7 @@ boek_auteur_association = Table(
 class Gebruiker(Base):
 # rol_list zijn de rollen die bestaan, en zodat de gebruiker enkel zijn eigen rol kan gebruiken.
     rol_list = [
+            ('admin', 'Admin'),
             ('bibliothecaris','Bibliothecaris'),
             ('ontlener','Ontlener')
            ]
