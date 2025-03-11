@@ -70,16 +70,16 @@ def index():
         return redirect(url_for("login"))
     else:
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
-    user = db.session.query(Gebruiker).filter_by(email=email).first()
-    if db.session.query(Boek).filter_by(bvdm=1).first():
-        boek = db.session.query(Boek).filter_by(bvdm=1).first()
-        bvdm = boek.bvdm
-        isbn = boek.ISBN
-    else:
-        bvdm = None
-        isbn = None
-    if str(user.rol) == "Bibliothecaris":
-        return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
+        user = db.session.query(Gebruiker).filter_by(email=email).first()
+        if db.session.query(Boek).filter_by(bvdm=1).first():
+            boek = db.session.query(Boek).filter_by(bvdm=1).first()
+            bvdm = boek.bvdm
+            isbn = boek.ISBN
+        else:
+            bvdm = None
+            isbn = None
+        if str(user.rol) == "Bibliothecaris":
+            return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
     return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
