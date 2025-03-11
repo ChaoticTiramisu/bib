@@ -129,7 +129,7 @@ def register():
             
             
             # een nieuwe gebruiker toevoegen aan de database met volgende velden.
-                new_gebruiker = Gebruiker(naam=register_name, email = register_email, paswoord = register_password, rol = rol)
+                new_gebruiker = Gebruiker(naam=register_name,achternaam = register_achternaam, email = register_email, paswoord = register_password, rol = rol)
             #database voert dit uit
                 db.session.add(new_gebruiker)
             # het opslaan van de veranderingen
