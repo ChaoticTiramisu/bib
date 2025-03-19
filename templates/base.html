@@ -29,17 +29,128 @@
             </div>
         </header>
         
-       
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+               
+        
+                <style>
+                    :root {
+                        --success: #4CAF50;
+                        --info: #2196F3;
+                        --warning: #ff9800;
+                        --error: #f44336;
+                    }
+                    
+                    .notification-container {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        max-width: 300px;
+                        width: 100%;
+                    }
+                    
+                    .notification {
+                        position: relative;
+                        padding: 15px 25px;
+                        margin-bottom: 1rem;
+                        border-radius: 8px;
+                        color: white;
+                        font-family: Arial, sans-serif;
+                        font-size: 0.9rem;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        opacity: 0;
+                        transform: translateX(100%);
+                        animation: slideIn 0.5s ease-out forwards, fadeOut 0.5s ease-out 4.5s forwards;
+                    }
+                    
+                    .notification.success { background-color: var(--success); }
+                    .notification.info { background-color: var(--info); }
+                    .notification.warning { background-color: var(--warning); }
+                    .notification.error { background-color: var(--error); }
+                    
+                    .notification-close {
+                        position: absolute;
+                        top: 5px;
+                        right: 5px;
+                        width: 20px;
+                        height: 20px;
+                        padding: 0;
+                        background: rgba(255, 255, 255, 0.3);
+                        border: none;
+                        border-radius: 50%;
+                        color: white;
+                        cursor: pointer;
+                        transition: background 0.3s ease;
+                    }
+                    
+                    .notification-close:hover {
+                        background: rgba(255, 255, 255, 0.5);
+                    }
+                    
+                    @keyframes slideIn {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    
+                    @keyframes fadeOut {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+                    </style>
+                    
+                    <div class="notification-container">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="notification {{ category }}">
+                                        {{ message }}
+                                        <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Auto-remove notifications after animation
+                        const notifications = document.querySelectorAll('.notification');
+                        notifications.forEach(notification => {
+                            setTimeout(() => {
+                                notification.style.animation = 'fadeOut 0.5s ease-out forwards';
+                                notification.addEventListener('animationend', () => {
+                                    notification.remove();
+                                });
+                            }, 5000);
+                        });
+                    
+                        // Close button handler
+                        document.querySelectorAll('.notification-close').forEach(button => {
+                            button.addEventListener('click', function() {
+                                this.parentElement.style.animation = 'fadeOut 0.5s ease-out forwards';
+                                this.parentElement.addEventListener('animationend', () => {
+                                    this.parentElement.remove();
+                                });
+                            });
+                        });
+                    });
+                    </script>
+            
+        </body>
+        </html>
+        
+        
     {% block body %} {% endblock %}
     
 </body>
