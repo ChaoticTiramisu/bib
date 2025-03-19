@@ -1,5 +1,5 @@
 # de nodige zaken importeren
-from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
+from flask import Flask, render_template, redirect, url_for, request, flash, session, abort, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
@@ -85,26 +85,25 @@ def index():
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    # checkt welke methode er wordt uitgevoerd
     if request.method == "POST":
-        # haalt de email van form(input) en haalt het password uit de form
         email = request.form["login_email"]
         password = request.form["login_paswoord"]
-        # hier zal hij zoeken in de database op basis van email naar een gebruiker.
         user = db.session.query(Gebruiker).filter_by(email=email).first()
         
-        # als er een gebruiker bestaat en het password klopt, zet hij de email in de sessie en is de login succesvol en hij brengt je terug naar de hoofdpagina
         if user is not None and user.paswoord == password:
             session["email"] = email
             session["rol"] = str(user.rol)
-            flash("Login succesvol")
+            flash("Login succesvol", "success")  # Add a category
             return redirect("/")
-        # als er een gebruiker nog niet bestaat of het wachtwoord oncorrect. toont(flash), de melding en brengt hij je terug naar de login pagina(loop)
         else:
-            flash("Paswoord incorrect of de gebruiker bestaat nog niet.")
+            flash("Paswoord incorrect of de gebruiker bestaat nog niet.", "error")  # Add a category
             return redirect(url_for("login"))
-        # render_template, als de methode niet post is zal hij deze runnen en dat is de html pagina runnen.
-    return render_template("login.html")
+    
+    # Only flash this message if it's a GET request and not a redirect
+    if not request.args.get("redirected"):
+        flash("Registratie succesvol", "success")
+    
+    return render_template("login.html", messages=get_flashed_messages(with_categories=True))
 
 # methodes post en get
 @app.route("/register", methods=["POST", "GET"])
@@ -135,7 +134,7 @@ def register():
             # het opslaan van de veranderingen
                 db.session.commit()
 
-                flash("Registratie succesvol")
+            flash("Registratie succesvol","success")
             return redirect(url_for("login"))
         else:
              flash("Deze email adress is al in gebruik.")
