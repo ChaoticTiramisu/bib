@@ -5,7 +5,7 @@ body {
     background-color: #f8f8f8; /* Light background */
     color: #333; /* Dark text color */
     margin: 0; /* Remove default margin */
-    padding: 20px; /* Padding around the page */
+    padding: 0px; /* Padding around the page */
     padding-top: 100px; /* Adjust this based on the height of the header (header height + some padding) */
 }
 
@@ -352,17 +352,6 @@ header .menu .button:hover {
 
 
 
-.footer {
-  position: relative;
-  width: 100%;
-  background: #3586ff;
-  min-height: 100px;
-  padding: 20px 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
 
 .social-icon,
 .menu {
@@ -403,76 +392,6 @@ header .menu .button:hover {
 
 .menu__link:hover {
   opacity: 1;
-}
-
-.footer p {
-  color: #fff;
-  margin: 15px 0 10px 0;
-  font-size: 1rem;
-  font-weight: 300;
-}
-
-.wave {
-  position: absolute;
-  top: -100px;
-  left: 0;
-  width: 100%;
-  height: 100px;
-/*background: url("https://i.ibb.co/wQZVxxk/wave.png");*/
-  background-size: 1000px 100px;
-}
-
-.wave#wave1 {
-  z-index: 1000;
-  opacity: 1;
-  bottom: 0;
-  animation: animateWaves 4s linear infinite;
-}
-
-.wave#wave2 {
-  z-index: 999;
-  opacity: 0.5;
-  bottom: 10px;
-  animation: animate 4s linear infinite !important;
-}
-
-.wave#wave3 {
-  z-index: 1000;
-  opacity: 0.2;
-  bottom: 15px;
-  animation: animateWaves 3s linear infinite;
-}
-
-.wave#wave4 {
-  z-index: 999;
-  opacity: 0.7;
-  bottom: 20px;
-  animation: animate 3s linear infinite;
-}
-
-@keyframes animateWaves {
-  0% {
-    background-position-x: 1000px;
-  }
-  100% {
-    background-positon-x: 0px;
-  }
-}
-
-@keyframes animate {
-  0% {
-    background-position-x: -1000px;
-  }
-  100% {
-    background-position-x: 0px;
-  }
-}
-
-.footerimage {
-    width:200px;
-    height: 200px;
-    border-radius: 50%;
-    padding: 20px; 
 }
 
 .sidenav {
@@ -558,4 +477,51 @@ header .menu .button:hover {
     width: 200px;        /* Breedte van de afbeelding */
     height: 300px;       /* Hoogte van de afbeelding */
     object-fit: cover;   /* Zorgt ervoor dat de afbeelding goed wordt bijgesneden */
+}
+
+.footer {
+    background-color: #0044cc;
+    color: white;
+    text-align: center;
+    padding: 0px ;
+    margin: 0px;
+}
+.circles {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.circle {
+    width: 100px;
+    height: 100px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0044cc;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+.circle:hover {
+    background-color: #002288;
+    color: white;
+}
+.links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 16px;
+}
+.links a:hover {
+    text-decoration: underline;
+}
+
+.circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
