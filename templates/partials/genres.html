@@ -1,0 +1,8 @@
+<div id="genreContainer">
+    <div class="scrollable-checkboxes">
+      {% for genre in genres %}
+        <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}">
+        <label for="genre_{{ genre[0] }}">{{ genre[0] }}</label><br>
+      {% endfor %}
+    </div>
+  </div>

@@ -1,0 +1,8 @@
+<div id="themaContainer">
+    <div class="scrollable-checkboxes">
+      {% for thema in themas %}
+        <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}">
+        <label for="thema_{{ thema[0] }}">{{ thema[0] }}</label><br>
+      {% endfor %}
+    </div>
+  </div>

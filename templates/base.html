@@ -18,14 +18,15 @@
                 <a href="{{url_for('index')}}"><img src="/static/afbeeldingen/logo.svg" alt="Logo"></a>
             </div>
             <div class="menu">
+                    {% if rol %}
                     <a href="{{url_for('boeken')}}" class="button">Boeken</a>
-                    {% if rol == "bibliothecaris" %}
+                    {% endif %}
+                    {% if rol == "Bibliothecaris" or rol == "Admin" %}
                          <a href="{{ url_for('admin') }}" class="button">admin</a>
                     {% endif %}
-                    {% if rol == "admin" %}
-                        <a href="{{ url_for('admin') }}" class="button">admin</a>
-                    {% endif %}
+                    {% if email%}
                     <a href="{{url_for('logout')}}" class="button">logout</a>
+                    {% endif %}
             </div>
         </header>
         
@@ -147,8 +148,8 @@
                     });
                     </script>
             
-        </body>
-        </html>
+        <br>
+        <br>
         
         
     {% block body %} {% endblock %}
