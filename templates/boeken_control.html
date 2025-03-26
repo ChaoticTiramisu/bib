@@ -1,159 +1,142 @@
 {% extends "base.html" %}
 
-{% block title %} Boeken {% endblock title %} 
+{% block title %}Boeken{% endblock title %} 
 
 {% block body %}
 <br>
 <center>
-<div class="toevoegen">
+  <div class="toevoegen">
     <h2>Boek Toevoegen</h2>
-    <form action="{{ url_for('add')}}" method="post" name="boek" id="boekForm" enctype = "multipart/form-data">
-
-        <input type = "file" name = "file" />
-        <br>
-        <h2>ISBN</h2>
-        <label for="ISBN"></label>
-        <input type="number" name="ISBN" placeholder="ISBN" id="ISBN" required ><br><br>
-
-        <h2>Titel</h2>
-        <input type="text" name="titel" placeholder="titel" id="titel" required><br><br>
-
-        <h2>Beschrijving</h2>
-        <input type="text" name="beschrijving" placeholder="beschrijving" required><br><br>
-
-        <h2>Beschikbaarheid</h2>
-        <input type="checkbox" value="Aanwezig" name="status" id="status">
-        <label for="Aanwezig">Aanwezig</label> 
-        <br>
-        <h2>Boek van de maand</h2>
-        <input type="checkbox" value="Ja" name="bvdm" id="bvdm">
-        <label for="Ja">Ja</label>
-        <h2>Genre</h2>
-        <div class="scrollable-checkboxes">
-            {% for genre in genres %}
-                <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}">
-                <label for="genre_{{ genre[0] }}">{{ genre[0] }}</label><br>
-            {% endfor %}
-        </div>
-
-        <h2>Thema</h2>
-        <div class="scrollable-checkboxes">
-            {% for thema in themas %}
-                <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}">
-                <label for="thema_{{ thema[0] }}">{{ thema[0] }}</label><br>
-            {% endfor %}
-        </div>
-
-        <h2>Auteur</h2>
-        <div class="scrollable-checkboxes">
-            {% for auteur in auteurs %}
-                <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}">
-                <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
-            {% endfor %}
-        </div>
-
-        <input type="submit" value="Register">
-    </form>
-    <form action="{{ url_for('add') }}" method="post">
-        <h2>Voeg een genre toe</h2>
-        <input type="text" name="genre" placeholder="genre">
-        <input type="submit" placeholder="voeg toe">
-    </form>
-    <br>
-
-    <form action="{{ url_for('add') }}" method="post">
-        <h2>Voeg een thema toe</h2>
-        <input type="text" name="thema" placeholder="thema">
-        <input type="submit" placeholder="voeg toe">
-    </form>
-    <br>
-
-    <form action="{{ url_for('add') }}" method="post">
-        <h2>Voeg een auteur toe</h2>
-        <input type="text" name="auteur" placeholder="auteur">
-        <input type="submit" placeholder="voeg toe">
-    </form>
-    <br>
     
-
-</div>
+    <div id="formContainer">
+      <form hx-post="{{ url_for('add') }}"  
+         method="post" 
+         name="boek" 
+         id="boekForm" 
+         enctype="multipart/form-data">
+       
+       <input type="file" name="file" />
+       <br>
+       <h2>ISBN</h2>
+       <label for="ISBN"></label>
+       <input type="number" name="ISBN" placeholder="ISBN" id="ISBN" required ><br><br>
+       
+       <h2>Titel</h2>
+       <input type="text" name="titel" placeholder="titel" id="titel" required><br><br>
+       
+       <h2>Beschrijving</h2>
+       <input type="text" name="beschrijving" placeholder="beschrijving" required><br><br>
+       
+       <h2>Beschikbaarheid</h2>
+       <input type="checkbox" value="Aanwezig" name="status" id="status">
+       <label for="Aanwezig">Aanwezig</label> 
+       <br>
+       
+       <h2>Boek van de maand</h2>
+       <input type="checkbox" value="Ja" name="bvdm" id="bvdm">
+       <label for="Ja">Ja</label>
+       
+       <!-- Genres Section -->
+       <h2>Genre</h2>
+       <div id="genreContainer">
+         <div class="scrollable-checkboxes">
+           {% for genre in genres %}
+             <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}">
+             <label for="genre_{{ genre[0] }}">{{ genre[0] }}</label><br>
+           {% endfor %}
+         </div>
+       </div>
+       
+       <!-- Themas Section -->
+       <h2>Thema</h2>
+       <div id="themaContainer">
+         <div class="scrollable-checkboxes">
+           {% for thema in themas %}
+             <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}">
+             <label for="thema_{{ thema[0] }}">{{ thema[0] }}</label><br>
+           {% endfor %}
+         </div>
+       </div>
+       
+       <!-- Auteurs Section -->
+       <h2>Auteur</h2>
+       <div id="auteurContainer">
+         <div class="scrollable-checkboxes">
+           {% for auteur in auteurs %}
+             <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}">
+             <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
+           {% endfor %}
+         </div>
+       </div>
+       
+       <input type="submit" value="Register">
+      </form>
+    </div>
+    
+    <div id="boekResult"></div>
+    
+    <br>
+    <!-- Genre addition form -->
+    <form hx-post="{{ url_for('add') }}" 
+          hx-target="#genreContainer"
+          hx-swap="outerHTML"
+          method="post">
+      <h2>Voeg een genre toe</h2>
+      <input type="text" name="genre" placeholder="genre" required>
+      <input type="submit" value="Voeg toe">
+    </form>
+    
+    <br>
+    <!-- Thema addition form -->
+    <form hx-post="{{ url_for('add') }}"
+          hx-target="#themaContainer"
+          hx-swap="outerHTML"
+          method="post">
+      <h2>Voeg een thema toe</h2>
+      <input type="text" name="thema" placeholder="thema" required>
+      <input type="submit" value="Voeg toe">
+    </form>
+    
+    <br>
+    <!-- Auteur addition form -->
+    <form hx-post="{{ url_for('add') }}"
+          hx-target="#auteurContainer"
+          hx-swap="outerHTML"
+          method="post">
+      <h2>Voeg een auteur toe</h2>
+      <input type="text" name="auteur" placeholder="auteur" required>
+      <input type="submit" value="Voeg toe">
+    </form>
+  </div>
 </center>
+
 <br><br><br>
 <center>
-<br><br><br><br>
-<div class="verwijderen">
+  <div class="verwijderen">
     <h2>Delete Items</h2>
-<div>
-    <form action="{{url_for('delete', table = 'boek')}}" method="GET">
+    <div>
+      <form hx-get="{{ url_for('delete', table='boek') }}">
         <button type="submit">Verwijder Boeken</button>
-    </form>
-</div>
-<div>
-    <form action="{{url_for('delete', table = 'genre')}}" method="GET">
+      </form>
+    </div>
+    <div>
+      <form hx-get="{{ url_for('delete', table='genre') }}">
         <button type="submit">Verwijder Genres</button>
-    </form>
-</div>
-<div>
-    <form action="{{url_for('delete', table = 'thema')}}" method="GET">
+      </form>
+    </div>
+    <div>
+      <form hx-get="{{ url_for('delete', table='thema') }}">
         <button type="submit">Verwijder Thema's</button>
-    </form>
-</div>
-<div>
-    <form action="{{url_for('delete', table = 'auteur')}}" method="GET">
+      </form>
+    </div>
+    <div>
+      <form hx-get="{{ url_for('delete', table='auteur') }}">
         <button type="submit">Verwijder Auteurs</button>
-    </form>
-</div>
-</div>
-
+      </form>
+    </div>
+  </div>
+  <div id="deleteResult"></div>
 </center>
 
 <br><br><br>
-<script>
-// Save form data to localStorage on input
-document.getElementById('boekForm').addEventListener('input', () => {
-    const formData = {
-        ISBN: document.getElementById('ISBN').value,
-        titel: document.getElementById('titel').value,
-        beschrijving: document.getElementById('beschrijving').value,
-        genres: Array.from(document.querySelectorAll('input[name="genres"]:checked')).map(cb => cb.value),
-        themas: Array.from(document.querySelectorAll('input[name="themas"]:checked')).map(cb => cb.value),
-        auteurs: Array.from(document.querySelectorAll('input[name="auteurs"]:checked')).map(cb => cb.value)
-    };
-    localStorage.setItem('boekForm', JSON.stringify(formData));
-});
-
-// Retrieve form data from localStorage on page load
-document.addEventListener('DOMContentLoaded', () => {
-    const savedData = JSON.parse(localStorage.getItem('boekForm') || '{}');
-
-    if (savedData.ISBN) document.getElementById('ISBN').value = savedData.ISBN;
-    if (savedData.titel) document.getElementById('titel').value = savedData.titel;
-    if (savedData.beschrijving) document.getElementById('beschrijving').value = savedData.beschrijving;
-
-    // Restore checkbox selections for genres, themas, and auteurs
-    if (savedData.genres) {
-        savedData.genres.forEach(value => {
-            const checkbox = document.querySelector(`input[name="genres"][value="${value}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-    }
-    if (savedData.themas) {
-        savedData.themas.forEach(value => {
-            const checkbox = document.querySelector(`input[name="themas"][value="${value}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-    }
-    if (savedData.auteurs) {
-        savedData.auteurs.forEach(value => {
-            const checkbox = document.querySelector(`input[name="auteurs"][value="${value}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-    }
-});
-
-// Clear form data from localStorage on successful submission
-document.getElementById('boekForm').addEventListener('submit', () => {
-    localStorage.removeItem('boekForm');
-});
-</script>
 {% endblock body %}
