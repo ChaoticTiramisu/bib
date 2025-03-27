@@ -19,7 +19,6 @@
                     <th>Voornaam</th>
                     <th>Achternaam</th>
                     <th>E-mailadres</th>
-                    <th>Telefoonnummer</th>
                     <th>Rol</th>
                 </tr>
             </thead>
@@ -30,7 +29,6 @@
                         <td>{{ gebruiker.naam }}</td>
                         <td>{{ gebruiker.achternaam}}</td>
                         <td>{{ gebruiker.email }}</td>
-                        <td>{{gebruiker.tl_nr}}</td>
                         <td>{{gebruiker.rol}}</td>
                         <td>
                             <a href="{{ url_for('bewerk_gebruiker', gebruiker_id=gebruiker.id) }}">
