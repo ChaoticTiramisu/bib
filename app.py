@@ -1,5 +1,5 @@
 # de nodige zaken importeren
-from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
+from flask import Flask, render_template, redirect, url_for, request, flash, session, abort, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
@@ -59,14 +59,18 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-    
+@app.context_processor
+def variables():
+    return {'email': session.get("email"),
+            'rol' : session.get("rol")}
+
+
 # brengt je naar de hoofdpagina
 @app.route("/")
 def index():
     # hier word de email uit de sessie gehaald
     email = session.get('email')
-
-    #indien er geen email is, wordt je terug gestuurd naar de inlogpagina
+    #indien er geen email is, wordt je terug gestuurd naar de inlog pagina
     if email == None:
         return redirect(url_for("login"))
     else:
@@ -81,33 +85,29 @@ def index():
         else:
             bvdm = None
             isbn = None
-        if str(user.rol) == "Bibliothecaris" or str(user.rol) =="Admin":
-            return render_template("index.html", rol=user.rol, bvdm = bvdm, isbn = isbn)
-    return render_template("index.html", user = user, bvdm = bvdm, isbn = isbn)
+    return render_template("index.html", bvdm = bvdm, isbn = isbn)
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    # checkt welke methode er wordt uitgevoerd
     if request.method == "POST":
-        # haalt de email van form(input) en haalt het password uit de form
         email = request.form["login_email"]
         password = request.form["login_paswoord"]
-        # hier zal hij zoeken in de database op basis van email naar een gebruiker.
         user = db.session.query(Gebruiker).filter_by(email=email).first()
         
-        # als er een gebruiker bestaat en het password klopt, zet hij de email in de sessie en is de login succesvol en hij brengt je terug naar de hoofdpagina
-        if user is not None and user.paswoord == password:
-            session["email"] = email
+        if user.email == email and user.paswoord == password:
+            session["email"] = str(user.email)
             session["rol"] = str(user.rol)
-            flash("Login succesvol")
-            return redirect("/")
-        # als er een gebruiker nog niet bestaat of het wachtwoord oncorrect. toont(flash), de melding en brengt hij je terug naar de login pagina(loop)
+            session["naam"] = str(user.naam)
+            flash("Login succesvol", "success")  # Add a category
+            return redirect(url_for("index"))
         else:
-            flash("Paswoord incorrect of de gebruiker bestaat nog niet.")
+            flash("Paswoord incorrect of de gebruiker bestaat nog niet.", "error")  # Add a category
             return redirect(url_for("login"))
-        # render_template, als de methode niet post is zal hij deze runnen en dat is de html pagina runnen.
-    return render_template("login.html")
+    
+    # Only flash this message if it's a GET request and not a redirect
+    
+    return render_template("login.html", messages=get_flashed_messages(with_categories=True))
 
 # methodes post en get
 @app.route("/register", methods=["POST", "GET"])
@@ -126,7 +126,7 @@ def register():
             rol = request.form["recht"]
 
             if "@" not in register_email:
-                flash("Deze email bestaat niet")
+                flash("Deze email bestaat niet","error")
             else:
 
             
@@ -138,7 +138,7 @@ def register():
             # het opslaan van de veranderingen
                 db.session.commit()
 
-                flash("Registratie succesvol")
+            flash("Registratie succesvol","success")
             return redirect(url_for("login"))
         else:
              flash("Deze email adress is al in gebruik.")
@@ -165,11 +165,16 @@ def logout():
 # boekenpagina
 @app.route("/boeken")
 def boeken():
-    # functie die alle boeken weergeeft
-    boeken = db.session.query(Boek).all() # haalt alle boeken uit database en kent hen toe aan variabelle
-    # de gebruiker van de persoon zelf opzoeken, die momenteel is ingelod en geeft hem nadien mee in de render template
-    user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-    return render_template("boeken.html", user = user)
+    email = session.get('email')
+    #indien er geen email is, wordt je terug gestuurd naar de inlog pagina
+    if email == None:
+        return redirect(url_for("login"))
+    else:
+        # functie die alle boeken weergeeft
+        boeken = db.session.query(Boek).all() # haalt alle boeken uit database en kent hen toe aan variabelle
+        # de gebruiker van de persoon zelf opzoeken, die momenteel is ingelod en geeft hem nadien mee in de render template
+        user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
+        return render_template("boeken.html", user = user)
 
 
 @app.route("/search")
@@ -203,115 +208,121 @@ def adminworkspace():
     if request.method == "GET":
         if session.get('email') == None:
             return redirect(url_for("login"))
-        # hij test als je wel een bibliothecaris bent, via naam indien het niet zo is errorcode 404
-        test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-        if str(test.rol) == "Bibliothecaris":
-            test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-            #haalt alle genres, themas en auteurs uit database.
-            if test.rol == "bibliothecaris":
-                genres = db.session.query(Genre.naam).all()
-                themas = db.session.query(Thema.naam).all()
-                auteurs = db.session.query(Auteur.naam).all()
-                
-                return render_template("boeken_control.html", genres = genres, themas = themas , auteurs = auteurs)
-            else:
-                abort(404)
         else:
-            return redirect(url_for("index"))
+            # hij test als je wel een bibliothecaris bent, via naam indien het niet zo is errorcode 404
+            test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+            if str(test.rol) == "Bibliothecaris":
+                test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
+                #haalt alle genres, themas en auteurs uit database.
+                if test.rol == "bibliothecaris":
+                    genres = db.session.query(Genre.naam).all()
+                    themas = db.session.query(Thema.naam).all()
+                    auteurs = db.session.query(Auteur.naam).all()
+                    
+                    return render_template("boeken_control.html", genres = genres, themas = themas , auteurs = auteurs)
+                else:
+                    abort(404)
+            else:
+                return redirect(url_for("index"))
     else:
         abort(404)
 
 
 
 #boeken toevoegen url
-@app.route("/adminworkspace/tools/add",methods = ["POST"])
+@app.route("/adminworkspace/tools/add", methods=["POST"])
 def add():
     if request.method == "POST":
-        
-        if session.get('email') == None:
+        if session.get('email') is None:
             return redirect(url_for("login"))
+            
         test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-        if str(test.rol) == "Bibliothecaris":
-            #hij kijkt als genr in je request form zit en niet een isbn, dus gaat ervan uit dat je enkle genre wilt toevoegen
-            if "genre" in request.form and "ISBN" not in request.form:
-                genre_naam = request.form["genre"].lower()
-                #checkt als genre nog niet in database zit, indien niet voegt hij deze toe
-                if checkContains(Genre,"naam",genre_naam) != True:
-                    genre_naam = Genre(naam = genre_naam)
-                    db.session.add(genre_naam)
-                    db.session.commit()
-                    flash("genre succesvol toegevoegd")
-                else:
-                    flash("Genre zit al in database.")
-                
-
-            elif "thema" in request.form and "ISBN" not in request.form:
-                thema_naam = request.form["thema"].lower()
-                if checkContains(Thema,"naam",thema_naam) != True:
-                    thema_naam = Thema(naam = thema_naam)
-                    db.session.add(thema_naam)
-                    db.session.commit()
-                    flash("Thema succesvol toegevoegd")
-                else:
-                    flash("Thema zit al in database.")
-
-            elif "auteur" in request.form and "ISBN" not in request.form:
-                auteur_naam = request.form["auteur"].lower()
-                if checkContains(Auteur,"naam",auteur_naam) != True:
-                    auteur_naam = Auteur(naam = request.form["auteur"].lower())
-                    db.session.add(auteur_naam)
-                    db.session.commit()
-                    flash("Auteur succesvol toegevoegd")
-                else:
-                    flash("De auteur zit al in database.")
-            #indien ISBN wel in je form zit, gaat ervan uit dat je boekt wilt toevoegen
-            elif "ISBN" in request.form:
-                ISBN_nr = request.form["ISBN"].lower()
-                # controleren als hij nog niet in database zit
-                if checkContains(Boek,"ISBN",ISBN_nr) != True:
-                    ISBN = request.form["ISBN"]
-                    titel = request.form["titel"]
-                    beschrijving = request.form["beschrijving"]
-                    status = request.form.get("status") == "Afwezig"
-                    bvdm = request.form.get("bvdm") == "Ja"
-                    file = request.files['file']
-                    if file and allowed_file(file.filename):
-                    
-                        filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
-                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                        file.save(file_path)
-                    # meerdere genres voer een boek mogelijk daarom is dit een lijst
-                    selected_genres = request.form.getlist("genres")
-                    selected_auteurs = request.form.getlist("auteurs")
-                    selected_themas = request.form.getlist("themas")
-
-                    #genres zoeken in database en indien er meerdere genres voor een boek zijn zal hij in een for lus elk genre toevoegen voor dit boek.
-                    genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) for genre_name in selected_genres]
-                    auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) for auteur_name in selected_auteurs]
-                    themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) for thema_name in selected_themas]
-                    # titel en isbn toevoegen aan variabele boek
-                    boek = Boek(titel=titel, ISBN=ISBN, beschrijving = beschrijving, status=status, bvdm=bvdm)
-                    # meerdere genres verlengen met nieuwe genres
-                    boek.genres.extend(genres)
-                    boek.auteurs.extend(auteurs)
-                    boek.themas.extend(themas)
-
-                    
-                    db.session.add(boek)
-                    db.session.commit()
-
-                    flash("Boek succesvol toegevoegd.")
-                else:
-                    flash("Deze ISBN is al eens gebruikt.")
-               
-                
-
-                
-                
+        if str(test.rol) != "Bibliothecaris":
+            abort(403)
+        
+        # Handle genre addition
+        if "genre" in request.form and "ISBN" not in request.form:
+            genre_naam = request.form["genre"].lower()
+            if not checkContains(Genre, "naam", genre_naam):
+                new_genre = Genre(naam=genre_naam)
+                db.session.add(new_genre)
+                db.session.commit()
+                genres = db.session.query(Genre.naam).all()
+                return render_template("partials/genres.html", genres=genres)
             else:
-                abort(404)
-      
-    return redirect(url_for("adminworkspace"))
+                return "Genre zit al in database.", 400
+
+        # Handle thema addition
+        elif "thema" in request.form and "ISBN" not in request.form:
+            thema_naam = request.form["thema"].lower()
+            if not checkContains(Thema, "naam", thema_naam):
+                new_thema = Thema(naam=thema_naam)
+                db.session.add(new_thema)
+                db.session.commit()
+                themas = db.session.query(Thema.naam).all()
+                return render_template("partials/themas.html", themas=themas)
+            else:
+                return "Thema zit al in database.", 400
+
+        # Handle auteur addition
+        elif "auteur" in request.form and "ISBN" not in request.form:
+            auteur_naam = request.form["auteur"].lower()
+            if not checkContains(Auteur, "naam", auteur_naam):
+                new_auteur = Auteur(naam=auteur_naam)
+                db.session.add(new_auteur)
+                db.session.commit()
+                auteurs = db.session.query(Auteur.naam).all()
+                return render_template("partials/auteurs.html", auteurs=auteurs)
+            else:
+                return "De auteur zit al in database.", 400
+
+        # Handle book addition
+        elif "ISBN" in request.form:
+            ISBN_nr = request.form["ISBN"].lower()
+            if not checkContains(Boek, "ISBN", ISBN_nr):
+                ISBN = request.form["ISBN"]
+                titel = request.form["titel"]
+                beschrijving = request.form["beschrijving"]
+                status = request.form.get("status") == "Afwezig"
+                bvdm = request.form.get("bvdm") == "Ja"
+                
+                file = request.files['file']
+                if file and allowed_file(file.filename):
+                    filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                
+                selected_genres = request.form.getlist("genres")
+                selected_auteurs = request.form.getlist("auteurs")
+                selected_themas = request.form.getlist("themas")
+
+                genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) 
+                          for genre_name in selected_genres]
+                auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) 
+                          for auteur_name in selected_auteurs]
+                themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) 
+                          for thema_name in selected_themas]
+
+                boek = Boek(
+                    titel=titel,
+                    ISBN=ISBN,
+                    beschrijving=beschrijving,
+                    status=status,
+                    bvdm=bvdm
+                )
+                
+                boek.genres.extend(genres)
+                boek.auteurs.extend(auteurs)
+                boek.themas.extend(themas)
+
+                db.session.add(boek)
+                db.session.commit()
+                
+                return "Boek succesvol toegevoegd."
+            else:
+                return "Deze ISBN is al eens gebruikt.", 400
+        else:
+            abort(404)
 
 
 # zoek boek, genre of thema om te  verwijderen
@@ -482,13 +493,16 @@ def taal():
 @app.route("/admin", methods=["POST", "GET"])
 
 def admin():
-    test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-    if str(test.rol) == "Bibliothecaris":
-        return render_template("admin.html", rol=test.rol)
-    elif str(test.rol) == "Admin":
-        return render_template("admin.html", rol=test.rol)
+    if session.get('email') == None:
+            return redirect(url_for("login"))
     else:
-        return redirect(url_for("index"))
+        if session.get("rol") == "Bibliothecaris" or session.get("rol") == "Admin":
+
+            test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+
+            return render_template("admin.html")
+        else:
+            return redirect(url_for("index"))
 
 @app.route("/admin/gebruikers", methods=["GET"])
 def gebruikers():
