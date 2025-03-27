@@ -76,6 +76,8 @@ def index():
     else:
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
         user = db.session.query(Gebruiker).filter_by(email=email).first()
+        if user is None:
+            return redirect(url_for("login"))
         if db.session.query(Boek).filter_by(bvdm=True).first():
             boek = db.session.query(Boek).filter_by(bvdm=True).first()
             bvdm = boek.bvdm
@@ -523,7 +525,6 @@ def bewerk_gebruiker(gebruiker_id):
         gebruiker.naam = request.form['naam']
         gebruiker.achternaam = request.form['achternaam']
         gebruiker.email = request.form['email']
-        gebruiker.tl_nr = request.form['tl_nr']
         gebruiker.rol = request.form.get('recht')
         
         db.session.commit()
