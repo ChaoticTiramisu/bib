@@ -19,7 +19,7 @@
             </div>
             <div class="menu">
                     {% if rol %}
-                    <a href="{{url_for('boeken')}}" class="button">Boeken</a>
+                    <a href="{{url_for('boeken')}}" class="button">overzicht</a>
                     {% endif %}
                     {% if rol == "Bibliothecaris" or rol == "Admin" %}
                          <a href="{{ url_for('admin') }}" class="button">admin</a>
