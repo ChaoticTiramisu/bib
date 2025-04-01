@@ -19,13 +19,13 @@
             </div>
             <div class="menu">
                     {% if rol %}
-                    <a href="{{url_for('boeken')}}" class="button">Boeken</a>
+                    <a href="{{url_for('boeken')}}" class="button"><img src="/static/afbeeldingen/zoeken.png" style="width:25px;height:25px;color:white;">Bibliotheek</a>
                     {% endif %}
                     {% if rol == "Bibliothecaris" or rol == "Admin" %}
                          <a href="{{ url_for('admin') }}" class="button">admin</a>
                     {% endif %}
                     {% if email%}
-                    <a href="{{url_for('logout')}}" class="button">logout</a>
+                    <a href="{{url_for('logout')}}" class="button"><img src="/static/afbeeldingen/logout.png" style="width:25px;height:25px;color:white;">Logout</a>
                     {% endif %}
             </div>
         </header>

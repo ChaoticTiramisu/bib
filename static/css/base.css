@@ -3,16 +3,19 @@ body {
     font-family: Arial, sans-serif; /* General font for the site */
     line-height: 1.6; /* Improved readability */
     background-color: #f8f8f8; /* Light background */
-    color: #333; /* Dark text color */
+    color: #302683; /* Dark text color */
     margin: 0; /* Remove default margin */
     padding: 0px; /* Padding around the page */
     padding-top: 100px; /* Adjust this based on the height of the header (header height + some padding) */
+    font-family: themify;
 }
 
 /* Centered Title */
 h2 {
-    text-align: center; /* Center align headings */
-    color: #2c3e50; /* Darker color for headings */
+    text-align: center; 
+    color: #302683;
+    font-family: sans-serif; 
+    font-weight: bold;
 }
 
 /* Form Styles */
@@ -148,7 +151,7 @@ header .menu {
 }
 
 header .menu .button {
-    background-color: #00a19a; /* Custom color */
+    background-color: #00A09A; /* Custom color */
     color: white;
     text-decoration: none;
     padding: 10px 20px;
@@ -480,7 +483,7 @@ header .menu .button:hover {
 }
 
 .footer {
-    background-color: #0044cc;
+    background-color: #302683;
     color: white;
     text-align: center;
     padding: 0px ;
@@ -525,3 +528,4 @@ header .menu .button:hover {
     object-fit: cover;
     border-radius: 50%;
 }
+

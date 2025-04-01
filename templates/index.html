@@ -9,7 +9,9 @@
 <div class="box">
   <h2>Boek van de maand!</h2>
   {% if bvdm == 1 %}
+    <div class="container">
       <img src="../static/upload/{{isbn}}.png" alt="Afbeelding">
+    </div>
   {% else %}
       <p>Geen boek van de maand gevonden</p>
   {% endif %}
