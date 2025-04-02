@@ -330,7 +330,7 @@ header .menu .button:hover {
     align-items: center;
     margin: 100px 0;
     width: 20%;
-    height: 20%;
+    height: 100px;
     border-radius: 100px;
 }
 
@@ -529,3 +529,44 @@ header .menu .button:hover {
     border-radius: 50%;
 }
 
+.sidebar {
+    width: 250px;
+    height: 200px;
+    background: #00A09A;
+    color: white;
+    padding: 20px;
+    position: absolute;
+    left: 0;
+    top: 100px;
+    border-radius: 50%;
+    box-shadow: 10px 10px lightblue;
+
+}
+
+.sidebar p {
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px red;
+}
+.content {
+    margin-left: 270px;
+    padding: 20px;
+}
+
+.background_index {
+    background-image: url(/static/afbeeldingen/background_blur.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+}
+
+.form {
+    background-color: #ffffff; 
+    border: 2px solid black; 
+    border-radius: 10px; 
+    padding: 20px; 
+    margin: 100px ; 
+    width: 650px; 
+}

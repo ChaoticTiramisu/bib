@@ -1,29 +1,36 @@
 {% extends "base.html"%}
 
 {% block body %}
-<div class="email">
-</div>
-<center>
+<div class="background_index">
+  <div class="email">
+  </div>
+
+  <center>
 <h2>Welkom op de bib site!</h2>
 <h2>Gemaakt door 6ICW</h2><br><br>
-<div class="box">
-  <h2>Boek van de maand!</h2>
-  {% if bvdm == 1 %}
-    <div class="container">
-      <img src="../static/upload/{{isbn}}.png" alt="Afbeelding">
-    </div>
-  {% else %}
-      <p>Geen boek van de maand gevonden</p>
-  {% endif %}
+<div class="form">
+  <div class="box">
+    <h2>Boek van de maand!</h2>
+    {% if bvdm == 1 %}
+      <div class="container">
+        <img src="../static/upload/{{isbn}}.png" alt="Afbeelding">
+      </div>
+    {% else %}
+        <p>Geen boek van de maand gevonden</p>
+    {% endif %}
+  </div>
 </div>
 <br>
-<div class="box">
-    <h2>Nieuwe boeken</h2>
-    <div class="container">
-        <img src="https://media.s-bol.com/NQlJgAXX4Dv/547x840.jpg">
-        <img src="https://media.s-bol.com/g5kq1wP97KW9/850x1200.jpg">
-        <img src="https://media.s-bol.com/4VMwojwBBv57/nRRvDNY/787x1200.jpg">       
-    </div>    
+<div class="form">
+  <div class="box">
+      <h2>Nieuwe boeken</h2>
+      <div class="container">
+          <img src="https://media.s-bol.com/NQlJgAXX4Dv/547x840.jpg">
+          <img src="https://media.s-bol.com/g5kq1wP97KW9/850x1200.jpg">
+          <img src="https://media.s-bol.com/4VMwojwBBv57/nRRvDNY/787x1200.jpg">       
+      </div>   
+  </div>
+</div>
     <br>
     <br>
     <br>
@@ -31,6 +38,14 @@
     <br>
     <br>
     <br>
+    <div class="sidebar">
+      <p>Medemogelijk gemaakt door:</p>
+      <p>Arno Cuvelier</p>
+      <p>Cairo Bellinck</p>
+      <p>Augustin Desmet</p>
+      
+  </div>
+</div>
     <footer class="footer">
       <br>
       <div class="circles">
@@ -49,7 +64,7 @@
       <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
       <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
-</div>
+
 </center>
 
 {% endblock %}
