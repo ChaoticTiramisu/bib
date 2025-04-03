@@ -2,7 +2,7 @@
 body {
     font-family: Arial, sans-serif; /* General font for the site */
     line-height: 1.6; /* Improved readability */
-    background-color: #f8f8f8; /* Light background */
+    background-color: #ffffff; /* Light background */
     color: #302683; /* Dark text color */
     margin: 0; /* Remove default margin */
     padding: 0px; /* Padding around the page */
@@ -530,17 +530,21 @@ header .menu .button:hover {
 }
 
 .sidebar {
-    width: 250px;
-    height: 200px;
+    width: 500px;
+    height: 400px;
     background: #00A09A;
     color: white;
     padding: 20px;
     position: absolute;
-    left: 0;
-    top: 100px;
     border-radius: 50%;
     box-shadow: 10px 10px lightblue;
-
+    font-size: 30px;
+    text-align: center;
+    left:32% ;
+    justify-content: center; 
+    align-items: center;
+    flex-direction: column;
+    display:flex;
 }
 
 .sidebar p {
@@ -548,6 +552,7 @@ header .menu .button:hover {
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px red;
+    
 }
 .content {
     margin-left: 270px;
@@ -559,12 +564,13 @@ header .menu .button:hover {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-
 }
+
+
 
 .form {
     background-color: #ffffff; 
-    border: 2px solid black; 
+    border: 1px solid darkgray; 
     border-radius: 10px; 
     padding: 20px; 
     margin: 100px ; 

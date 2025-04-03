@@ -476,11 +476,6 @@ def boek(ISBN):
 
 
 
-
-
-    
-
-
 @app.route("/PICT")
 def PICT():
     return render_template("PICT.html")
@@ -488,6 +483,10 @@ def PICT():
 @app.route("/taal")
 def taal():
     return render_template("taal.html")
+
+@app.route("/overons")
+def overons():
+    return render_template("overons.html")
 
 #admin page
 @app.route("/admin", methods=["POST", "GET"])
