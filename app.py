@@ -85,7 +85,8 @@ def index():
         else:
             bvdm = None
             isbn = None
-    return render_template("index.html", bvdm = bvdm, isbn = isbn)
+        laatste_boeken = db.session.query(Boek).order_by(Boek.toegevoegd_op.desc()).limit(3).all()
+    return render_template("index.html", bvdm = bvdm, isbn = isbn, boeken=laatste_boeken)
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
@@ -474,7 +475,9 @@ def boek(ISBN):
         boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
         return render_template("boek.html",boek = boek)
 
-
+@app.route("/boeken_verwijderen")
+def delpage():
+    return render_template("deletepage.html")
 
 @app.route("/PICT")
 def PICT():

@@ -1,7 +1,9 @@
 # het importen van verschilde zaken voor sqlalchemy (database)
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, DateTime
 from sqlalchemy.orm import relationship, declarative_base, mapped_column
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
+from datetime import datetime
+
 
 # start het programma die de database aanmaakt dit is in een instance folder met de naam van de database is bib. echo is debugging informatie weergeven
 engine = create_engine("sqlite:///instance/bib.db", echo=True)
@@ -64,6 +66,8 @@ class Boek(Base):
     status = mapped_column(Boolean, nullable=True)
     beschrijving = mapped_column(String, nullable=False )
     bvdm = mapped_column(Boolean, nullable=True)
+
+    toegevoegd_op = mapped_column(DateTime, default=datetime.utcnow)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')
