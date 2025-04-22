@@ -10,7 +10,6 @@
     
         
     <center>
-        <br><br><br><br>
         <h2>Log-in</h2>
         <form action="/login" method="post" class="mb-3">
             <label for="email">Email adres</label>
@@ -18,12 +17,14 @@
             <label for="password">Wachtwoord</label>
             <input type="password" placeholder="Wachtwoord" name="login_paswoord">
             <br>
+            <p>Wachtwoord vergeten?</p>
+            <!--POP-UP TOEVOEGEN!!!-->
             <input type="submit" name="login" value="Log-in">
         </form>
         <br>
 
-        <p>Nog geen account?</p>
-        <button onclick="document.location='register'">Registreer</button>
+        <a href="{{ url_for('register') }}"><h3>Nog geen account?</h3></a>
+        <!--<button onclick="document.location='register'">Registreer</button>-->
         
         
         
