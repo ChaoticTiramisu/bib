@@ -466,15 +466,20 @@ def change(ISBN):
     else:
         abort(404)
 
-@app.route("/<int:ISBN>",methods=["POST", "GET"]) 
+@app.route("/boek/<int:ISBN>",methods=["POST", "GET"]) 
 def boek(ISBN):
-    if request.method == "post":
-        return render_template()
-    else:
-        boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
-        return render_template("boek.html",boek = boek)
+    
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
+    return render_template("boek.html",boek = boek)
 
-
+@app.route('/boek/<int:book_id>/calendar')
+def book_calendar(book_id):
+    boek = Boek.query.get_or_404(book_id)
+    
+    reservations = Reservation.query.filter_by(book_id=book.id).all()
+    reserved_dates = [r.start_date.isoformat() for r in reservations]
+    # Render a partial template with the calendar widget.
+    return render_template('partials/book_calendar.html', reserved_dates=reserved_dates)
 
 
 

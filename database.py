@@ -1,5 +1,5 @@
 # het importen van verschilde zaken voor sqlalchemy (database)
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date
 from sqlalchemy.orm import relationship, declarative_base, mapped_column
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 
@@ -68,9 +68,17 @@ class Boek(Base):
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')
     auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken')
-    
-    
-    
+    reservaties = relationship("Reservatie", back_populates="boek")
+class Reservatie(Base):
+    __tablename__ = "reservatie"
+
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    boek_isbn = mapped_column(String, ForeignKey("boek.ISBN"), nullable=False)
+    start_date = mapped_column(Date, nullable=False)
+    end_date = mapped_column(Date, nullable=False)
+
+    # Relatie naar het boek
+    boek = relationship("Boek", back_populates="reservaties")
 
 class Genre(Base):
     __tablename__ = "genre"

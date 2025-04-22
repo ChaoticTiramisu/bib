@@ -3,19 +3,21 @@
 {% block title %} Boeken {% endblock title %} 
 
 {% block body %}
-    <div class="book-container">
-        <div class="book-details">
-            <img class="book-cover" src="../static/upload/{{boek.ISBN}}.png" alt="Book Cover">
-                <p><strong>{{boek.titel}}</strong></p>
-                <p><strong>Auteur:</strong>{% for auteur in boek.auteurs %} {{auteur.naam}} {% endfor %}</p>
-                <p><strong>Genre:</strong> {% for genre in boek.genres %} {{genre.naam}} {% endfor %}</p>
-                <p><strong>Thema:</strong>{%for thema in boek.themas %} {{thema.naam}} {% endfor %}</p>
-                <p><strong>ISBN:</strong> {{boek.ISBN}}</p>
-                <p><strong>Beschrijving:</strong>{{boek.beschrijving}}</p>
-            </div>
-                
-            </div>
-        </div>
+<div class="book-container">
+    <div class="book-details">
+        <img class="book-cover" src="../static/upload/{{ boek.ISBN }}.png" alt="Book Cover">
+        <p><strong>{{ boek.titel }}</strong></p>
+        <p><strong>Auteur:</strong>{% for auteur in boek.auteurs %} {{ auteur.naam }} {% endfor %}</p>
+        <p><strong>Genre:</strong>{% for genre in boek.genres %} {{ genre.naam }} {% endfor %}</p>
+        <p><strong>Thema:</strong>{% for thema in boek.themas %} {{ thema.naam }} {% endfor %}</p>
+        <p><strong>ISBN:</strong> {{ boek.ISBN }}</p>
+        <p><strong>Beschrijving:</strong>{{ boek.beschrijving }}</p>
     </div>
     
+    <!-- Calendar Widget -->
+    <div id="calendar-container"
+       hx-get="/book/{{ boek.id }}/calendar"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+  </div>
 {% endblock body %}
