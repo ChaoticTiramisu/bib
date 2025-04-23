@@ -106,7 +106,7 @@ def login():
         password = request.form["login_paswoord"]
         user = db.session.query(Gebruiker).filter_by(email=email).first()
         
-        if user.email == email and user.paswoord == password:
+        if user and user.paswoord == password:
             session['gebruiker_id'] = user.id
             session['email'] = user.email
             flash("Login succesvol", "success")  # Add a category
@@ -116,7 +116,6 @@ def login():
             return redirect(url_for("login"))
     
     # Only flash this message if it's a GET request and not a redirect
-    
     return render_template("login.html", messages=get_flashed_messages(with_categories=True))
 
 # methodes post en get
