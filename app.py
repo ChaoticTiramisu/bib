@@ -1,13 +1,14 @@
 # de nodige zaken importeren
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import text, Column, Integer, String, ForeignKey, DateTime  # Add DateTime here
 from sqlalchemy.sql.expression import or_
 import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
-
+from sqlalchemy.orm import relationship, mapped_column
+from datetime import datetime
 
 from sqlalchemy_utils import ChoiceType
 
@@ -64,14 +65,15 @@ def inject_gebruiker():
         gebruiker = db.session.query(Gebruiker).filter_by(id=session.get("gebruiker_id")).first()
     else:
         gebruiker = None
-    return {'gebruiker': gebruiker,
-            'email' : gebruiker.email,
-            'naam' : gebruiker.naam,
-            'achternaam' :gebruiker.achternaam,
-            'rol' : gebruiker.rol
-            }  
 
-
+    # Safely return attributes only if gebruiker is not None
+    return {
+        'gebruiker': gebruiker,
+        'email': gebruiker.email if gebruiker else None,
+        'naam': gebruiker.naam if gebruiker else None,
+        'achternaam': gebruiker.achternaam if gebruiker else None,
+        'rol': gebruiker.rol if gebruiker else None
+    }
 
 # brengt je naar de hoofdpagina
 @app.route("/")
@@ -93,7 +95,7 @@ def index():
         else:
             bvdm = None
             isbn = None
-        laatste_boeken = db.session.query(Boek).order_by(Boek.toegevoegd_op.desc()).limit(3).all()
+    laatste_boeken = db.session.query(Boek).order_by(Boek.toegevoegd_op.desc()).limit(3).all()
     return render_template("index.html", bvdm = bvdm, isbn = isbn, boeken=laatste_boeken)
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
@@ -549,4 +551,8 @@ def bewerk_gebruiker(gebruiker_id):
 
 # je hebt het nodig voor het programma te runnen.
 if __name__ == "__main__":
+    with app.app_context():
+        # Automatically apply migrations
+        from flask_migrate import upgrade
+        upgrade()
     app.run(debug=True)
