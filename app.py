@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.sql.expression import or_
 import os
-from database import Gebruiker, Boek, Genre, Auteur, Thema
+from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 
@@ -58,11 +58,19 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @app.context_processor
-def variables():
-    return {'email': session.get("email"),
-            'rol' : session.get("rol")}
+def inject_gebruiker():
+    if 'gebruiker_id' in session:
+        gebruiker = db.session.query(Gebruiker).filter_by(id=session.get("gebruiker_id")).first()
+    else:
+        gebruiker = None
+    return {'gebruiker': gebruiker,
+            'email' : gebruiker.email,
+            'naam' : gebruiker.naam,
+            'achternaam' :gebruiker.achternaam,
+            'rol' : gebruiker.rol
+            }  
+
 
 
 # brengt je naar de hoofdpagina
@@ -97,9 +105,8 @@ def login():
         user = db.session.query(Gebruiker).filter_by(email=email).first()
         
         if user.email == email and user.paswoord == password:
-            session["email"] = str(user.email)
-            session["rol"] = str(user.rol)
-            session["naam"] = str(user.naam)
+            session['gebruiker_id'] = user.id
+            session['email'] = user.email
             flash("Login succesvol", "success")  # Add a category
             return redirect(url_for("index"))
         else:
@@ -469,18 +476,16 @@ def change(ISBN):
 
 @app.route("/boek/<int:ISBN>",methods=["POST", "GET"]) 
 def boek(ISBN):
-    
     boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
     return render_template("boek.html",boek = boek)
 
-@app.route('/boek/<int:book_id>/calendar')
-def book_calendar(book_id):
-    boek = Boek.query.get_or_404(book_id)
-    
-    reservations = Reservation.query.filter_by(book_id=book.id).all()
+@app.route('/boek/<int:ISBN>/calendar')
+def book_calendar(ISBN):
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
+    reservations = db.session.query(Reservatie).filter_by(boek_isbn=boek.ISBN).all()
     reserved_dates = [r.start_date.isoformat() for r in reservations]
-    # Render a partial template with the calendar widget.
-    return render_template('partials/book_calendar.html', reserved_dates=reserved_dates)
+    return render_template('partials/calendar.html', reserved_dates=reserved_dates)
+
 
 
 

@@ -18,15 +18,25 @@
                 <a href="{{url_for('index')}}"><img src="/static/afbeeldingen/logo.svg" alt="Logo"></a>
             </div>
             <div class="menu">
-                    {% if rol %}
-                    <a href="{{url_for('boeken')}}" class="button"><img src="/static/afbeeldingen/zoeken.png" style="width:25px;height:25px;color:white;">Bibliotheek</a>
-                    {% endif %}
-                    {% if rol == "Bibliothecaris" or rol == "Admin" %}
-                         <a href="{{ url_for('admin') }}" class="button"><img src="/static/afbeeldingen/admin.png" style="width:25px;height:25px;color:white;"> Admin</a>
-                    {% endif %}
-                    {% if email%}
-                    <a href="{{url_for('logout')}}" class="button"><img src="/static/afbeeldingen/logout.png" style="width:25px;height:25px;color:white;">Logout</a>
-                    {% endif %}
+               
+                
+                <!-- Display rol -->
+             
+            
+                <!-- Show admin link only for specific roles -->
+                {% if rol in ["Bibliothecaris", "Admin"] %}
+                    <a href="{{ url_for('admin') }}" class="button">Admin</a>
+                {% endif %}
+            
+                <!-- Logout link -->
+                {% if email %}
+                    <a href="{{ url_for('logout') }}" class="button">Logout</a>
+                {% endif %}
+            
+                <!-- Display naam -->
+                {{ naam }}
+            
+                    <br>
             </div>
         </header>
         
@@ -67,7 +77,6 @@
                     .notification.info { background-color: var(--info); }
                     .notification.warning { background-color: var(--warning); }
                     .notification.error { background-color: var(--error); }
-                    
                     .notification-close {
                         position: absolute;
                         top: 5px;

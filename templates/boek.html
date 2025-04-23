@@ -14,10 +14,11 @@
         <p><strong>Beschrijving:</strong>{{ boek.beschrijving }}</p>
     </div>
     
-    <!-- Calendar Widget -->
+   
     <div id="calendar-container"
-       hx-get="/book/{{ boek.id }}/calendar"
-       hx-trigger="load"
-       hx-swap="innerHTML">
-  </div>
+     hx-get="/boek/{{ boek.ISBN }}/calendar"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+    </div>
+
 {% endblock body %}

@@ -576,3 +576,19 @@ header .menu .button:hover {
     margin: 100px ; 
     width: 650px; 
 }
+
+/* Prevent other styles from affecting datepicker */
+:not(.datepicker-styles) ~ .datepicker {
+    all: revert !important;
+}
+
+/* Fix for Bootstrap 5 compatibility */
+.datepicker-dropdown {
+    z-index: 1060 !important;
+    padding: 0 !important;
+}
+
+.datepicker {
+    --bs-body-font-family: inherit !important;
+    --bs-body-bg: white !important;
+}
