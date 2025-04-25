@@ -61,18 +61,16 @@ def allowed_file(filename):
 
 @app.context_processor
 def inject_gebruiker():
+    gebruiker = None
     if 'gebruiker_id' in session:
-        gebruiker = db.session.query(Gebruiker).filter_by(id=session.get("gebruiker_id")).first()
-    else:
-        gebruiker = None
+        gebruiker = db.session.query(Gebruiker).get(session.get("gebruiker_id"))
 
-    # Safely return attributes only if gebruiker is not None
     return {
         'gebruiker': gebruiker,
-        'email': gebruiker.email if gebruiker else None,
-        'naam': gebruiker.naam if gebruiker else None,
-        'achternaam': gebruiker.achternaam if gebruiker else None,
-        'rol': gebruiker.rol if gebruiker else None
+        'email': getattr(gebruiker, 'email', None),
+        'naam': getattr(gebruiker, 'naam', None),
+        'achternaam': getattr(gebruiker, 'achternaam', None),
+        'rol': getattr(gebruiker, 'rol', None)
     }
 
 # brengt je naar de hoofdpagina
@@ -548,10 +546,10 @@ def bewerk_gebruiker(gebruiker_id):
 
     return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices)
 
-# je hebt het nodig voor het programma te runnen.
 if __name__ == "__main__":
     with app.app_context():
-        # Automatically apply migrations
-        from flask_migrate import upgrade
-        upgrade()
+        db.create_all()
+
     app.run(debug=True)
+
+
