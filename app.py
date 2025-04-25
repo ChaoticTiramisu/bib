@@ -220,10 +220,10 @@ def adminworkspace():
         else:
             # hij test als je wel een bibliothecaris bent, via naam indien het niet zo is errorcode 404
             test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-            if str(test.rol) == "Bibliothecaris":
+            if str(test.rol) == "Bibliothecaris" or str(test.rol) == "Admin":
                 test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
                 #haalt alle genres, themas en auteurs uit database.
-                if test.rol == "bibliothecaris":
+                if str(test.rol) == "Bibliothecaris" or str(test.rol) == "Admin":
                     genres = db.session.query(Genre.naam).all()
                     themas = db.session.query(Thema.naam).all()
                     auteurs = db.session.query(Auteur.naam).all()
@@ -246,7 +246,7 @@ def add():
             return redirect(url_for("login"))
             
         test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-        if str(test.rol) != "Bibliothecaris":
+        if str(test.rol) != "Bibliothecaris" or str(test.rol) != "Admin":
             abort(403)
         
         # Handle genre addition
@@ -394,7 +394,7 @@ def delete_voorwerp(table, voorwerp_id):
 @app.route("/adminworkspace/tools/change/<int:ISBN>", methods=["POST", "GET"])
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-    if str(test.rol) == "Bibliothecaris":
+    if str(test.rol) == "Bibliothecaris" or str(test.rol) == "Admin":
         if request.method == "POST":
             if "ISBN" in request.form:
                 # kijken als je boek daadwerkelijk bestaat
@@ -507,7 +507,6 @@ def overons():
 
 #admin page
 @app.route("/admin", methods=["POST", "GET"])
-
 def admin():
     if session.get('email') == None:
             return redirect(url_for("login"))
