@@ -325,7 +325,7 @@ def add():
             abort(404)
 
 
-@app.route("delpage", methods=["GET"])
+@app.route("/delpage", methods=["GET"])
 def delpage():
     return render_template("deletepage.html")
 
