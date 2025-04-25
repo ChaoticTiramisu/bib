@@ -325,6 +325,10 @@ def add():
             abort(404)
 
 
+@app.route("delpage", methods=["GET"])
+def delpage():
+    return render_template("deletepage.html")
+
 # zoek boek, genre of thema om te  verwijderen
 @app.route("/adminworkspace/tools/delete/<string:table>/search", methods=["GET"])
 # <string:table> => zorgt voor dynamisch url en zorgt dat elk boek eigen aparte pagina heeft en het is ook een variabele
