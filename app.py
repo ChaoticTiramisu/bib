@@ -61,18 +61,16 @@ def allowed_file(filename):
 
 @app.context_processor
 def inject_gebruiker():
+    gebruiker = None
     if 'gebruiker_id' in session:
-        gebruiker = db.session.query(Gebruiker).filter_by(id=session.get("gebruiker_id")).first()
-    else:
-        gebruiker = None
+        gebruiker = db.session.query(Gebruiker).get(session.get("gebruiker_id"))
 
-    # Safely return attributes only if gebruiker is not None
     return {
         'gebruiker': gebruiker,
-        'email': gebruiker.email if gebruiker else None,
-        'naam': gebruiker.naam if gebruiker else None,
-        'achternaam': gebruiker.achternaam if gebruiker else None,
-        'rol': gebruiker.rol if gebruiker else None
+        'email': getattr(gebruiker, 'email', None),
+        'naam': getattr(gebruiker, 'naam', None),
+        'achternaam': getattr(gebruiker, 'achternaam', None),
+        'rol': getattr(gebruiker, 'rol', None)
     }
 
 # brengt je naar de hoofdpagina
@@ -212,27 +210,20 @@ def search():
     return render_template("search_result.html", results=results, user=user)
 
 # de werkplaats waar de bibliothecaris kan bewerekn en toevoegen
-@app.route("/adminworkspace",methods = ["GET"])
+@app.route("/adminworkspace", methods=["GET"])
 def adminworkspace():
-    if request.method == "GET":
-        if session.get('email') == None:
-            return redirect(url_for("login"))
-        else:
-            # hij test als je wel een bibliothecaris bent, via naam indien het niet zo is errorcode 404
-            test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-            if str(test.rol) == "Bibliothecaris" or str(test.rol) == "Admin":
-                test = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-                #haalt alle genres, themas en auteurs uit database.
-                if str(test.rol) == "Bibliothecaris" or str(test.rol) == "Admin":
-                    genres = db.session.query(Genre.naam).all()
-                    themas = db.session.query(Thema.naam).all()
-                    auteurs = db.session.query(Auteur.naam).all()
-                    
-                    return render_template("boeken_control.html", genres = genres, themas = themas , auteurs = auteurs)
-                else:
-                    abort(404)
-            else:
-                return redirect(url_for("index"))
+    if session.get('email') is None:
+        return redirect(url_for("login"))
+    
+    # Fetch the logged-in user
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    if gebruiker and gebruiker.rol in ["bibliothecaris", "admin"]:
+        # Haal alle genres, themas en auteurs uit de database
+        genres = db.session.query(Genre.naam).all()
+        themas = db.session.query(Thema.naam).all()
+        auteurs = db.session.query(Auteur.naam).all()
+        
+        return render_template("boeken_control.html", genres=genres, themas=themas, auteurs=auteurs)
     else:
         abort(404)
 
@@ -246,7 +237,7 @@ def add():
             return redirect(url_for("login"))
             
         test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-        if str(test.rol) != "Bibliothecaris" or str(test.rol) != "Admin":
+        if str(test.rol).lower() not in ["bibliothecaris", "admin"]:
             abort(403)
         
         # Handle genre addition
@@ -333,6 +324,10 @@ def add():
         else:
             abort(404)
 
+
+@app.route("delpage", methods=["GET"])
+def delpage():
+    return render_template("deletepage.html")
 
 # zoek boek, genre of thema om te  verwijderen
 @app.route("/adminworkspace/tools/delete/<string:table>/search", methods=["GET"])
@@ -487,10 +482,54 @@ def book_calendar(ISBN):
     reserved_dates = [r.start_date.isoformat() for r in reservations]
     return render_template('partials/calendar.html', reserved_dates=reserved_dates)
 
+@app.route('/boek/<int:ISBN>/reserveer', methods=['GET', 'POST'])
+def reserveer_boek(ISBN):
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
+    reservations = db.session.query(Reservatie).filter_by(boek_isbn=boek.ISBN).all()
 
+    if request.method == 'POST':
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
 
+        # Check if the dates are valid
+        if not start_date or not end_date:
+            flash("Startdatum en einddatum zijn verplicht.", "error")
+            return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
-    
+        # Check for overlapping reservations
+        overlapping = db.session.query(Reservatie).filter(
+            Reservatie.boek_isbn == boek.ISBN,
+            Reservatie.start_date <= end_date,
+            Reservatie.end_date >= start_date
+        ).first()
+
+        if overlapping:
+            flash("Deze periode is al gereserveerd.", "error")
+            return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+        # Create a new reservation
+        new_reservation = Reservatie(
+            boek_isbn=boek.ISBN,
+            gebruiker_id=session.get('gebruiker_id'),
+            start_date=start_date,
+            end_date=end_date
+        )
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        flash("Boek succesvol gereserveerd!", "success")
+        return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+    reserved_dates = [
+        {'start': r.start_date.isoformat(), 'end': r.end_date.isoformat()}
+        for r in reservations
+    ]
+
+    return render_template(
+        'reserveer_boek.html',
+        boek=boek,
+        reserved_dates=reserved_dates
+    )
 
 
 @app.route("/PICT")
@@ -506,18 +545,17 @@ def overons():
     return render_template("overons.html")
 
 #admin page
-@app.route("/admin", methods=["POST", "GET"])
+@app.route("/admin", methods=["GET"])
 def admin():
-    if session.get('email') == None:
-            return redirect(url_for("login"))
-    else:
-        if session.get("rol") == "Bibliothecaris" or session.get("rol") == "Admin":
+    if 'email' not in session:
+        return redirect(url_for("login"))
 
-            test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    if gebruiker and gebruiker.rol in ["bibliothecaris", "admin"]:
+        return render_template("admin.html")
 
-            return render_template("admin.html")
-        else:
-            return redirect(url_for("index"))
+    flash("Je hebt geen toegang tot de adminpagina.", "error")
+    return redirect(url_for("index"))
 
 @app.route("/admin/gebruikers", methods=["GET"])
 def gebruikers():
@@ -547,10 +585,10 @@ def bewerk_gebruiker(gebruiker_id):
 
     return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices)
 
-# je hebt het nodig voor het programma te runnen.
 if __name__ == "__main__":
     with app.app_context():
-        # Automatically apply migrations
-        from flask_migrate import upgrade
-        upgrade()
+        db.create_all()
+
     app.run(debug=True)
+
+
