@@ -1,113 +1,132 @@
-# het importen van verschilde zaken voor sqlalchemy (database)
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime, Index
 from datetime import datetime
 from sqlalchemy.orm import relationship, declarative_base, mapped_column
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 
-
-
-# start het programma die de database aanmaakt dit is in een instance folder met de naam van de database is bib. echo is debugging informatie weergeven
+# Initialize the database engine
 engine = create_engine("sqlite:///instance/bib.db", echo=True)
 
-# indien de database nog niet bestaat, zal hij deze aanmaken en als hij al bestaat zal hij het niet runnen.
+# Create the database if it doesn't exist
 if not database_exists("sqlite:///instance/bib.db"):
     create_database(engine.url)
 
-# lange variable korter maken, voor sneller gebruik
+# Base class for all models
 Base = declarative_base()
 
-# associatie(apparte tabel waar thema en boek worden gelinkt), metadata zijn gegevens die altijd moeten ingevuld worden
+# Association tables for many-to-many relationships
 boek_thema_association = Table(
     'boek_thema_association', Base.metadata,
-    Column('boek_id', Integer, ForeignKey('boek.ISBN')),
-    Column('thema_id', Integer, ForeignKey('thema.id'))
+    Column('boek_id', String, ForeignKey('boeken.ISBN')),
+    Column('thema_id', Integer, ForeignKey('themas.id'))
 )
 
 boek_genre_association = Table(
     'boek_genre_association', Base.metadata,
-    Column('boek_id', Integer, ForeignKey('boek.ISBN')),
-    Column('genre_id', Integer, ForeignKey('genre.id'))
+    Column('boek_id', String, ForeignKey('boeken.ISBN')),
+    Column('genre_id', Integer, ForeignKey('genres.id'))
 )
 
 boek_auteur_association = Table(
     'boek_auteur_association', Base.metadata,
-    Column('boek_id', Integer, ForeignKey('boek.ISBN')),
-    Column('auteur_id', Integer, ForeignKey('auteur.id'))
+    Column('boek_id', String, ForeignKey('boeken.ISBN')),
+    Column('auteur_id', Integer, ForeignKey('auteurs.id'))
 )
 
-# een klasse dat gebruikt heet, dit zijn de echte tabellen met de gebruikers erin en hun nodig kolomen
+# User model
 class Gebruiker(Base):
-# rol_list zijn de rollen die bestaan, en zodat de gebruiker enkel zijn eigen rol kan gebruiken.
-    rol_list = [
-            ('admin', 'Admin'),
-            ('bibliothecaris','Bibliothecaris'),
-            ('ontlener','Ontlener')
-           ]
-    
-    __tablename__ = "Gebruiker"
+    __tablename__ = "gebruikers"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    naam = mapped_column(String)
-    achternaam = mapped_column(String)
-    email = mapped_column(String)
-    paswoord = mapped_column(String)
-    geboortedtm = mapped_column(String)
-    tel_nr = mapped_column(Integer)
-    rol = mapped_column(ChoiceType(rol_list,impl=String()))
-   
+    naam = mapped_column(String, nullable=False)
+    achternaam = mapped_column(String, nullable=False)
+    email = mapped_column(String, nullable=False, unique=True, index=True)
+    paswoord = mapped_column(String, nullable=False)
+    geboortedtm = mapped_column(Date, nullable=True)
+    tel_nr = mapped_column(String, nullable=True)
+    rol_list = [
+        ('admin', 'Admin'),
+        ('bibliothecaris', 'Bibliothecaris'),
+        ('ontlener', 'Ontlener')
+    ]
+    rol = mapped_column(ChoiceType(rol_list, impl=String()), nullable=False)
 
+    reservaties = relationship("Reservatie", back_populates="gebruiker", lazy="select")
 
+    def __repr__(self):
+        return f"<Gebruiker(id={self.id}, naam={self.naam}, email={self.email}, rol={self.rol})>"
 
+# Book model
 class Boek(Base):
-    __tablename__ = "boek"
+    __tablename__ = "boeken"
 
     ISBN = mapped_column(String, primary_key=True)
     titel = mapped_column(String, nullable=False)
-    gereserveerd = mapped_column(Boolean,default=False)
+    gereserveerd = mapped_column(Boolean, default=False)
     status = mapped_column(Boolean, nullable=True)
-    beschrijving = mapped_column(String, nullable=False )
+    beschrijving = mapped_column(String, nullable=False)
     bvdm = mapped_column(Boolean, nullable=True)
-
     toegevoegd_op = mapped_column(DateTime, default=datetime.utcnow)
 
-    themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken')
-    genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken')
-    auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken')
-    reservaties = relationship("Reservatie", back_populates="boek")
+    themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken', lazy="select")
+    genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken', lazy="select")
+    auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken', lazy="select")
+    reservaties = relationship("Reservatie", back_populates="boek", lazy="select")
+
+    def __repr__(self):
+        return f"<Boek(ISBN={self.ISBN}, titel={self.titel})>"
+
+# Reservation model
 class Reservatie(Base):
-    __tablename__ = "reservatie"
+    __tablename__ = "reservaties"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    boek_isbn = mapped_column(String, ForeignKey("boek.ISBN"), nullable=False)
+    boek_isbn = mapped_column(String, ForeignKey("boeken.ISBN"), nullable=False)
+    gebruiker_id = mapped_column(Integer, ForeignKey("gebruikers.id"), nullable=False)
     start_date = mapped_column(Date, nullable=False)
     end_date = mapped_column(Date, nullable=False)
 
-    # Relatie naar het boek
-    boek = relationship("Boek", back_populates="reservaties")
+    boek = relationship("Boek", back_populates="reservaties", lazy="joined")
+    gebruiker = relationship("Gebruiker", back_populates="reservaties", lazy="joined")
 
+    def __repr__(self):
+        return f"<Reservatie(id={self.id}, boek_isbn={self.boek_isbn}, gebruiker_id={self.gebruiker_id})>"
+
+# Genre model
 class Genre(Base):
-    __tablename__ = "genre"
+    __tablename__ = "genres"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    naam = mapped_column(String)
+    naam = mapped_column(String, nullable=False, unique=True)
 
-    boeken = relationship('Boek', secondary=boek_genre_association, back_populates='genres')
+    boeken = relationship('Boek', secondary=boek_genre_association, back_populates='genres', lazy="select")
 
+    def __repr__(self):
+        return f"<Genre(id={self.id}, naam={self.naam})>"
+
+# Theme model
 class Thema(Base):
-    __tablename__ = "thema"
+    __tablename__ = "themas"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    naam = mapped_column(String)
+    naam = mapped_column(String, nullable=False, unique=True)
 
-    boeken = relationship('Boek', secondary=boek_thema_association, back_populates='themas')
+    boeken = relationship('Boek', secondary=boek_thema_association, back_populates='themas', lazy="select")
 
+    def __repr__(self):
+        return f"<Thema(id={self.id}, naam={self.naam})>"
+
+# Author model
 class Auteur(Base):
-    __tablename__ = "auteur"
+    __tablename__ = "auteurs"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    naam = mapped_column(String)
+    naam = mapped_column(String, nullable=False, unique=True)
 
-    boeken = relationship('Boek', secondary=boek_auteur_association, back_populates='auteurs')
+    boeken = relationship('Boek', secondary=boek_auteur_association, back_populates='auteurs', lazy="select")
 
-# alle data wordt toegevoegd aan het databasebestand = alle data worden erin gedaan (altijd nodig)
-Base.metadata.create_all(bind=engine)
+    def __repr__(self):
+        return f"<Auteur(id={self.id}, naam={self.naam})>"
+
+# Create all tables
+with engine.begin() as connection:
+    Base.metadata.create_all(bind=connection)
