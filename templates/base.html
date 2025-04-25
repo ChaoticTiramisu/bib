@@ -18,22 +18,17 @@
                 <a href="{{url_for('index')}}"><img src="/static/afbeeldingen/logo.svg" alt="Logo"></a>
             </div>
             <div class="menu">
+                <a href="{{url_for('boeken')}}" class="button">Bibliotheek</a>
                 <!-- Show admin link only for specific roles -->
-                {% if rol in ["Bibliothecaris", "Admin"] %}
+                {% if rol %}
                     <a href="{{ url_for('admin') }}" class="button">Admin</a>
                 {% endif %}
             
                 <!-- Logout link -->
                 {% if email %}
                     <a href="{{ url_for('logout') }}" class="button">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('login') }}" class="button">Login</a>
                 {% endif %}
-            
-                <!-- Display naam -->
-                {% if naam %}
-                    <span>Welcome, {{ naam }}</span>
-                {% endif %}
+
             </div>
         </header>
         
