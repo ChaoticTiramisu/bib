@@ -59,6 +59,7 @@
                                     <td>{{ gebruiker.email }}</td>
                                     <td>{{ gebruiker.rol }}</td>
                                     <td>
+                                        <a href="{{ url_for('gebruiker_info', gebruiker_id=gebruiker.id) }}" class="btn btn-sm btn-info">Info</a>
                                         <a href="{{ url_for('bewerk_gebruiker', gebruiker_id=gebruiker.id) }}" class="btn btn-sm btn-warning">Wijzig</a>
                                         <form action="{{ url_for('verwijder_gebruiker', gebruiker_id=gebruiker.id) }}" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')">Verwijder</button>

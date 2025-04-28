@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Gebruiker Details{% endblock title %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Gebruiker Details</h1>
+
+    <!-- User Details -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title">Persoonlijke Informatie</h3>
+            <p><strong>Naam:</strong> {{ gebruiker.naam }} {{ gebruiker.achternaam }}</p>
+            <p><strong>Email:</strong> {{ gebruiker.email }}</p>
+            <p><strong>Rol:</strong> {{ gebruiker.rol }}</p>
+        </div>
+    </div>
+
+    <!-- Reserved Books -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title">Gereserveerde Boeken</h3>
+            {% if reserveringen %}
+            <ul class="list-group">
+                {% for reservering in reserveringen %}
+                <li class="list-group-item">
+                    <strong>Titel:</strong> {{ reservering.boek.titel }}<br>
+                    <strong>ISBN:</strong> {{ reservering.boek.ISBN }}<br>
+                    <strong>Startdatum:</strong> {{ reservering.start_date }}<br>
+                    <strong>Einddatum:</strong> {{ reservering.end_date }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">Geen gereserveerde boeken gevonden.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

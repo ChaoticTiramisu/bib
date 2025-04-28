@@ -2,69 +2,78 @@
 
 {% block body %}
 <div class="background_index">
-  <div class="email">
-  </div>
+  <div class="email"></div>
 
   <center>
-<h2>Welkom op de bib site!</h2>
-<h2>Gemaakt door 6ICW</h2><br><br>
+    <h2 class="fw-bold text-primary">Welkom op de bib site!</h2>
+    <h4 class="text-muted">Gemaakt door 6ICW</h4>
+    <br><br>
 
-<div class="form">
-  <div class="box">
-    <h2>Boek van de maand!</h2>
-    {% if bvdm == 1 %}
-      <div class="container">
-        <img src="../static/upload/{{isbn}}.png" alt="Afbeelding">
+    <!-- Boek van de Maand Section -->
+    <div class="form mb-5">
+      <div class="box">
+        <h2 class="text-center fw-bold">Boek van de maand!</h2>
+        {% if bvdm == 1 %}
+        <div class="swiper mySwiper mt-4">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <a href="{{ url_for('boek', ISBN=isbn) }}">
+                <img src="../static/upload/{{ isbn }}.png" class="d-block mx-auto img-fluid" alt="Boek van de maand">
+              </a>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">Geen boek van de maand gevonden</p>
+        {% endif %}
       </div>
-    {% else %}
-        <p>Geen boek van de maand gevonden</p>
-    {% endif %}
-  </div>
-</div>
-<br>
-<div class="form">
-  <div class="box">
-      <h2>Nieuwe boeken</h2>
-      <div class="container">
-        {% for boek in boeken %}
-        <img src="{{ url_for('static', filename='upload/' ~ boek.ISBN ~ '.png') }}" alt="Afbeelding">
-        {% endfor %}     
-      </div>   
-  </div>
-</div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-</div>
-<footer class="footer bg-dark text-white py-4">
-  <div class="container">
-    <div class="row justify-content-center">
-      <!-- Circles Section -->
-      <div class="col-12 text-center mb-4">
-        <div class="d-flex justify-content-center">
-          <a href="https://ronse.bibliotheek.be/" class="circle mx-3">
-            <img src="/static/afbeeldingen/bib.png" alt="bib" class="img-fluid rounded-circle" style="width: 80px; height: 80px;">
-          </a>
-          <a href="{{ url_for('PICT') }}" class="circle mx-3">
-            <img src="/static/afbeeldingen/pict.png" alt="pict" class="img-fluid rounded-circle" style="width: 80px; height: 80px;">
-          </a>
-          <a href="{{ url_for('taal') }}" class="circle mx-3">
-            <img src="/static/afbeeldingen/taal.png" alt="taal" class="img-fluid rounded-circle" style="width: 80px; height: 80px;">
-          </a>
+    </div>
+
+    <!-- Nieuwe Boeken Section -->
+    <div class="form">
+      <div class="box">
+        <h2 class="text-center fw-bold">Nieuwe boeken</h2>
+        <div class="swiper mySwiper mt-4">
+          <div class="swiper-wrapper">
+            {% for boek in boeken %}
+            <div class="swiper-slide">
+              <a href="{{ url_for('boek', ISBN=boek.ISBN) }}">
+                <img src="{{ url_for('static', filename='upload/' ~ boek.ISBN ~ '.png') }}" class="d-block mx-auto img-fluid" alt="{{ boek.titel }}">
+              </a>
+              <div class="text-center mt-2">
+                <h5>{{ boek.titel }}</h5>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <!-- Navigation Buttons -->
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+          <!-- Pagination -->
+          <div class="swiper-pagination"></div>
         </div>
       </div>
+    </div>
+  </center>
+</div>
 
+<footer class="footer bg-dark text-white py-4">
+  <div class="container-fluid">
+    <div class="row justify-content-between align-items-center">
       <!-- Links Section -->
-      <div class="col-12 text-center">
-        <ul class="list-inline">
+      <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+        <ul class="list-inline mb-0">
           <li class="list-inline-item mx-3"><a href="#" class="text-white text-decoration-none">Diensten</a></li>
           <li class="list-inline-item mx-3"><a href="#" class="text-white text-decoration-none">Blog</a></li>
           <li class="list-inline-item mx-3"><a href="#" class="text-white text-decoration-none">Contact</a></li>
         </ul>
+      </div>
+
+      <!-- Social Media Section -->
+      <div class="col-md-6 text-center text-md-end">
+        <a href="#" class="text-white mx-2"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="text-white mx-2"><i class="bi bi-twitter"></i></a>
+        <a href="#" class="text-white mx-2"><i class="bi bi-instagram"></i></a>
       </div>
     </div>
 
@@ -73,10 +82,35 @@
     </div>
   </div>
 </footer>
-      <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-      <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
+<!-- Swiper.js -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
-</center>
-
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.mySwiper', {
+      slidesPerView: 1,
+      spaceBetween: 10,
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      breakpoints: {
+        768: {
+          slidesPerView: 2,
+          spaceBetween: 20,
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: 30,
+        },
+      },
+    });
+  });
+</script>
 {% endblock %}

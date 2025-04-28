@@ -646,6 +646,19 @@ def verwijder_gebruiker(gebruiker_id):
     
     return redirect(url_for('gebruikers'))  # Redirect back to the users list
 
+@app.route('/gebruiker/<int:gebruiker_id>', methods=['GET'])
+def gebruiker_info(gebruiker_id):
+    # Fetch the user from the database
+    gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
+    if not gebruiker:
+        flash("Gebruiker niet gevonden.", "error")
+        return redirect(url_for('gebruikers'))  # Redirect back to the users list
+
+    # Fetch the books reserved by the user
+    reserveringen = db.session.query(Reservatie).filter_by(gebruiker_id=gebruiker_id).all()
+
+    return render_template('gebruiker_info.html', gebruiker=gebruiker, reserveringen=reserveringen)
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
