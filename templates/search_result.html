@@ -1,60 +1,58 @@
-<div class="book-widget">
-    {% for result in results %}
-    <div class="book-card">
-        <div class="book-image">
-            <a href="{{url_for('boek', ISBN = result.ISBN)}}"><img src="../static/upload/{{result.ISBN}}.png" alt="Afbeelding"></a>
-        </div>
-        <div class="book-details">
-            <h3 class="book-title">{{ result.titel }}</h3>
-            <div class="book-authors">
-                <strong>Auteurs:</strong>
-                <ul>
-                    {% for auteur in result.auteurs %}
-                    <li>{{ auteur.naam }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            
-            <div class="book-themes">
-                <strong>Themas:</strong>
-                <ul>
-                    {% for thema in result.themas %}
-                    <li>{{ thema.naam }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+<div class="container mt-4">
+    <div class="row">
+        {% for result in results %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <!-- Book Image and Title -->
+                <img src="../static/upload/{{ result.ISBN }}.png" class="card-img-top" alt="Afbeelding van {{ result.titel }}">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ result.titel }}</h5>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ result.ISBN }}" aria-expanded="false" aria-controls="details-{{ result.ISBN }}">
+                        Meer Info
+                    </button>
+                </div>
 
-            <div class="book-genres">
-                <strong>Genres:</strong>
-                <ul>
-                    {% for genre in result.genres %}
-                    <li>{{ genre.naam }}</li>
-                    {% endfor %}
-                </ul>
+                <!-- Collapsible Section for Extra Info -->
+                <div class="collapse" id="details-{{ result.ISBN }}">
+                    <div class="card-body">
+                        <p><strong>Auteurs:</strong></p>
+                        <ul class="list-unstyled">
+                            {% for auteur in result.auteurs %}
+                            <li>{{ auteur.naam }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p><strong>Thema's:</strong></p>
+                        <ul class="list-unstyled">
+                            {% for thema in result.themas %}
+                            <li>{{ thema.naam }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p><strong>Genres:</strong></p>
+                        <ul class="list-unstyled">
+                            {% for genre in result.genres %}
+                            <li>{{ genre.naam }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p><strong>Beschikbaar?</strong> 
+                            {% if result.status == 1 %}
+                            <img src="/static/afbeeldingen/check.svg" alt="Beschikbaar">
+                            {% else %}
+                            <img src="/static/afbeeldingen/block.svg" alt="Niet Beschikbaar">
+                            {% endif %}
+                        </p>
+                        <p><strong>ISBN:</strong> {{ result.ISBN }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{{ url_for('boek', ISBN=result.ISBN) }}" class="btn btn-primary btn-sm">Bekijk Boek</a>
+                        {% if rol == "bibliothecaris" or rol == "admin" %}
+                        <a href="{{ url_for('change', ISBN=result.ISBN) }}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil-square"></i> Bewerken
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            <div>
-                <strong>Beschikbaar?</strong>
-                {% if result.status == 1 %}
-                <img src="/static/afbeeldingen/check.svg">
-                {% else %}
-                <img src="/static/afbeeldingen/block.svg">
-                {% endif %}
-            </div>
-      
-            <p class="book-isbn"><strong>ISBN:</strong> {{ result.ISBN }}</p>
-
-            {% if user.rol == "bibliothecaris" %}
-            <div class="book-actions">
-                {% set ISBN = result.ISBN | int %}
-                <a href="{{ url_for('change', ISBN=ISBN) }}" class="edit-book">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                    </svg>
-                </a>
-            </div>
-            {% endif %}
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>

@@ -1,24 +1,67 @@
 {% extends "base.html" %}
 
-{% block title %} Boeken {% endblock title %} 
+{% block title %} Boeken {% endblock title %}
 
 {% block body %}
-<div class="book-container">
-    <div class="book-details">
-        <img class="book-cover" src="../static/upload/{{ boek.ISBN }}.png" alt="Book Cover">
-        <p><strong>{{ boek.titel }}</strong></p>
-        <p><strong>Auteur:</strong>{% for auteur in boek.auteurs %} {{ auteur.naam }} {% endfor %}</p>
-        <p><strong>Genre:</strong>{% for genre in boek.genres %} {{ genre.naam }} {% endfor %}</p>
-        <p><strong>Thema:</strong>{% for thema in boek.themas %} {{ thema.naam }} {% endfor %}</p>
-        <p><strong>ISBN:</strong> {{ boek.ISBN }}</p>
-        <p><strong>Beschrijving:</strong>{{ boek.beschrijving }}</p>
-    </div>
-    
-   
-    <div id="calendar-container"
-     hx-get="/boek/{{ boek.ISBN }}/calendar"
-     hx-trigger="load"
-     hx-swap="innerHTML">
-    </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <!-- Beschikbaarheid Status -->
+        <div class="col-12 mb-4">
+            {% if boek.gereserveerd %}
+                <div class="alert alert-danger text-center" role="alert">
+                    Dit boek is momenteel <strong>gereserveerd</strong>.
+                </div>
+            {% else %}
+                <div class="alert alert-success text-center" role="alert">
+                    Dit boek is <strong>beschikbaar</strong> voor reservering.
+                </div>
+            {% endif %}
+        </div>
 
+        <!-- Book Details Section -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <img class="card-img-top" src="../static/upload/{{ boek.ISBN }}.png" alt="Book Cover">
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ boek.titel }}</h5>
+                    <p class="card-text"><strong>Auteur:</strong> 
+                        {% for auteur in boek.auteurs %} {{ auteur.naam }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    <p class="card-text"><strong>Genre:</strong> 
+                        {% for genre in boek.genres %} {{ genre.naam }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    <p class="card-text"><strong>Thema:</strong> 
+                        {% for thema in boek.themas %} {{ thema.naam }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    <p class="card-text"><strong>ISBN:</strong> {{ boek.ISBN }}</p>
+                    <p class="card-text"><strong>Beschrijving:</strong> {{ boek.beschrijving }}</p>
+                    <!-- Reserve Button -->
+                    <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-primary btn-block mt-3">
+                        Reserveer dit boek
+                    </a>
+                </div>
+            </div>
+        </div>
+
+       
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'nl',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: JSON.parse('{{ reserved_dates | tojson | safe }}'),
+            eventColor: '#dc3545', // Red color for reserved dates
+            eventTextColor: '#ffffff', // White text for better contrast
+            height: 'auto'
+        });
+        calendar.render();
+    });
+</script>
 {% endblock body %}

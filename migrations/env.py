@@ -2,8 +2,6 @@ import logging
 from logging.config import fileConfig
 
 from flask import current_app
-from database import Base
-target_metadata = Base.metadata
 
 from alembic import context
 

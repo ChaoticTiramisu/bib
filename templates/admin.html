@@ -1,16 +1,47 @@
 {% extends "base.html" %}
 
-
-{% block title %} admin {% endblock title %} 
+{% block title %}Admin Portaal{% endblock title %}
 
 {% block body %}
-<h2>Welkom op de admin</h2>
-<body>
-  <div class="sidenav">
-    <a href="{{url_for('adminworkspace')}}">Toevoegen</a>
-    <a href="{{url_for('delpage')}}">Verwijderen</a>
-    <a href="{{url_for('gebruikers')}}">Gebruikers</a>
+<div class="container mt-5">
+  <div class="text-center mb-4">
+    <h1 class="fw-bold text-primary">Admin Portaal</h1>
+    <p class="text-muted fs-5">Beheer de bibliotheek met gemak.</p>
   </div>
-</body>
-{% endblock body %}
 
+  <div class="row justify-content-center">
+    <!-- Toevoegen -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h5 class="card-title">Toevoegen</h5>
+          <p class="card-text text-muted">Voeg nieuwe boeken, genres, thema's en auteurs toe.</p>
+          <a href="{{ url_for('adminworkspace') }}" class="btn btn-primary w-100">Ga naar Toevoegen</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verwijderen -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h5 class="card-title">Verwijderen</h5>
+          <p class="card-text text-muted">Verwijder bestaande boeken, genres, thema's en auteurs.</p>
+          <a href="{{ url_for('delpage') }}" class="btn btn-danger w-100">Ga naar Verwijderen</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gebruikers -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h5 class="card-title">Gebruikers</h5>
+          <p class="card-text text-muted">Beheer gebruikers en hun rechten.</p>
+          <a href="{{ url_for('gebruikers') }}" class="btn btn-secondary w-100">Ga naar Gebruikers</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock body %}

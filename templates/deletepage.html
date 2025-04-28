@@ -1,33 +1,143 @@
 {% extends "base.html" %}
 
 {% block body %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Beheer Items</h2>
+    <div class="row justify-content-center">
+        <!-- Section for Boeken -->
+        <div class="col-md-6 mb-4">
+            <h3>Boeken</h3>
+            <input type="text" id="searchBoeken" class="form-control mb-3" placeholder="Zoek Boeken..." oninput="filterItems('searchBoeken', 'boekenContainer')">
+            <div id="boekenContainer" class="scrollable-box">
+                {% if boeken %}
+                <ul class="list-group">
+                    {% for boek in boeken %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ boek.titel }}</span>
+                        <form action="{{ url_for('delete_voorwerp', table='boek', voorwerp_id=boek.ISBN) }}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">Verwijder</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-center text-muted">Geen boeken gevonden.</p>
+                {% endif %}
+            </div>
+        </div>
 
-<center>
-<div class="verwijderen">
-    <h2>Delete Items</h2>
-    <div>
-      <form hx-get="{{ url_for('delete', table='boek') }}">
-        <button type="submit">Verwijder Boeken</button>
-      </form>
-    </div>
-    <div>
-      <form hx-get="{{ url_for('delete', table='genre') }}">
-        <button type="submit">Verwijder Genres</button>
-      </form>
-    </div>
-    <div>
-      <form hx-get="{{ url_for('delete', table='thema') }}">
-        <button type="submit">Verwijder Thema's</button>
-      </form>
-    </div>
-    <div>
-      <form hx-get="{{ url_for('delete', table='auteur') }}">
-        <button type="submit">Verwijder Auteurs</button>
-      </form>
-    </div>
-  </div>
-  <div id="deleteResult"></div>
-</center>
+        <!-- Section for Genres -->
+        <div class="col-md-6 mb-4">
+            <h3>Genres</h3>
+            <input type="text" id="searchGenres" class="form-control mb-3" placeholder="Zoek Genres..." oninput="filterItems('searchGenres', 'genresContainer')">
+            <div id="genresContainer" class="scrollable-box">
+                {% if genres %}
+                <ul class="list-group">
+                    {% for genre in genres %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ genre.naam }}</span>
+                        <form action="{{ url_for('delete_voorwerp', table='genre', voorwerp_id=genre.id) }}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">Verwijder</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-center text-muted">Geen genres gevonden.</p>
+                {% endif %}
+            </div>
+        </div>
 
+        <!-- Section for Thema's -->
+        <div class="col-md-6 mb-4">
+            <h3>Thema's</h3>
+            <input type="text" id="searchThemas" class="form-control mb-3" placeholder="Zoek Thema's..." oninput="filterItems('searchThemas', 'themasContainer')">
+            <div id="themasContainer" class="scrollable-box">
+                {% if themas %}
+                <ul class="list-group">
+                    {% for thema in themas %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ thema.naam }}</span>
+                        <form action="{{ url_for('delete_voorwerp', table='thema', voorwerp_id=thema.id) }}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">Verwijder</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-center text-muted">Geen thema's gevonden.</p>
+                {% endif %}
+            </div>
+        </div>
 
+        <!-- Section for Auteurs -->
+        <div class="col-md-6 mb-4">
+            <h3>Auteurs</h3>
+            <input type="text" id="searchAuteurs" class="form-control mb-3" placeholder="Zoek Auteurs..." oninput="filterItems('searchAuteurs', 'auteursContainer')">
+            <div id="auteursContainer" class="scrollable-box">
+                {% if auteurs %}
+                <ul class="list-group">
+                    {% for auteur in auteurs %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ auteur.naam }}</span>
+                        <form action="{{ url_for('delete_voorwerp', table='auteur', voorwerp_id=auteur.id) }}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">Verwijder</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-center text-muted">Geen auteurs gevonden.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+<script>
+    function filterItems(inputId, containerId) {
+        const input = document.getElementById(inputId);
+        const filter = input.value.toLowerCase();
+        const container = document.getElementById(containerId);
+        const items = container.getElementsByClassName('list-group-item');
+        let hasVisibleItems = false;
+
+        for (let i = 0; i < items.length; i++) {
+            const text = items[i].querySelector('span').innerText.toLowerCase();
+            if (text.includes(filter)) {
+                items[i].style.display = ''; // Show the item
+                hasVisibleItems = true;
+            } else {
+                items[i].style.display = 'none'; // Hide the item
+            }
+        }
+
+        // Display "No results found" if no items are visible
+        const noResults = container.querySelector('.no-results');
+        if (!hasVisibleItems) {
+            if (!noResults) {
+                const message = document.createElement('div');
+                message.className = 'no-results text-center text-muted mt-3';
+                message.innerText = 'Geen resultaten gevonden.';
+                container.appendChild(message);
+            }
+        } else {
+            if (noResults) {
+                noResults.remove();
+            }
+        }
+    }
+</script>
+
+<style>
+    .scrollable-box {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+</style>
 {% endblock %}

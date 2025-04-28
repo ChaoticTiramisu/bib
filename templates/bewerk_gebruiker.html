@@ -3,27 +3,47 @@
 {% block title %} Bewerk Gebruiker {% endblock title %}
 
 {% block body %}
-<h2>Gebruiker Bewerken</h2>
-<form method="POST">
-    <label>Voornaam:</label>
-    <input type="text" name="naam" value="{{ gebruiker.naam }}" required><br>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Gebruiker Bewerken</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="naam" class="form-label">Voornaam:</label>
+                            <input type="text" id="naam" name="naam" class="form-control" value="{{ gebruiker.naam }}" required>
+                        </div>
 
-    <label>Achternaam:</label>
-    <input type="text" name="achternaam" value="{{ gebruiker.achternaam }}" required><br>
+                        <div class="mb-3">
+                            <label for="achternaam" class="form-label">Achternaam:</label>
+                            <input type="text" id="achternaam" name="achternaam" class="form-control" value="{{ gebruiker.achternaam }}" required>
+                        </div>
 
-    <label>E-mail:</label>
-    <input type="email" name="email" value="{{ gebruiker.email }}" required><br>
-    
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-mail:</label>
+                            <input type="email" id="email" name="email" class="form-control" value="{{ gebruiker.email }}" required>
+                        </div>
 
+                        <div class="mb-3">
+                            <label for="recht" class="form-label">Rol:</label>
+                            <select name="recht" id="recht" class="form-select">
+                                {% for choice, label in rol_choices %}
+                                    <option value="{{ choice }}" {% if gebruiker.rol == choice %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-    <label>Rol:</label>
-    <select name="recht" id="recht">
-        {% for choice, label in rol_choices %}
-                <option value="{{ choice }}">{{ label }}</option>
-        {% endfor %}
-    </select>
-
-    <button type="submit">Opslaan</button>
-    <a href="{{ url_for('gebruikers') }}"><button type="button">Annuleren</button></a>
-</form>
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">Opslaan</button>
+                            <a href="{{ url_for('gebruikers') }}" class="btn btn-secondary">Annuleren</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock body %}

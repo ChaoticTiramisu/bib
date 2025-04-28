@@ -1,64 +1,140 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
+
+{% block title %}Boek Bewerken{% endblock title %}
 
 {% block body %}
-
-<center>
-    <div class="aanpassen">
-        
-        <h2>Aanpassen</h2>
-        <form action="{{ url_for('change', ISBN = def_ISBN) }}" method="post" name="change" enctype = "multipart/form-data">
-            
-            <img src="../static/upload/{{def_ISBN}}.jpg" alt="Afbeelding">
-            <input type = "file" name = "file" />
-            <h2>ISBN</h2>
-            <label for="ISBN"></label>
-            <input type="number" name="ISBN" value="{{def_ISBN}}" required><br><br>
-    
-            <h2>Titel</h2>
-            <input type="text" name="titel" value="{{def_titel}}" required><br><br>
-    
-            <h2>Thema</h2>
-            <div class="scrollable-checkboxes">
-            {% for thema in themas %}
-                <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}"
-                       {% if thema[0] in def_themas %} checked {% endif %}>
-                <label for="thema_{{ thema[0] }}">{{ thema[0] }}</label><br>
-            {% endfor %}
-            </div>
-    
-            <h2>Genre</h2>
-        <div class="scrollable-checkboxes">
-            {% for genre in genres %}
-                <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}"
-                       {% if genre[0] in def_genres %} checked {% endif %}>
-                <label for="genre_{{ genre[0] }}">{{ genre[0] }}</label><br>
-            {% endfor %}
-        </div>
-    
-            <h2>Auteur</h2>
-            <div class="scrollable-checkboxes">
-            {% for auteur in auteurs %}
-                <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}"
-                       {% if auteur[0] in def_auteurs %} checked {% endif %}>
-                <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
-            {% endfor %}
-            </div>
-            <h2>Beschikbaarheid</h2>
-            <input type="checkbox" id="status" name="status" value="Aanwezig" 
-                 {% if def_status %} checked {% endif %}>
-            <label for="status">Aanwezig</label>
-            <br>
-            <br>
-            <h2>Boek van de maand?</h2>
-            <input type="checkbox" id="bvdm" name="bvdm" value="Ja"
-                {% if def_bvdm %} checked {% endif %}>
-            <label for="bvdm">Boek van de maand</label>
-            <br>
-            <br>
-            <input type="submit" value="Wijzig">
-        </form>
-       
+<div class="container mt-5">
+    <!-- Titel en Beschrijving -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-primary">Boek Bewerken</h1>
+        <p class="text-muted fs-5">Pas de details van het boek aan, inclusief genres, thema's en auteurs.</p>
     </div>
-    </center>
 
+    <div class="row justify-content-center">
+        <!-- Formulier voor Boek Bewerken -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Boek Aanpassen</h3>
+                    <form action="{{ url_for('change', ISBN=def_ISBN) }}" method="post" enctype="multipart/form-data">
+                        <!-- Boek Cover -->
+                        <div class="mb-3 text-center">
+                            <img src="../static/upload/{{ def_ISBN }}.jpg" alt="Boek Cover" class="img-fluid mb-3" style="max-height: 200px;">
+                            <input type="file" name="file" class="form-control">
+                        </div>
+
+                        <!-- ISBN -->
+                        <div class="mb-3">
+                            <label for="ISBN" class="form-label">ISBN</label>
+                            <input type="number" name="ISBN" class="form-control" value="{{ def_ISBN }}" required>
+                        </div>
+
+                        <!-- Titel -->
+                        <div class="mb-3">
+                            <label for="titel" class="form-label">Titel</label>
+                            <input type="text" name="titel" class="form-control" value="{{ def_titel }}" required>
+                        </div>
+
+                        <!-- Thema's -->
+                        <div class="mb-3">
+                            <h5>Thema's</h5>
+                            <input type="text" id="themaSearch" class="form-control mb-2" placeholder="Zoek thema's...">
+                            <div id="themaContainer" class="scrollable-box">
+                                {% for thema in themas %}
+                                <div class="form-check">
+                                    <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}" class="form-check-input"
+                                           {% if thema[0] in def_themas %} checked {% endif %}>
+                                    <label for="thema_{{ thema[0] }}" class="form-check-label">{{ thema[0] }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Genres -->
+                        <div class="mb-3">
+                            <h5>Genres</h5>
+                            <input type="text" id="genreSearch" class="form-control mb-2" placeholder="Zoek genres...">
+                            <div id="genreContainer" class="scrollable-box">
+                                {% for genre in genres %}
+                                <div class="form-check">
+                                    <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}" class="form-check-input"
+                                           {% if genre[0] in def_genres %} checked {% endif %}>
+                                    <label for="genre_{{ genre[0] }}" class="form-check-label">{{ genre[0] }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Auteurs -->
+                        <div class="mb-3">
+                            <h5>Auteurs</h5>
+                            <input type="text" id="auteurSearch" class="form-control mb-2" placeholder="Zoek auteurs...">
+                            <div id="auteurContainer" class="scrollable-box">
+                                {% for auteur in auteurs %}
+                                <div class="form-check">
+                                    <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}" class="form-check-input"
+                                           {% if auteur[0] in def_auteurs %} checked {% endif %}>
+                                    <label for="auteur_{{ auteur[0] }}" class="form-check-label">{{ auteur[0] }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Beschikbaarheid -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="status" name="status" value="Aanwezig" class="form-check-input"
+                                   {% if def_status %} checked {% endif %}>
+                            <label for="status" class="form-check-label">Aanwezig</label>
+                        </div>
+
+                        <!-- Boek van de Maand -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="bvdm" name="bvdm" value="Ja" class="form-check-input"
+                                   {% if def_bvdm %} checked {% endif %}>
+                            <label for="bvdm" class="form-check-label">Boek van de maand</label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100">Wijzigingen Opslaan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+<script>
+    function filterItems(inputId, containerId) {
+        const input = document.getElementById(inputId);
+        const filter = input.value.toLowerCase();
+        const container = document.getElementById(containerId);
+        const items = container.getElementsByClassName('form-check');
+
+        for (let i = 0; i < items.length; i++) {
+            const label = items[i].getElementsByTagName('label')[0];
+            if (label.innerText.toLowerCase().includes(filter)) {
+                items[i].style.display = '';
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+    }
+
+    document.getElementById('genreSearch').addEventListener('input', () => filterItems('genreSearch', 'genreContainer'));
+    document.getElementById('themaSearch').addEventListener('input', () => filterItems('themaSearch', 'themaContainer'));
+    document.getElementById('auteurSearch').addEventListener('input', () => filterItems('auteurSearch', 'auteurContainer'));
+</script>
+
+<!-- CSS for Scrollable Boxes -->
+<style>
+    .scrollable-box {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+</style>
 {% endblock %}

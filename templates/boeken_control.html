@@ -1,115 +1,169 @@
 {% extends "base.html" %}
 
-{% block title %}Boeken{% endblock title %} 
+{% block title %}Boek Beheer{% endblock title %}
 
 {% block body %}
-<br>
-<center>
-  <div class="toevoegen">
-    <h2>Boek Toevoegen</h2>
-    
-    <div id="formContainer">
-      <form hx-post="{{ url_for('add') }}"  
-         method="post" 
-         name="boek" 
-         id="boekForm" 
-         enctype="multipart/form-data">
-       
-       <input type="file" name="file" />
-       <br>
-       <h2>ISBN</h2>
-       <label for="ISBN"></label>
-       <input type="number" name="ISBN" placeholder="ISBN" id="ISBN" required ><br><br>
-       
-       <h2>Titel</h2>
-       <input type="text" name="titel" placeholder="titel" id="titel" required><br><br>
-       
-       <h2>Beschrijving</h2>
-       <input type="text" name="beschrijving" placeholder="beschrijving" required><br><br>
-       
-       <h2>Beschikbaarheid</h2>
-       <input type="checkbox" value="Aanwezig" name="status" id="status">
-       <label for="Aanwezig">Aanwezig</label> 
-       <br>
-       
-       <h2>Boek van de maand</h2>
-       <input type="checkbox" value="Ja" name="bvdm" id="bvdm">
-       <label for="Ja">Ja</label>
-       
-       <!-- Genres Section -->
-       <h2>Genre</h2>
-       <div id="genreContainer">
-         <div class="scrollable-checkboxes">
-           {% for genre in genres %}
-             <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}">
-             <label for="genre_{{ genre[0] }}">{{ genre[0] }}</label><br>
-           {% endfor %}
-         </div>
-       </div>
-       
-       <!-- Themas Section -->
-       <h2>Thema</h2>
-       <div id="themaContainer">
-         <div class="scrollable-checkboxes">
-           {% for thema in themas %}
-             <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}">
-             <label for="thema_{{ thema[0] }}">{{ thema[0] }}</label><br>
-           {% endfor %}
-         </div>
-       </div>
-       
-       <!-- Auteurs Section -->
-       <h2>Auteur</h2>
-       <div id="auteurContainer">
-         <div class="scrollable-checkboxes">
-           {% for auteur in auteurs %}
-             <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}">
-             <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
-           {% endfor %}
-         </div>
-       </div>
-       
-       <input type="submit" value="Register">
-      </form>
-    </div>
-    
-    <div id="boekResult"></div>
-    
-    <br>
-    <!-- Genre addition form -->
-    <form hx-post="{{ url_for('add') }}" 
-          hx-target="#genreContainer"
-          hx-swap="outerHTML"
-          method="post">
-      <h2>Voeg een genre toe</h2>
-      <input type="text" name="genre" placeholder="genre" required>
-      <input type="submit" value="Voeg toe">
-    </form>
-    
-    <br>
-    <!-- Thema addition form -->
-    <form hx-post="{{ url_for('add') }}"
-          hx-target="#themaContainer"
-          hx-swap="outerHTML"
-          method="post">
-      <h2>Voeg een thema toe</h2>
-      <input type="text" name="thema" placeholder="thema" required>
-      <input type="submit" value="Voeg toe">
-    </form>
-    
-    <br>
-    <!-- Auteur addition form -->
-    <form hx-post="{{ url_for('add') }}"
-          hx-target="#auteurContainer"
-          hx-swap="outerHTML"
-          method="post">
-      <h2>Voeg een auteur toe</h2>
-      <input type="text" name="auteur" placeholder="auteur" required>
-      <input type="submit" value="Voeg toe">
-    </form>
+<div class="container mt-5">
+  <!-- Titel en Beschrijving -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold text-primary">Boek Beheer</h1>
+    <p class="text-muted fs-5">Voeg nieuwe boeken toe en beheer genres, thema's en auteurs.</p>
   </div>
-</center>
 
+  <div class="row">
+    <!-- Main Form Section -->
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h3 class="card-title text-center">Boek Toevoegen</h3>
+          <form action="{{ url_for('add') }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="file" class="form-label">Boek Cover</label>
+              <input type="file" name="file" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="ISBN" class="form-label">ISBN</label>
+              <input type="number" name="ISBN" class="form-control" placeholder="ISBN" required>
+            </div>
+            <div class="mb-3">
+              <label for="titel" class="form-label">Titel</label>
+              <input type="text" name="titel" class="form-control" placeholder="Titel" required>
+            </div>
+            <div class="mb-3">
+              <label for="beschrijving" class="form-label">Beschrijving</label>
+              <textarea name="beschrijving" class="form-control" rows="3" placeholder="Beschrijving" required></textarea>
+            </div>
+            <div class="form-check mb-3">
+              <input type="checkbox" name="status" value="Aanwezig" class="form-check-input" id="status">
+              <label for="status" class="form-check-label">Aanwezig</label>
+            </div>
+            <div class="form-check mb-3">
+              <input type="checkbox" name="bvdm" value="Ja" class="form-check-input" id="bvdm">
+              <label for="bvdm" class="form-check-label">Boek van de maand</label>
+            </div>
 
-<br><br><br>
+            <!-- Genres Section -->
+            <div class="mb-3">
+              <h5>Genres</h5>
+              <input type="text" id="genreSearch" class="form-control mb-2" placeholder="Zoek genres...">
+              <div id="genreContainer" class="scrollable-box">
+                {% for genre in genres %}
+                <div class="form-check">
+                  <input type="checkbox" id="genre_{{ genre[0] }}" name="genres" value="{{ genre[0] }}" class="form-check-input">
+                  <label for="genre_{{ genre[0] }}" class="form-check-label">{{ genre[0] }}</label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Thema's Section -->
+            <div class="mb-3">
+              <h5>Thema's</h5>
+              <input type="text" id="themaSearch" class="form-control mb-2" placeholder="Zoek thema's...">
+              <div id="themaContainer" class="scrollable-box">
+                {% for thema in themas %}
+                <div class="form-check">
+                  <input type="checkbox" id="thema_{{ thema[0] }}" name="themas" value="{{ thema[0] }}" class="form-check-input">
+                  <label for="thema_{{ thema[0] }}" class="form-check-label">{{ thema[0] }}</label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Auteurs Section -->
+            <div class="mb-3">
+              <h5>Auteurs</h5>
+              <input type="text" id="auteurSearch" class="form-control mb-2" placeholder="Zoek auteurs...">
+              <div id="auteurContainer" class="scrollable-box">
+                {% for auteur in auteurs %}
+                <div class="form-check">
+                  <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}" class="form-check-input">
+                  <label for="auteur_{{ auteur[0] }}" class="form-check-label">{{ auteur[0] }}</label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Boek Toevoegen</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right-Side Overflow Menu -->
+    <div class="col-md-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Nieuw Genre Toevoegen</h5>
+          <!-- Add Genre Form -->
+<form hx-post="{{ url_for('add') }}" hx-target="#genreContainer" hx-swap="innerHTML">
+    <div class="mb-3">
+        <input type="text" name="genre" class="form-control" placeholder="Nieuw Genre" required>
+    </div>
+    <button type="submit" class="btn btn-success w-100">Toevoegen</button>
+</form>
+        </div>
+      </div>
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Nieuw Thema Toevoegen</h5>
+          <!-- Add Thema Form -->
+<form hx-post="{{ url_for('add') }}" hx-target="#themaContainer" hx-swap="innerHTML">
+    <div class="mb-3">
+        <input type="text" name="thema" class="form-control" placeholder="Nieuw Thema" required>
+    </div>
+    <button type="submit" class="btn btn-success w-100">Toevoegen</button>
+</form>
+        </div>
+      </div>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Nieuwe Auteur Toevoegen</h5>
+          <!-- Add Auteur Form -->
+<form hx-post="{{ url_for('add') }}" hx-target="#auteurContainer" hx-swap="innerHTML">
+    <div class="mb-3">
+        <input type="text" name="auteur" class="form-control" placeholder="Nieuwe Auteur" required>
+    </div>
+    <button type="submit" class="btn btn-success w-100">Toevoegen</button>
+</form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+<script>
+  function filterItems(inputId, containerId) {
+    const input = document.getElementById(inputId);
+    const filter = input.value.toLowerCase();
+    const container = document.getElementById(containerId);
+    const items = container.getElementsByClassName('form-check');
+
+    for (let i = 0; i < items.length; i++) {
+      const label = items[i].getElementsByTagName('label')[0];
+      if (label.innerText.toLowerCase().includes(filter)) {
+        items[i].style.display = '';
+      } else {
+        items[i].style.display = 'none';
+      }
+    }
+  }
+
+  document.getElementById('genreSearch').addEventListener('input', () => filterItems('genreSearch', 'genreContainer'));
+  document.getElementById('themaSearch').addEventListener('input', () => filterItems('themaSearch', 'themaContainer'));
+  document.getElementById('auteurSearch').addEventListener('input', () => filterItems('auteurSearch', 'auteurContainer'));
+</script>
+
+<!-- CSS for Scrollable Boxes -->
+<style>
+  .scrollable-box {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+</style>
 {% endblock body %}

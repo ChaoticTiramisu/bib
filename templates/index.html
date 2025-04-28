@@ -40,21 +40,39 @@
     <br>
     <br>
 </div>
-    <footer class="footer">
-      <br>
-      <div class="circles">
-          <a href="https://ronse.bibliotheek.be/" class="circle"><img src="/static/afbeeldingen/bib.png" alt="bib"></a>
-          <a href="{{url_for('PICT')}}" class="circle"><img src="/static/afbeeldingen/pict.png" alt="bib"></a>
-          <a href="{{url_for('taal')}}" class="circle"><img src="/static/afbeeldingen/taal.png" alt="bib"></a>
+<footer class="footer bg-dark text-white py-4">
+  <div class="container">
+    <div class="row justify-content-center">
+      <!-- Circles Section -->
+      <div class="col-12 text-center mb-4">
+        <div class="d-flex justify-content-center">
+          <a href="https://ronse.bibliotheek.be/" class="circle mx-3">
+            <img src="/static/afbeeldingen/bib.png" alt="bib" class="img-fluid rounded-circle" style="width: 80px; height: 80px;">
+          </a>
+          <a href="{{ url_for('PICT') }}" class="circle mx-3">
+            <img src="/static/afbeeldingen/pict.png" alt="pict" class="img-fluid rounded-circle" style="width: 80px; height: 80px;">
+          </a>
+          <a href="{{ url_for('taal') }}" class="circle mx-3">
+            <img src="/static/afbeeldingen/taal.png" alt="taal" class="img-fluid rounded-circle" style="width: 80px; height: 80px;">
+          </a>
+        </div>
       </div>
-      <div class="links">
-          <a href="#">Home</a>
-          <a href="{{url_for('overons')}}">Over ons</a>
-          <a href="#">Diensten</a>
-          <a href="#">Blog</a>
-          <a href="#">Contact</a>
+
+      <!-- Links Section -->
+      <div class="col-12 text-center">
+        <ul class="list-inline">
+          <li class="list-inline-item mx-3"><a href="#" class="text-white text-decoration-none">Diensten</a></li>
+          <li class="list-inline-item mx-3"><a href="#" class="text-white text-decoration-none">Blog</a></li>
+          <li class="list-inline-item mx-3"><a href="#" class="text-white text-decoration-none">Contact</a></li>
+        </ul>
       </div>
-  </footer>
+    </div>
+
+    <div class="text-center mt-3">
+      <p class="mb-0">&copy; 2025 Bibliotheek Glorieux. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+</footer>
       <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
       <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 

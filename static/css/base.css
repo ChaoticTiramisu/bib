@@ -1,594 +1,137 @@
-/* Base Styles */
+/* General Styles */
 body {
-    font-family: Arial, sans-serif; /* General font for the site */
-    line-height: 1.6; /* Improved readability */
-    background-color: #ffffff; /* Light background */
-    color: #302683; /* Dark text color */
-    margin: 0; /* Remove default margin */
-    padding: 0px; /* Padding around the page */
-    padding-top: 100px; /* Adjust this based on the height of the header (header height + some padding) */
-    font-family: themify;
-}
-
-/* Centered Title */
-h2 {
-    text-align: center; 
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    background-color: #ffffff;
     color: #302683;
-    font-family: sans-serif; 
+    margin: 0;
+    padding-top: 100px; /* Adjust for fixed header */
+}
+
+/* Title Styling */
+h1, h2 {
+    color: #302683;
     font-weight: bold;
+    text-align: center;
 }
 
-/* Form Styles */
-form {
-    background-color: #ffffff; /* White background for forms */
-    border: 1px solid #ddd; /* Light border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 20px; /* Inner padding */
-    margin: 20px auto; /* Margin for spacing */
-    width: 80%; /* Full width for forms */
-    max-width: 600px; /* Limit maximum width */
-}
-
-/* Input and Button Styles */
-input[type="text"],
-input[type="number"],
-input[type="password"],
-select {
-    width: 100%; /* Full width for inputs */
-    padding: 10px; /* Inner padding */
-    margin: 10px 0; /* Margin for spacing */
-    border: 1px solid #ccc; /* Light border */
-    border-radius: 4px; /* Rounded corners */
-}
-
-/* Button Styles */
-input[type="submit"],
-button {
-    background-color: #3498db; /* Blue background */
-    color: white; /* White text */
-    border: none; /* No border */
-    padding: 10px 15px; /* Padding for buttons */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-}
-
-input[type="submit"]:hover,
-button:hover {
-    background-color: #2980b9; /* Darker blue on hover */
-}
-
-/* Table Row Styles */
-.entity-list table {
-    width: 100%; /* Full width for tables */
-    border-collapse: collapse; /* Collapse borders */
-}
-
-.entity-list td {
-    padding: 12px 15px; /* Padding for cells */
-    vertical-align: top; /* Align items to the top */
-    border-bottom: 1px solid #e0e0e0; /* Bottom border for separation */
-}
-
-.entity-list img {
-    width: 50px; /* Set a fixed width for images */
-    height: auto; /* Maintain aspect ratio */
-    margin-right: 10px; /* Space between image and title */
-}
-
-/* Lists inside table cells */
-td ul {
-    padding: 0; /* Remove default padding */
-    margin: 0; /* Remove default margin */
-    list-style-type: none; /* Remove bullet points */
-}
-
-td ul li {
-    background-color: #f5f5f5; /* Light gray background for list items */
-    padding: 5px; /* Padding for list items */
-    border-radius: 4px; /* Rounded corners */
-    margin-bottom: 5px; /* Space between list items */
-}
-
-/* Action Button Styles */
-td a {
-    text-decoration: none; /* Remove underline from links */
-}
-
-td a svg {
-    fill: #ff6600; /* Icon color */
-    transition: fill 0.2s; /* Smooth fill transition */
-}
-
-td a:hover svg {
-    fill: #e65c00; /* Darker orange on hover */
-}
-
-/* Sidebar Styles */
-.zijbalk {
-    margin-top: 20px; /* Space above sidebar */
-}
-
-.zijbalk a {
-    display: inline-block; /* Inline block for sidebar links */
-    margin: 5px; /* Margin around links */
-}
-
-/* Email display */
-.email {
-    text-align: center; /* Center align email */
-    font-weight: bold; /* Bold email text */
-}
-
-/* Scrollable Checkbox Container */
-.scrollable-checkboxes {
-    max-height: 150px; /* Maximum height for checkboxes */
-    overflow-y: auto; /* Vertical scroll if necessary */
-}
-
-/* Header Styling */
-header.hoofdbalk {
-    background-color: #ffffff; /* Light background color */
-    padding: 20px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    position: fixed; /* Keep header fixed at the top */
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000; /* Ensures the header stays on top of other content */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a shadow for better visibility */
-}
-
-header .logo img {
-    height: 60px; /* Adjust the size of the logo */
-}
-
-header .menu {
-    display: flex;
-    gap: 20px; /* Space between the menu buttons */
-}
-
-header .menu .button {
-    background-color: #00A09A; /* Custom color */
-    color: white;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease-in-out;
-    font-weight: bold;
-}
-
-header .menu .button:hover {
-    background-color: #312783; /* Darker shade on hover */
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    header.hoofdbalk {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    header .menu {
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    header .menu .button {
-        width: 100%; /* Full width for buttons on mobile */
-    }
-}
-
-/* Responsive Design for Table */
-@media (max-width: 768px) {
-    .entity-list td {
-        display: block; /* Stack table cells */
-        width: 100%; /* Full width */
-    }
-
-    .entity-list img {
-        width: 30px; /* Smaller images for mobile */
-    }
-
-    td ul li {
-        padding: 3px; /* Smaller padding for list items */
-    }
-
-    /* Form styles for smaller devices */
-    form {
-        width: 95%; /* Increase width for small screens */
-    }
-
-    /* Centering h2 for mobile */
-    h2 {
-        font-size: 1.5em; /* Smaller font size on mobile */
-    }
-}
-/* Book Widget Container */
-/* Book Widget Container */
-.book-widget {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-/* Individual Book Card */
-.book-card {
-    background-color: #ffffff; /* Match with form and base background */
+/* Form Styling */
+.custom-form-container form {
+    background-color: #ffffff;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 20px;
-    width: 280px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    transition: transform 0.3s ease;
-    font-family: Arial, sans-serif; /* Ensure consistency with base styles */
-    text-align: center; /* Center align the content */
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Hover Effect on the Book Card */
-.book-card:hover {
-    transform: translateY(-10px); /* Lift effect on hover */
+.custom-form-container .form-label {
+    font-weight: bold;
+    color: #302683;
 }
 
-/* Book Image Styling */
-.book-image img {
-    width: 100%;                /* Make sure the image fits the container */
-    height: auto;                /* Maintain aspect ratio */
+.custom-form-container .form-control {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.custom-form-container .btn-primary {
+    background-color: #302683;
+    border-color: #302683;
+    transition: background-color 0.3s ease;
+}
+
+.custom-form-container .btn-primary:hover {
+    background-color: #4b3c8e;
+    border-color: #4b3c8e;
+}
+
+/* Calendar Styling */
+#calendar {
+    border: 1px solid #ddd;
     border-radius: 8px;
-    margin-bottom: 15px;
-    object-fit: cover;           /* Scale and crop the image if necessary */
-    transition: transform 0.3s ease; /* Smooth scaling on hover */
+    padding: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Book Title */
-.book-title {
-    font-size: 1.25em;
-    color: #2c3e50; /* Use same color as <h2> */
-    margin-bottom: 10px;
+/* Header Styling */
+header.navbar {
+    height: 80px; /* Increase the height */
+    padding: 15px 20px; /* Add more padding */
+    background-color: #f8f9fa; /* Light background color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
-/* Book Details (Lists of Authors, Themes, Genres) */
-.book-details ul {
-    list-style-type: none; /* Remove bullets */
-    padding: 0;
-    margin: 0;
+header .navbar-brand img {
+    height: 60px; /* Increase logo size */
 }
 
-.book-details ul li {
-    background-color: #f5f5f5; /* Same light gray background */
-    padding: 5px;
-    border-radius: 4px;
-    margin-bottom: 5px;
+header .navbar-nav .nav-link {
+    font-size: 1.1rem; /* Increase font size */
+    font-weight: bold; /* Make text bold */
+    color: #302683; /* Match the theme color */
+    transition: color 0.3s ease;
 }
 
-/* Section Titles (Authors, Themes, Genres) */
-.book-details strong {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    color: #3498db; /* Match with the button color */
-}
-
-/* ISBN Section */
-.book-isbn {
-    margin-top: 10px;
-    font-size: 0.9em;
-    color: #7f8c8d; /* Slightly lighter for secondary text */
-}
-
-/* Librarian Edit Button */
-.book-actions {
-    margin-top: 15px;
-}
-
-.book-actions a {
-    color: #ff6600;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-}
-
-.book-actions a svg {
-    margin-right: 5px;
-}
-
-.book-actions a:hover svg {
-    fill: #e65c00; /* Darker orange on hover */
-}
-
-/* Hover Effect on the Book Image */
-.book-image img:hover {
-    transform: scale(1.1); /* Slightly zoom the image on hover */
+header .navbar-nav .nav-link:hover {
+    color: #4b3c8e; /* Add hover effect */
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .book-card {
-        width: 100%; /* Full width for smaller screens */
-        margin-bottom: 20px;
-    }
-
-    .book-title {
-        font-size: 1.1em; /* Slightly smaller font on mobile */
-    }
-
-    .book-image img {
-        width: 100%; /* Ensure full width on smaller screens */
-        height: auto;
+    .custom-form-container form {
+        width: 95%;
     }
 }
 
-/* Centered Image Container with Hover Effect */
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 100px 0;
-    width: 20%;
-    height: 100px;
-    border-radius: 100px;
+.card {
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.container img {
-    width: 50%;
-    height: 50%;
+.card-img-top {
+    height: 200px;
     object-fit: cover;
-    transition: transform 0.5s ease-in-out; /* Smooth scaling effect */
 }
 
-.container img:hover {
-    transform: scale(2); /* Scale up on hover */
-}
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap");
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+.card-body {
+    padding: 15px;
 }
 
-
-
-
-.social-icon,
-.menu {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 10px 0;
-  flex-wrap: wrap;
+.card .btn {
+    transition: transform 0.2s ease;
 }
 
-.social-icon__item,
-.menu__item {
-  list-style: none;
+.card .btn:hover {
+    transform: scale(1.05);
 }
 
-.social-icon__link {
-  font-size: 2rem;
-  color: #fff;
-  margin: 0 10px;
-  display: inline-block;
-  transition: 0.5s;
-}
-.social-icon__link:hover {
-  transform: translateY(-10px);
+/* Flash Message Animations */
+.flash-message {
+    animation: fadeInDown 0.5s ease, fadeOutUp 0.5s ease 4.5s;
 }
 
-.menu__link {
-  font-size: 1.2rem;
-  color: #fff;
-  margin: 0 10px;
-  display: inline-block;
-  transition: 0.5s;
-  text-decoration: none;
-  opacity: 0.75;
-  font-weight: 300;
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.menu__link:hover {
-  opacity: 1;
-}
-
-.sidenav {
-    height: 100%; /* Volledige hoogte van het scherm */
-    width: 200px; /* Breedte van de zijbalk */
-    position: fixed; /* Blijft altijd zichtbaar */
-    top: 15%;
-    left: 0;
-    background-color: #2980b9; /* Blauwe kleur */
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-}
-
-/* Stijl voor de links in de zijbalk */
-.sidenav a {
-    padding: 15px 20px;
-    text-decoration: none;
-    font-size: 18px;
-    color: white; /* Witte tekstkleur */
-    display: block;
-}
-
-/* Stijl voor hover-effect */
-.sidenav a:hover {
-    background-color: #1f6390; /* Iets donkerdere blauwe kleur */
-    color: #f1f1f1; /* Lichte tekstkleur */
-}
-
-/* Hoofdinhoud, met marge links zodat het niet overlapt met de zijbalk */
-.main-content {
-    margin-left: 220px; /* Ruimte aan de linkerkant om de zijbalk te accommoderen */
-    padding: 20px;
-}
-
-
-
-/* Gebruikerscontainerstijl */
-.gebruikers-container {
-    flex: 1; /* Laat de gebruikerscontainer de resterende ruimte vullen */
-    margin: 20px;
-    padding-left: 180px;
-    background-color: #fff; /* Witte achtergrond voor contrast */
-    overflow-y: auto; /* Zorg ervoor dat de inhoud kan scrollen als deze te groot wordt */
-}
-
-/* Optionele extra's voor de gebruikerslijst */
-.gebruikers-container h1 {
-    font-size: 24px;
-    margin-bottom: 15px;
-}
-
-.gebruikers-container ul {
-    list-style-type: none; /* Verwijder standaard opsommingstekens */
-    padding: 0;
-}
-
-.gebruikers-container li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-.gebruikers-container th, .gebruikers-container td {
-    border: 1px solid #ddd; /* Rand om cellen */
-    padding: 8px; /* Ruimte binnen cellen */
-    text-align: left; /* Tekst uitlijnen aan de linkerkant */
-}
-
-.gebruikers-container th {
-    background-color: #f4f4f4; /* Lichte achtergrondkleur voor kopteksten */
-    font-weight: bold; /* Vetgedrukte tekst voor kopteksten */
-}
-
-.gebruikers-container tr:nth-child(even) {
-    background-color: #f9f9f9; /* Alternatieve achtergrondkleur voor rijen */
-}
-
-.gebruikers-container tr:hover {
-    background-color: #f1f1f1; /* Hoogtepunt wanneer je over een rij zweeft */
-}
-
-.box img {
-    width: 200px;        /* Breedte van de afbeelding */
-    height: 300px;       /* Hoogte van de afbeelding */
-    object-fit: cover;   /* Zorgt ervoor dat de afbeelding goed wordt bijgesneden */
-}
-
-.footer {
-    background-color: #302683;
-    color: white;
-    text-align: center;
-    padding: 0px ;
-    margin: 0px;
-}
-.circles {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-.circle {
-    width: 100px;
-    height: 100px;
-    background-color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0044cc;
-    font-weight: bold;
-    text-decoration: none;
-    transition: background 0.3s;
-}
-.circle:hover {
-    background-color: #002288;
-    color: white;
-}
-.links a {
-    color: white;
-    text-decoration: none;
-    margin: 0 10px;
-    font-size: 16px;
-}
-.links a:hover {
-    text-decoration: underline;
-}
-
-.circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.sidebar {
-    width: 500px;
-    height: 400px;
-    background: #00A09A;
-    color: white;
-    padding: 20px;
-    position: absolute;
-    border-radius: 50%;
-    box-shadow: 10px 10px lightblue;
-    font-size: 30px;
-    text-align: center;
-    left:32% ;
-    justify-content: center; 
-    align-items: center;
-    flex-direction: column;
-    display:flex;
-}
-
-.sidebar p {
-    text-align: center;
-    font-weight: bold;
-    color: white;
-    text-shadow: 2px 2px red;
-    
-}
-.content {
-    margin-left: 270px;
-    padding: 20px;
-}
-
-.background_index {
-    background-image: url(/static/afbeeldingen/background_blur.png);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
-
-
-.form {
-    background-color: #ffffff; 
-    border: 1px solid darkgray; 
-    border-radius: 10px; 
-    padding: 20px; 
-    margin: 100px ; 
-    width: 650px; 
-}
-
-/* Prevent other styles from affecting datepicker */
-:not(.datepicker-styles) ~ .datepicker {
-    all: revert !important;
-}
-
-/* Fix for Bootstrap 5 compatibility */
-.datepicker-dropdown {
-    z-index: 1060 !important;
-    padding: 0 !important;
-}
-
-.datepicker {
-    --bs-body-font-family: inherit !important;
-    --bs-body-bg: white !important;
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }

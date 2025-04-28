@@ -1,42 +1,91 @@
 {% extends "base.html" %}
 
-{% block title %} Gebruikers {% endblock title %} 
+{% block title %} Gebruikersbeheer {% endblock title %}
 
 {% block body %}
-<body>
-    <div class="sidenav">
-      <a href="{{url_for('adminworkspace')}}">Toevoegen</a>
-      <a href="{{url_for('delpage')}}">Verwijderen</a>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Navigatie</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a href="{{ url_for('adminworkspace') }}" class="text-decoration-none">Toevoegen</a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="{{ url_for('delpage') }}" class="text-decoration-none">Verwijderen</a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="{{ url_for('admin') }}" class="text-decoration-none">Admin Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title text-primary">Gebruikersbeheer</h1>
+                    <p class="text-muted">Beheer alle gebruikers in het systeem.</p>
+
+                    <!-- Search Bar -->
+                    <div class="mb-3">
+                        <input type="text" id="searchBar" class="form-control" placeholder="Zoek op naam, e-mailadres of rol...">
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Voornaam</th>
+                                    <th>Achternaam</th>
+                                    <th>E-mailadres</th>
+                                    <th>Rol</th>
+                                    <th>Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTable">
+                                {% for gebruiker in gebruikers %}
+                                <tr>
+                                    <td>{{ gebruiker.id }}</td>
+                                    <td>{{ gebruiker.naam }}</td>
+                                    <td>{{ gebruiker.achternaam }}</td>
+                                    <td>{{ gebruiker.email }}</td>
+                                    <td>{{ gebruiker.rol }}</td>
+                                    <td>
+                                        <a href="{{ url_for('bewerk_gebruiker', gebruiker_id=gebruiker.id) }}" class="btn btn-sm btn-warning">Wijzig</a>
+                                        <form action="{{ url_for('verwijder_gebruiker', gebruiker_id=gebruiker.id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')">Verwijder</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </body>
-    <div class="gebruikers-container">
-        <h1>Gebruikerslijst</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>id</th>
-                    <th>Voornaam</th>
-                    <th>Achternaam</th>
-                    <th>E-mailadres</th>
-                    <th>Rol</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for gebruiker in gebruikers %}
-                    <tr>
-                        <td>{{ gebruiker.id}}</td>
-                        <td>{{ gebruiker.naam }}</td>
-                        <td>{{ gebruiker.achternaam}}</td>
-                        <td>{{ gebruiker.email }}</td>
-                        <td>{{gebruiker.rol}}</td>
-                        <td>
-                            <a href="{{ url_for('bewerk_gebruiker', gebruiker_id=gebruiker.id) }}">
-                                <button>Wijzig</button>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    
+</div>
+
+<!-- JavaScript for Search Functionality -->
+<script>
+    document.getElementById('searchBar').addEventListener('input', function () {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#userTable tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const match = Array.from(cells).some(cell => cell.textContent.toLowerCase().includes(filter));
+            row.style.display = match ? '' : 'none';
+        });
+    });
+</script>
 {% endblock body %}

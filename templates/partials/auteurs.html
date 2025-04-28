@@ -1,8 +1,9 @@
-<div id="auteurContainer">
-  <div class="scrollable-checkboxes">
+<div id="auteurContainer" class="scrollable-box">
     {% for auteur in auteurs %}
-      <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}">
-      <label for="auteur_{{ auteur[0] }}">{{ auteur[0] }}</label><br>
+    <div class="form-check">
+        <input type="checkbox" id="auteur_{{ auteur[0] }}" name="auteurs" value="{{ auteur[0] }}" class="form-check-input">
+        <label for="auteur_{{ auteur[0] }}" class="form-check-label">{{ auteur[0] }}</label>
+    </div>
     {% endfor %}
-  </div>
 </div>
+

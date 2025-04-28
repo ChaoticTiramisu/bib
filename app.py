@@ -8,9 +8,10 @@ from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from sqlalchemy.orm import relationship, mapped_column
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy_utils import ChoiceType
+from flask import jsonify, make_response
 
 
 # dirname, is de weg naar dit bestand. 
@@ -232,102 +233,128 @@ def adminworkspace():
 #boeken toevoegen url
 @app.route("/adminworkspace/tools/add", methods=["POST"])
 def add():
-    if request.method == "POST":
-        if session.get('email') is None:
-            return redirect(url_for("login"))
-            
-        test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-        if str(test.rol).lower() not in ["bibliothecaris", "admin"]:
-            abort(403)
+    if session.get('email') is None:
+        flash("Je moet ingelogd zijn om deze actie uit te voeren.", "error")
+        return redirect(url_for("login"))
         
-        # Handle genre addition
-        if "genre" in request.form and "ISBN" not in request.form:
-            genre_naam = request.form["genre"].lower()
-            if not checkContains(Genre, "naam", genre_naam):
-                new_genre = Genre(naam=genre_naam)
-                db.session.add(new_genre)
-                db.session.commit()
-                genres = db.session.query(Genre.naam).all()
-                return render_template("partials/genres.html", genres=genres)
-            else:
-                return "Genre zit al in database.", 400
-
-        # Handle thema addition
-        elif "thema" in request.form and "ISBN" not in request.form:
-            thema_naam = request.form["thema"].lower()
-            if not checkContains(Thema, "naam", thema_naam):
-                new_thema = Thema(naam=thema_naam)
-                db.session.add(new_thema)
-                db.session.commit()
-                themas = db.session.query(Thema.naam).all()
-                return render_template("partials/themas.html", themas=themas)
-            else:
-                return "Thema zit al in database.", 400
-
-        # Handle auteur addition
-        elif "auteur" in request.form and "ISBN" not in request.form:
-            auteur_naam = request.form["auteur"].lower()
-            if not checkContains(Auteur, "naam", auteur_naam):
-                new_auteur = Auteur(naam=auteur_naam)
-                db.session.add(new_auteur)
-                db.session.commit()
-                auteurs = db.session.query(Auteur.naam).all()
-                return render_template("partials/auteurs.html", auteurs=auteurs)
-            else:
-                return "De auteur zit al in database.", 400
-
-        # Handle book addition
-        elif "ISBN" in request.form:
-            ISBN_nr = request.form["ISBN"].lower()
-            if not checkContains(Boek, "ISBN", ISBN_nr):
-                ISBN = request.form["ISBN"]
-                titel = request.form["titel"]
-                beschrijving = request.form["beschrijving"]
-                status = request.form.get("status") == "Afwezig"
-                bvdm = request.form.get("bvdm") == "Ja"
-                
-                file = request.files['file']
-                if file and allowed_file(file.filename):
-                    filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                
-                selected_genres = request.form.getlist("genres")
-                selected_auteurs = request.form.getlist("auteurs")
-                selected_themas = request.form.getlist("themas")
-
-                genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) 
-                          for genre_name in selected_genres]
-                auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) 
-                          for auteur_name in selected_auteurs]
-                themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) 
-                          for thema_name in selected_themas]
-
-                boek = Boek(
-                    titel=titel,
-                    ISBN=ISBN,
-                    beschrijving=beschrijving,
-                    status=status,
-                    bvdm=bvdm
-                )
-                
-                boek.genres.extend(genres)
-                boek.auteurs.extend(auteurs)
-                boek.themas.extend(themas)
-
-                db.session.add(boek)
-                db.session.commit()
-                
-                return "Boek succesvol toegevoegd."
-            else:
-                return "Deze ISBN is al eens gebruikt.", 400
+    test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    if str(test.rol).lower() not in ["bibliothecaris", "admin"]:
+        flash("Je hebt geen toestemming om deze actie uit te voeren.", "error")
+        abort(403)
+    
+    # Handle genre addition
+    if "genre" in request.form and "ISBN" not in request.form:
+        genre_naam = request.form["genre"].lower()
+        if not checkContains(Genre, "naam", genre_naam):
+            new_genre = Genre(naam=genre_naam)
+            db.session.add(new_genre)
+            db.session.commit()
+            genres = db.session.query(Genre.naam).all()
+            response = make_response(render_template("partials/genres.html", genres=genres))
+            response.headers['HX-Trigger'] = jsonify({"showMessage": f"Genre '{genre_naam}' succesvol toegevoegd."})
+            return response
         else:
-            abort(404)
+            genres = db.session.query(Genre.naam).all()
+            response = make_response(render_template("partials/genres.html", genres=genres))
+            response.headers['HX-Trigger'] = jsonify({"showMessage": f"Genre '{genre_naam}' zit al in de database."})
+            return response
+
+    # Handle thema addition
+    elif "thema" in request.form and "ISBN" not in request.form:
+        thema_naam = request.form["thema"].lower()
+        if not checkContains(Thema, "naam", thema_naam):
+            new_thema = Thema(naam=thema_naam)
+            db.session.add(new_thema)
+            db.session.commit()
+            themas = db.session.query(Thema.naam).all()
+            response = make_response(render_template("partials/themas.html", themas=themas))
+            response.headers['HX-Trigger'] = jsonify({"showMessage": f"Thema '{thema_naam}' succesvol toegevoegd."})
+            return response
+        else:
+            themas = db.session.query(Thema.naam).all()
+            response = make_response(render_template("partials/themas.html", themas=themas))
+            response.headers['HX-Trigger'] = jsonify({"showMessage": f"Thema '{thema_naam}' zit al in de database."})
+            return response
+
+    # Handle auteur addition
+    elif "auteur" in request.form and "ISBN" not in request.form:
+        auteur_naam = request.form["auteur"].lower()
+        if not checkContains(Auteur, "naam", auteur_naam):
+            new_auteur = Auteur(naam=auteur_naam)
+            db.session.add(new_auteur)
+            db.session.commit()
+            auteurs = db.session.query(Auteur.naam).all()
+            response = make_response(render_template("partials/auteurs.html", auteurs=auteurs))
+            response.headers['HX-Trigger'] = jsonify({"showMessage": f"Auteur '{auteur_naam}' succesvol toegevoegd."})
+            return response
+        else:
+            auteurs = db.session.query(Auteur.naam).all()
+            response = make_response(render_template("partials/auteurs.html", auteurs=auteurs))
+            response.headers['HX-Trigger'] = jsonify({"showMessage": f"Auteur '{auteur_naam}' zit al in de database."})
+            return response
+
+    # Handle book addition
+    elif "ISBN" in request.form:
+        ISBN_nr = request.form["ISBN"].lower()
+        if not checkContains(Boek, "ISBN", ISBN_nr):
+            ISBN = request.form["ISBN"]
+            titel = request.form["titel"]
+            beschrijving = request.form["beschrijving"]
+            status = request.form.get("status") == "Afwezig"
+            bvdm = request.form.get("bvdm") == "Ja"
+            
+            file = request.files['file']
+            if file and allowed_file(file.filename):
+                filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+            
+            selected_genres = request.form.getlist("genres")
+            selected_auteurs = request.form.getlist("auteurs")
+            selected_themas = request.form.getlist("themas")
+
+            genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) 
+                      for genre_name in selected_genres]
+            auteurs = [db.session.query(Auteur).filter_by(naam=auteur_name).first() or Auteur(naam=auteur_name) 
+                      for auteur_name in selected_auteurs]
+            themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) 
+                      for thema_name in selected_themas]
+
+            boek = Boek(
+                titel=titel,
+                ISBN=ISBN,
+                beschrijving=beschrijving,
+                status=status,
+                bvdm=bvdm
+            )
+            
+            boek.genres.extend(genres)
+            boek.auteurs.extend(auteurs)
+            boek.themas.extend(themas)
+
+            db.session.add(boek)
+            db.session.commit()
+            
+            flash(f"Boek '{titel}' succesvol toegevoegd.", "success")
+            return "Boek succesvol toegevoegd."
+        else:
+            flash(f"Boek met ISBN '{ISBN_nr}' zit al in de database.", "error")
+            return "Deze ISBN is al eens gebruikt.", 400
+    else:
+        flash("Onbekende fout opgetreden.", "error")
+        abort(404)
 
 
 @app.route("/delpage", methods=["GET"])
 def delpage():
-    return render_template("deletepage.html")
+    # Fetch all items from the database
+    boeken = db.session.query(Boek).all()
+    genres = db.session.query(Genre).all()
+    themas = db.session.query(Thema).all()
+    auteurs = db.session.query(Auteur).all()
+
+    # Pass the items to the template
+    return render_template("deletepage.html", boeken=boeken, genres=genres, themas=themas, auteurs=auteurs)
 
 # zoek boek, genre of thema om te  verwijderen
 @app.route("/adminworkspace/tools/delete/<string:table>/search", methods=["GET"])
@@ -383,13 +410,13 @@ def delete_voorwerp(table, voorwerp_id):
         db.session.commit()
 # weergeven van boek of auteur of genre of thema, en als de table een boek is dan geeft hij ISBN weer en als het niet zo is enkel het ID
         flash(f"{table.capitalize()} with {'ISBN' if table == 'ISBN' else 'id'}  {voorwerp_id} succesvol verwijderd")
-        return redirect(url_for("delete", table = table)) 
+        return redirect(url_for("delpage")) 
 
 # verandernde van boekn
 @app.route("/adminworkspace/tools/change/<int:ISBN>", methods=["POST", "GET"])
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
-    if str(test.rol) == "Bibliothecaris":
+    if str(test.rol).lower() in ["bibliothecaris", "admin"]:
         if request.method == "POST":
             if "ISBN" in request.form:
                 # kijken als je boek daadwerkelijk bestaat
@@ -404,13 +431,11 @@ def change(ISBN):
                     auteur_names = request.form.getlist("auteurs")
                     file = request.files['file']
                     if file and allowed_file(file.filename):
-                    
                         old_filename = f"{ISBN}{os.path.splitext(file.filename)[1]}"
                         new_filename = f"{new_ISBN}{os.path.splitext(file.filename)[1]}"
                         old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], old_filename)
                         new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
 
-                        
                         if new_ISBN != ISBN:
                             if os.path.exists(old_file_path):
                                 os.rename(old_file_path, new_file_path)
@@ -418,10 +443,8 @@ def change(ISBN):
                                 file.save(new_file_path)
                         else:
                             file.save(old_file_path)
-                    
-                    
 
-                    # meerdere genres aan een variable toe kenne , indien nodig met for lus
+                    # meerdere genres aan een variable toe kennen, indien nodig met for lus
                     genres = [db.session.query(Genre).filter_by(naam=name).first() for name in genre_names]
                     themas = [db.session.query(Thema).filter_by(naam=name).first() for name in thema_names]
                     auteurs = [db.session.query(Auteur).filter_by(naam=name).first() for name in auteur_names]
@@ -433,7 +456,7 @@ def change(ISBN):
                     boek.auteurs = auteurs
                     boek.status = status
                     boek.bvdm = bvdm
-                    
+
                     db.session.commit()
                     flash("Boek succesvol veranderd")
                     return redirect(url_for("boeken"))
@@ -447,10 +470,7 @@ def change(ISBN):
             genres = db.session.query(Genre.naam).all()
             themas = db.session.query(Thema.naam).all()
             auteurs = db.session.query(Auteur.naam).all()
-            
-            
-                
-            
+
             boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
             return render_template(
                 "boek_edit.html",
@@ -463,17 +483,27 @@ def change(ISBN):
                 genres=genres,
                 themas=themas,
                 auteurs=auteurs,
-                def_status = boek.status,
-                def_bvdm = boek.bvdm,
-                
+                def_status=boek.status,
+                def_bvdm=boek.bvdm,
             )
     else:
         abort(404)
 
-@app.route("/boek/<int:ISBN>",methods=["POST", "GET"]) 
+@app.route("/boek/<int:ISBN>")
 def boek(ISBN):
-    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
-    return render_template("boek.html",boek = boek)
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
+
+    # Fetch reserved dates for the book
+    reserved_dates = [
+        {
+            "title": "Gereserveerd",
+            "start": reservatie.start_date.strftime('%Y-%m-%d'),
+            "end": (reservatie.end_date + timedelta(days=1)).strftime('%Y-%m-%d')  # Add 1 day to include the end date
+        }
+        for reservatie in boek.reservaties
+    ]
+
+    return render_template('boek.html', boek=boek, reserved_dates=reserved_dates)
 
 @app.route('/boek/<int:ISBN>/calendar')
 def book_calendar(ISBN):
@@ -488,12 +518,20 @@ def reserveer_boek(ISBN):
     reservations = db.session.query(Reservatie).filter_by(boek_isbn=boek.ISBN).all()
 
     if request.method == 'POST':
-        start_date = request.form.get('start_date')
-        end_date = request.form.get('end_date')
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
 
         # Check if the dates are valid
-        if not start_date or not end_date:
+        if not start_date_str or not end_date_str:
             flash("Startdatum en einddatum zijn verplicht.", "error")
+            return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+        try:
+            # Convert strings to Python date objects
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash("Ongeldige datumindeling. Gebruik het formaat JJJJ-MM-DD.", "error")
             return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
         # Check for overlapping reservations
@@ -521,7 +559,11 @@ def reserveer_boek(ISBN):
         return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
     reserved_dates = [
-        {'start': r.start_date.isoformat(), 'end': r.end_date.isoformat()}
+        {
+            'title': 'Gereserveerd',
+            'start': r.start_date.isoformat(),
+            'end': (r.end_date + timedelta(days=1)).isoformat()  # Add 1 day to include the end date
+        }
         for r in reservations
     ]
 
@@ -584,6 +626,25 @@ def bewerk_gebruiker(gebruiker_id):
         return redirect(url_for('gebruikers'))  # Terug naar de gebruikerslijst
 
     return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices)
+
+@app.route('/verwijder_gebruiker/<int:gebruiker_id>', methods=['POST'])
+def verwijder_gebruiker(gebruiker_id):
+    # Fetch the user from the database
+    gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
+    
+    if not gebruiker:
+        flash("Gebruiker niet gevonden.", "error")
+        return redirect(url_for('gebruikers'))  # Redirect back to the users list
+
+    try:
+        # Delete the user
+        db.session.delete(gebruiker)
+        db.session.commit()
+        flash(f"Gebruiker '{gebruiker.naam} {gebruiker.achternaam}' succesvol verwijderd.", "success")
+    except Exception as e:
+        flash(f"Er is een fout opgetreden bij het verwijderen van de gebruiker: {str(e)}", "error")
+    
+    return redirect(url_for('gebruikers'))  # Redirect back to the users list
 
 if __name__ == "__main__":
     with app.app_context():
