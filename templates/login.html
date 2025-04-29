@@ -1,34 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %} Login {% endblock title %} 
+{% block title %} Login {% endblock title %}
 
-
-
-
-    {% block body %}
-    <body>
-    
-        
-    <center>
-        <h2>Log-in</h2>
-        <form action="/login" method="post" class="mb-3">
-            <label for="email">Email adres</label>
-            <input type="text" placeholder="E-mail" name="login_email"> <br>
-            <label for="password">Wachtwoord</label>
-            <input type="password" placeholder="Wachtwoord" name="login_paswoord">
-            <br>
-            <p>Wachtwoord vergeten?</p>
-            <!--POP-UP TOEVOEGEN!!!-->
-            <input type="submit" name="login" value="Log-in">
-        </form>
-        <br>
-
-        <a href="{{ url_for('register') }}"><h3>Nog geen account?</h3></a>
-        <!--<button onclick="document.location='register'">Registreer</button>-->
-        
-        
-        
-    </center>
-    </body>
-    {% endblock body %}
+{% block body %}
+<body class="bg-light">
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+            <h2 class="text-center mb-4">Log-in</h2>
+            <form action="/login" method="post">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email adres</label>
+                    <input type="text" class="form-control" id="email" name="login_email" placeholder="E-mail" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Wachtwoord</label>
+                    <input type="password" class="form-control" id="password" name="login_paswoord" placeholder="Wachtwoord" required>
+                </div>
+                <div class="mb-3 text-center">
+                    <a href="#" class="text-decoration-none">Wachtwoord vergeten?</a>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Log-in</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('register') }}" class="text-decoration-none">Nog geen account?</a>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock body %}
 
