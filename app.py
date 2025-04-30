@@ -514,64 +514,69 @@ def book_calendar(ISBN):
 
 @app.route('/boek/<int:ISBN>/reserveer', methods=['GET', 'POST'])
 def reserveer_boek(ISBN):
-    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
-    reservations = db.session.query(Reservatie).filter_by(boek_isbn=boek.ISBN).all()
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    if gebruiker.actief == 0:
+        flash("Je account is geblokkeerd, vraag je leerkracht voor meer info.", "error")
+        return render_template('index.html')
+    else:
+        boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
+        reservations = db.session.query(Reservatie).filter_by(boek_isbn=boek.ISBN).all()
 
-    if request.method == 'POST':
-        start_date_str = request.form.get('start_date')
-        end_date_str = request.form.get('end_date')
+        if request.method == 'POST':
+            start_date_str = request.form.get('start_date')
+            end_date_str = request.form.get('end_date')
 
-        # Check if the dates are valid
-        if not start_date_str or not end_date_str:
-            flash("Startdatum en einddatum zijn verplicht.", "error")
+            # Check if the dates are valid
+            if not start_date_str or not end_date_str:
+                flash("Startdatum en einddatum zijn verplicht.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+            try:
+                # Convert strings to Python date objects
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash("Ongeldige datumindeling. Gebruik het formaat JJJJ-MM-DD.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+            # Check for overlapping reservations
+            overlapping = db.session.query(Reservatie).filter(
+                Reservatie.boek_isbn == boek.ISBN,
+                Reservatie.start_date <= end_date,
+                Reservatie.end_date >= start_date
+            ).first()
+
+            if overlapping:
+                flash("Deze periode is al gereserveerd.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+            # Create a new reservation
+            new_reservation = Reservatie(
+                boek_isbn=boek.ISBN,
+                gebruiker_id=session.get('gebruiker_id'),
+                start_date=start_date,
+                end_date=end_date
+            )
+            db.session.add(new_reservation)
+            db.session.commit()
+
+            flash("Boek succesvol gereserveerd!", "success")
             return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
-        try:
-            # Convert strings to Python date objects
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            flash("Ongeldige datumindeling. Gebruik het formaat JJJJ-MM-DD.", "error")
-            return redirect(url_for('reserveer_boek', ISBN=ISBN))
+        reserved_dates = [
+            {
+                'title': 'Gereserveerd',
+                'start': r.start_date.isoformat(),
+                'end': (r.end_date + timedelta(days=1)).isoformat()  # Add 1 day to include the end date
+            }
+            for r in reservations
+        ]
 
-        # Check for overlapping reservations
-        overlapping = db.session.query(Reservatie).filter(
-            Reservatie.boek_isbn == boek.ISBN,
-            Reservatie.start_date <= end_date,
-            Reservatie.end_date >= start_date
-        ).first()
-
-        if overlapping:
-            flash("Deze periode is al gereserveerd.", "error")
-            return redirect(url_for('reserveer_boek', ISBN=ISBN))
-
-        # Create a new reservation
-        new_reservation = Reservatie(
-            boek_isbn=boek.ISBN,
-            gebruiker_id=session.get('gebruiker_id'),
-            start_date=start_date,
-            end_date=end_date
+        return render_template(
+            'reserveer_boek.html',
+            boek=boek,
+            reserved_dates=reserved_dates
         )
-        db.session.add(new_reservation)
-        db.session.commit()
-
-        flash("Boek succesvol gereserveerd!", "success")
-        return redirect(url_for('reserveer_boek', ISBN=ISBN))
-
-    reserved_dates = [
-        {
-            'title': 'Gereserveerd',
-            'start': r.start_date.isoformat(),
-            'end': (r.end_date + timedelta(days=1)).isoformat()  # Add 1 day to include the end date
-        }
-        for r in reservations
-    ]
-
-    return render_template(
-        'reserveer_boek.html',
-        boek=boek,
-        reserved_dates=reserved_dates
-    )
 
 
 @app.route("/PICT")
@@ -621,11 +626,12 @@ def bewerk_gebruiker(gebruiker_id):
         gebruiker.achternaam = request.form['achternaam']
         gebruiker.email = request.form['email']
         gebruiker.rol = request.form.get('recht')
+        gebruiker.actief = request.form.get('actief') == "on"
         
         db.session.commit()
         return redirect(url_for('gebruikers'))  # Terug naar de gebruikerslijst
 
-    return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices)
+    return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices, def_actief=gebruiker.actief)
 
 @app.route('/verwijder_gebruiker/<int:gebruiker_id>', methods=['POST'])
 def verwijder_gebruiker(gebruiker_id):
