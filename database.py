@@ -154,7 +154,7 @@ def ensure_admin_account():
             session.commit()
             print(f"Admin account created:\nEmail: {admin_email}\nPassword: {admin_password}")
         else:
-            print(f"Admin account already exists:\nEmail: {admin_email}")
+            print(f"Admin account already exists:\nEmail: {admin_email}\nPassword: {admin.paswoord}")
 
 # Call the function to ensure the admin account is created
 ensure_admin_account()
