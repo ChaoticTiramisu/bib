@@ -20,36 +20,110 @@
 <body>
     <!-- Header -->
     <header class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
-        <div class="container">
-            <a href="{{ url_for('index') }}" class="navbar-brand">
-                <img src="/static/afbeeldingen/logo.svg" alt="Logo" height="40">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+    <div class="container-fluid">
+        <a href="{{ url_for('index') }}" class="navbar-brand">
+            <img src="/static/afbeeldingen/logo.svg" alt="Logo" height="40">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item me-2">
+                    <a href="{{ url_for('boeken') }}" class="btn btn-primary text-white">
+                        <i class="fas fa-book"></i> Bibliotheek
+                    </a>
+                </li>
+                {% if rol %}
                     <li class="nav-item me-2">
-                        <a href="{{ url_for('boeken') }}" class="btn btn-primary text-white">Bibliotheek</a>
+                        <a href="{{ url_for('admin') }}" class="btn btn-secondary text-white">
+                            <i class="fas fa-user-shield"></i> Admin
+                        </a>
                     </li>
-                    {% if rol %}
-                        <li class="nav-item me-2">
-                            <a href="{{ url_for('admin') }}" class="btn btn-secondary text-white">Admin</a>
-                        </li>
-                    {% endif %}
-                    {% if email %}
-                        <li class="nav-item me-2">
-                            <a href="{{ url_for('logout') }}" class="btn btn-danger text-white">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('login') }}" class="btn btn-success text-white">Login</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
+                {% endif %}
+                {% if email %}
+                    <li class="nav-item me-2">
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger text-white">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('login') }}" class="btn btn-success text-white">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </li>
+                {% endif %}
+                <!-- Dark Mode Toggle Button -->
+                <li class="nav-item ms-2">
+                    <button id="darkModeToggle" class="btn btn-outline-dark">Dark Mode</button>
+                </li>
+            </ul>
         </div>
-    </header>
+    </div>
+</header>
+
+<script>
+    // Dark Mode Toggle Script
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    // Check for saved dark mode preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+        body.classList.add('dark-mode');
+        darkModeToggle.textContent = 'Light Mode';
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+        if (body.classList.contains('dark-mode')) {
+            body.classList.remove('dark-mode');
+            darkModeToggle.textContent = 'Dark Mode';
+            localStorage.setItem('darkMode', 'disabled');
+        } else {
+            body.classList.add('dark-mode');
+            darkModeToggle.textContent = 'Light Mode';
+            localStorage.setItem('darkMode', 'enabled');
+        }
+    });
+</script>
+
+<style>
+    /* Dark Mode Styles */
+    body.dark-mode {
+        background-color: #121212;
+        color: #ffffff;
+    }
+
+    body.dark-mode .navbar {
+        background-color: #1f1f1f;
+    }
+
+    body.dark-mode .btn {
+        border-color: #ffffff;
+        color: #ffffff;
+    }
+
+    body.dark-mode .btn-primary {
+        background-color: #3a3a3a;
+        border-color: #3a3a3a;
+    }
+
+    body.dark-mode .btn-secondary {
+        background-color: #3a3a3a;
+        border-color: #3a3a3a;
+    }
+
+    body.dark-mode .btn-danger {
+        background-color: #b00020;
+        border-color: #b00020;
+    }
+
+    body.dark-mode .btn-success {
+        background-color: #388e3c;
+        border-color: #388e3c;
+    }
+</style>
+
     <div id="flash-messages" class="container mt-3">
         <!-- Render Flash Messages on Full Page Load -->
         {% with messages = get_flashed_messages(with_categories=true) %}
