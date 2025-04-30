@@ -1,8 +1,10 @@
+from flask import app
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime, Index
 from datetime import datetime
 from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 from werkzeug.security import generate_password_hash
+import click
 
 # Initialize the database engine
 engine = create_engine("sqlite:///instance/bib.db", echo=True)
@@ -130,11 +132,11 @@ class Auteur(Base):
         return f"<Auteur(id={self.id}, naam={self.naam})>"
 
 # Create all tables
-with engine.begin() as connection:
-    Base.metadata.create_all(bind=connection)
 
+
+@app.cli.command("create-admin")
 # Ensure admin account exists
-def ensure_admin_account():
+def admin_account():
     admin_email = "admin@example.com"
     admin_password = "admin123"  # Default password
     with Session(engine) as session:
@@ -157,4 +159,4 @@ def ensure_admin_account():
             print(f"Admin account already exists:\nEmail: {admin_email}\nPassword: {admin.paswoord}")
 
 # Call the function to ensure the admin account is created
-ensure_admin_account()
+
