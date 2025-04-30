@@ -30,28 +30,20 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item me-2">
-                    <a href="{{ url_for('boeken') }}" class="btn btn-primary text-white">
-                        <i class="fas fa-book"></i> Bibliotheek
-                    </a>
+                    <a href="{{ url_for('boeken') }}" class="btn btn-primary text-white">Bibliotheek</a>
                 </li>
                 {% if rol %}
                     <li class="nav-item me-2">
-                        <a href="{{ url_for('admin') }}" class="btn btn-secondary text-white">
-                            <i class="fas fa-user-shield"></i> Admin
-                        </a>
+                        <a href="{{ url_for('admin') }}" class="btn btn-secondary text-white">Admin</a>
                     </li>
                 {% endif %}
                 {% if email %}
                     <li class="nav-item me-2">
-                        <a href="{{ url_for('logout') }}" class="btn btn-danger text-white">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger text-white">Logout</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a href="{{ url_for('login') }}" class="btn btn-success text-white">
-                            <i class="fas fa-sign-in-alt"></i> Login
-                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-success text-white">Login</a>
                     </li>
                 {% endif %}
                 <!-- Dark Mode Toggle Button -->
@@ -187,6 +179,62 @@
 
 <!-- Swiper.js JavaScript -->
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<footer class="bg-dark text-white py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Logo and Description -->
+            <div class="col-md-3 mb-4">
+                <img src="/static/afbeeldingen/logo.svg" alt="Logo" height="50" class="mb-3">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Incidunt consequatur amet culpa cum itaque neque.</p>
+            </div>
+
+            <!-- About Us -->
+            <div class="col-md-2 mb-4">
+                <h5 class="text-uppercase">Over Ons</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white text-decoration-none">Geschiedenis</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">Ons Team</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">Vacatures</a></li>
+                </ul>
+            </div>
+
+            <!-- Services -->
+            <div class="col-md-2 mb-4">
+                <h5 class="text-uppercase">Onze Diensten</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white text-decoration-none">Webontwikkeling</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">Webdesign</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">Marketing</a></li>
+                </ul>
+            </div>
+
+            <!-- Helpful Links -->
+            <div class="col-md-2 mb-4">
+                <h5 class="text-uppercase">Handige Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white text-decoration-none">FAQ</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">Support</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">Live Chat</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Us -->
+            <div class="col-md-3 mb-4">
+                <h5 class="text-uppercase">Contacteer Ons</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-envelope"></i> <a href="mailto:info@glorieuxsecundair.be" class="text-white text-decoration-none">info@glorieuxsecundair.be</a></li>
+                    <li><i class="fas fa-phone"></i> 055 123 456</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Glorieuxstraat 1, 9700 Oudenaarde</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="mb-0">&copy; 2025 Glorieux Secundair. Alle rechten voorbehouden. <a href="#" class="text-white text-decoration-none">Privacybeleid</a> | <a href="#" class="text-white text-decoration-none">Algemene Voorwaarden</a></p>
+        </div>
+    </div>
+</footer>
 </body>
 </html>
 
