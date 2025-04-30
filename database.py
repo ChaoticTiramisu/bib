@@ -43,6 +43,7 @@ class Gebruiker(Base):
     paswoord = mapped_column(String, nullable=False)
     geboortedtm = mapped_column(Date, nullable=True)
     tel_nr = mapped_column(String, nullable=True)
+    actief = mapped_column(Boolean, default=True)
     rol_list = [
         ('admin', 'Admin'),
         ('bibliothecaris', 'Bibliothecaris'),
@@ -66,6 +67,8 @@ class Boek(Base):
     beschrijving = mapped_column(String, nullable=False)
     bvdm = mapped_column(Boolean, nullable=True)
     toegevoegd_op = mapped_column(DateTime, default=datetime.utcnow)
+    aantal = mapped_column(Integer, nullable=False, default=1)
+    aantal_bladzijden = mapped_column(Integer, nullable=True)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken', lazy="select")
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken', lazy="select")
