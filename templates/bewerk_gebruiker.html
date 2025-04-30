@@ -36,6 +36,13 @@
                             </select>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="actief" class="form-label">Blokkeren</label> <br>
+                            <input type="checkbox" id="actief" name="actief" class="form-check-input"
+                                {% if def_actief %} checked {% endif %}>
+                            <label for="actief" class="form-check-label">Actief?</label>
+                        </div>
+
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-success">Opslaan</button>
                             <a href="{{ url_for('gebruikers') }}" class="btn btn-secondary">Annuleren</a>

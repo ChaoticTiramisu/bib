@@ -42,8 +42,6 @@ class Gebruiker(Base):
     achternaam = mapped_column(String, nullable=False)
     email = mapped_column(String, nullable=False, unique=True, index=True)
     paswoord = mapped_column(String, nullable=False)
-    geboortedtm = mapped_column(Date, nullable=True)
-    tel_nr = mapped_column(String, nullable=True)
     actief = mapped_column(Boolean, default=True)
     rol_list = [
         ('admin', 'Admin'),
