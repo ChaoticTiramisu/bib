@@ -35,7 +35,7 @@ app.config['UPLOAD_FOLDER'] = 'static/upload'
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 # hier worden alle tabellen aangemaakt
 
 # definitie om te checken als een bepaalde waarde in een tabel zit in een bepaalde kolom
