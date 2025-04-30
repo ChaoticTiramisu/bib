@@ -134,7 +134,7 @@ class Auteur(Base):
 # Create all tables
 
 
-@app.cli.command("create-admin")
+@click.command("create-admin")
 # Ensure admin account exists
 def admin_account():
     admin_email = "admin@example.com"
