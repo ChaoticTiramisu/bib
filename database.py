@@ -1,7 +1,8 @@
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime, Index
 from datetime import datetime
-from sqlalchemy.orm import relationship, declarative_base, mapped_column
+from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
+from werkzeug.security import generate_password_hash
 
 # Initialize the database engine
 engine = create_engine("sqlite:///instance/bib.db", echo=True)
@@ -133,3 +134,29 @@ class Auteur(Base):
 # Create all tables
 with engine.begin() as connection:
     Base.metadata.create_all(bind=connection)
+
+# Ensure admin account exists
+def ensure_admin_account():
+    admin_email = "admin@example.com"
+    admin_password = "admin123"  # Default password
+    with Session(engine) as session:
+        # Check if an admin account already exists
+        admin = session.query(Gebruiker).filter_by(email=admin_email).first()
+        if not admin:
+            # Create the admin account
+            admin = Gebruiker(
+                naam="Admin",
+                achternaam="User",
+                email=admin_email,
+                paswoord=admin_password,  # Securely hash the password
+                rol="admin",
+                actief=True
+            )
+            session.add(admin)
+            session.commit()
+            print(f"Admin account created:\nEmail: {admin_email}\nPassword: {admin_password}")
+        else:
+            print(f"Admin account already exists:\nEmail: {admin_email}")
+
+# Call the function to ensure the admin account is created
+ensure_admin_account()
