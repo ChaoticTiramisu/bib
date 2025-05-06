@@ -1,16 +1,16 @@
 from flask import app
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime, Index
-from datetime import datetime
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime
 from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 import click
 
 # Initialize the database engine
 engine = create_engine("sqlite:///instance/bib.db", echo=True)
 
 # Create the database if it doesn't exist
-if not database_exists("sqlite:///instance/bib.db"):
+if not database_exists(engine.url):
     create_database(engine.url)
 
 # Base class for all models
@@ -132,23 +132,20 @@ class Auteur(Base):
         return f"<Auteur(id={self.id}, naam={self.naam})>"
 
 # Create all tables
-
+Base.metadata.create_all(engine)
 
 @click.command("create-admin")
-# Ensure admin account exists
 def admin_account():
     admin_email = "admin@example.com"
     admin_password = "admin123"  # Default password
     with Session(engine) as session:
-        # Check if an admin account already exists
         admin = session.query(Gebruiker).filter_by(email=admin_email).first()
         if not admin:
-            # Create the admin account
             admin = Gebruiker(
                 naam="Admin",
                 achternaam="User",
                 email=admin_email,
-                paswoord=admin_password,  # Securely hash the password
+                paswoord=generate_password_hash(admin_password, method="sha256"),
                 rol="admin",
                 actief=True
             )
@@ -156,7 +153,8 @@ def admin_account():
             session.commit()
             print(f"Admin account created:\nEmail: {admin_email}\nPassword: {admin_password}")
         else:
-            print(f"Admin account already exists:\nEmail: {admin_email}\nPassword: {admin.paswoord}")
+            print(f"Admin account already exists:\nEmail: {admin_email}")
 
-# Call the function to ensure the admin account is created
+# Ensure the admin account is created
+admin_account()
 
