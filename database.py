@@ -155,5 +155,8 @@ def admin_account():
             print(f"Admin account already exists:\nEmail: {admin_email}")
 
 # Ensure the admin account is created
-admin_account()
+
+
+if __name__ == "__main__":
+    admin_account()
 
