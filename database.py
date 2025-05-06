@@ -2,7 +2,6 @@ from flask import app
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime
 from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
-from werkzeug.security import generate_password_hash
 from datetime import datetime
 import click
 
@@ -145,7 +144,7 @@ def admin_account():
                 naam="Admin",
                 achternaam="User",
                 email=admin_email,
-                paswoord=generate_password_hash(admin_password, method="sha256"),
+                paswoord=admin_password,  # Store password in plain text
                 rol="admin",
                 actief=True
             )
