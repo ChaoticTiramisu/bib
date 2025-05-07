@@ -43,5 +43,18 @@
       </div>
     </div>
   </div>
+
+  <div class="row justify-content-center mt-4">
+    <!-- Verlopen Reservaties -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h5 class="card-title">Reservaties</h5>
+          <p class="card-text text-muted">Bekijk en beheer verlopen reservaties.</p>
+          <a href="{{ url_for('overdue_reservations') }}" class="btn btn-warning w-100">Bekijk Verlopen Reservaties</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock body %}
