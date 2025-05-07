@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Overdue Reservations{% endblock title %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Overdue Reservations</h1>
+
+    <!-- Search Bar -->
+    <form method="GET" action="{{ url_for('overdue_reservations') }}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Zoek op naam of e-mailadres..." value="{{ request.args.get('q', '') }}">
+            <button type="submit" class="btn btn-primary">Zoek</button>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title">Gebruikers met Verlopen Reservaties</h3>
+            {% if overdue_reservations %}
+            <ul class="list-group">
+                {% for reservatie in overdue_reservations %}
+                <li class="list-group-item">
+                    <strong>Gebruiker:</strong> {{ reservatie.gebruiker.naam }} {{ reservatie.gebruiker.achternaam }}<br>
+                    <strong>Email:</strong> {{ reservatie.gebruiker.email }}<br>
+                    <strong>Boek:</strong> {{ reservatie.boek.titel }}<br>
+                    <strong>ISBN:</strong> {{ reservatie.boek.ISBN }}<br>
+                    <strong>Startdatum:</strong> {{ reservatie.start_date }}<br>
+                    <strong>Einddatum:</strong> {{ reservatie.end_date }}<br>
+                    <form action="{{ url_for('verwijder_reservatie', reservatie_id=reservatie.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm mt-2" onclick="return confirm('Weet je zeker dat je deze reservatie wilt verwijderen?')">Verwijder</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">Geen verlopen reservaties gevonden.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
