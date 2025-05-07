@@ -14,14 +14,19 @@
       <div class="box">
         <h2 class="text-center fw-bold">Boek van de maand!</h2>
         {% if bvdm == 1 %}
-        <div class="swiper mySwiper mt-4">
+        <div class="swiper mySwiper mt-4 position-relative">
           <div class="swiper-wrapper">
             <div class="swiper-slide">
               <a href="{{ url_for('boek', ISBN=isbn) }}">
-                <img src="../static/upload/{{ isbn }}.png" class="d-block mx-auto img-fluid" alt="Boek van de maand">
+                <div class="card shadow-sm p-3" style="background-color: #f8f9fa;">
+                  <img src="../static/upload/{{ isbn }}.png" class="d-block mx-auto img-fluid" alt="Boek van de maand" style="height: 300px; object-fit: cover;">
+                </div>
               </a>
             </div>
           </div>
+          <!-- Navigation Buttons -->
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
         </div>
         {% else %}
         <p class="text-center text-muted">Geen boek van de maand gevonden</p>
@@ -33,12 +38,14 @@
     <div class="form">
       <div class="box">
         <h2 class="text-center fw-bold">Nieuwe boeken</h2>
-        <div class="swiper mySwiper mt-4">
+        <div class="swiper mySwiper mt-4 position-relative">
           <div class="swiper-wrapper">
             {% for boek in boeken %}
             <div class="swiper-slide">
               <a href="{{ url_for('boek', ISBN=boek.ISBN) }}">
-                <img src="{{ url_for('static', filename='upload/' ~ boek.ISBN ~ '.png') }}" class="d-block mx-auto img-fluid" alt="{{ boek.titel }}">
+                <div class="card shadow-sm p-3" style="background-color: #f8f9fa;">
+                  <img src="{{ url_for('static', filename='upload/' ~ boek.ISBN ~ '.png') }}" class="d-block mx-auto img-fluid" alt="{{ boek.titel }}" style="height: 300px; object-fit: cover;">
+                </div>
               </a>
               <div class="text-center mt-2">
                 <h5>{{ boek.titel }}</h5>
@@ -56,8 +63,6 @@
     </div>
   </center>
 </div>
-
-
 
 <!-- Swiper.js -->
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
@@ -84,6 +89,14 @@
         1024: {
           slidesPerView: 3,
           spaceBetween: 30,
+        },
+      },
+      on: {
+        init: function () {
+          // Disable navigation if only one slide
+          if (this.slides.length <= 1) {
+            this.navigation.disable();
+          }
         },
       },
     });
