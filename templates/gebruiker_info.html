@@ -27,7 +27,10 @@
                     <strong>Titel:</strong> {{ reservering.boek.titel }}<br>
                     <strong>ISBN:</strong> {{ reservering.boek.ISBN }}<br>
                     <strong>Startdatum:</strong> {{ reservering.start_date }}<br>
-                    <strong>Einddatum:</strong> {{ reservering.end_date }}
+                    <strong>Einddatum:</strong> {{ reservering.end_date }}<br>
+                    <form action="{{ url_for('verwijder_reservatie', reservatie_id=reservering.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm mt-2" onclick="return confirm('Weet je zeker dat je deze reservatie wilt verwijderen?')">Verwijder</button>
+                    </form>
                 </li>
                 {% endfor %}
             </ul>
