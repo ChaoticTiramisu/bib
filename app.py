@@ -336,10 +336,10 @@ def add():
             db.session.commit()
             
             flash(f"Boek '{titel}' succesvol toegevoegd.", "success")
-            return "Boek succesvol toegevoegd."
+            return redirect(url_for("adminworkspace"))
         else:
             flash(f"Boek met ISBN '{ISBN_nr}' zit al in de database.", "error")
-            return "Deze ISBN is al eens gebruikt.", 400
+            return redirect(url_for("adminworkspace"))
     else:
         flash("Onbekende fout opgetreden.", "error")
         abort(404)
@@ -505,12 +505,7 @@ def boek(ISBN):
 
     return render_template('boek.html', boek=boek, reserved_dates=reserved_dates)
 
-@app.route('/boek/<int:ISBN>/calendar')
-def book_calendar(ISBN):
-    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
-    reservations = db.session.query(Reservatie).filter_by(boek_isbn=boek.ISBN).all()
-    reserved_dates = [r.start_date.isoformat() for r in reservations]
-    return render_template('partials/calendar.html', reserved_dates=reserved_dates)
+
 
 @app.route('/boek/<int:ISBN>/reserveer', methods=['GET', 'POST'])
 def reserveer_boek(ISBN):
@@ -537,6 +532,11 @@ def reserveer_boek(ISBN):
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
             except ValueError:
                 flash("Ongeldige datumindeling. Gebruik het formaat JJJJ-MM-DD.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+            # Check if the reservation exceeds 3 months
+            if (end_date - start_date).days > 90:
+                flash("Een reservering kan niet langer dan 3 maanden duren.", "error")
                 return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
             # Check for overlapping reservations
@@ -664,6 +664,62 @@ def gebruiker_info(gebruiker_id):
     reserveringen = db.session.query(Reservatie).filter_by(gebruiker_id=gebruiker_id).all()
 
     return render_template('gebruiker_info.html', gebruiker=gebruiker, reserveringen=reserveringen)
+
+@app.route('/verwijder_reservatie/<int:reservatie_id>', methods=['POST'])
+def verwijder_reservatie(reservatie_id):
+    if 'email' not in session:
+        return redirect(url_for("login"))
+
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    if not gebruiker or gebruiker.rol not in ["bibliothecaris", "admin"]:
+        flash("Je hebt geen toegang tot deze actie.", "error")
+        return redirect(url_for("index"))
+
+    # Fetch the reservation
+    reservatie = db.session.query(Reservatie).get(reservatie_id)
+    if not reservatie:
+        flash("Reservatie niet gevonden.", "error")
+        return redirect(url_for('gebruikers'))
+
+    try:
+        # Delete the reservation
+        db.session.delete(reservatie)
+        db.session.commit()
+        flash("Reservatie succesvol verwijderd.", "success")
+    except Exception as e:
+        flash(f"Er is een fout opgetreden bij het verwijderen van de reservatie: {str(e)}", "error")
+
+    return redirect(url_for('gebruikers'))
+
+@app.route('/admin/overdue', methods=['GET'])
+def overdue_reservations():
+    if 'email' not in session:
+        return redirect(url_for("login"))
+
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    if not gebruiker or gebruiker.rol not in ["bibliothecaris", "admin"]:
+        flash("Je hebt geen toegang tot deze pagina.", "error")
+        return redirect(url_for("index"))
+
+    # Fetch all overdue reservations
+    today = datetime.today().date()
+    query = request.args.get('q', '').strip()
+
+    if query:
+        # Filter overdue reservations by user name or email
+        overdue_reservations = db.session.query(Reservatie).join(Gebruiker).filter(
+            Reservatie.end_date < today,
+            or_(
+                Gebruiker.naam.ilike(f"%{query}%"),
+                Gebruiker.achternaam.ilike(f"%{query}%"),
+                Gebruiker.email.ilike(f"%{query}%")
+            )
+        ).all()
+    else:
+        # Fetch all overdue reservations if no query is provided
+        overdue_reservations = db.session.query(Reservatie).filter(Reservatie.end_date < today).all()
+
+    return render_template('overdue_reservations.html', overdue_reservations=overdue_reservations)
 
 if __name__ == "__main__":
     with app.app_context():
