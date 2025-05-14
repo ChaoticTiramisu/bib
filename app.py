@@ -474,9 +474,9 @@ def change(ISBN):
             boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
             return render_template(
                 "boek_edit.html",
+                boek=boek,  # Pass the boek object to the template
                 def_ISBN=boek.ISBN,
                 def_titel=boek.titel,
-                # de boeken in variable steken indien nodig opnieuw for lus
                 def_genres=[genre.naam for genre in boek.genres],
                 def_themas=[thema.naam for thema in boek.themas],
                 def_auteurs=[auteur.naam for auteur in boek.auteurs],
