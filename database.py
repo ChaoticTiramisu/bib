@@ -67,7 +67,8 @@ class Boek(Base):
     beschrijving = mapped_column(String, nullable=False)
     bvdm = mapped_column(Boolean, nullable=True)
     toegevoegd_op = mapped_column(DateTime, default=datetime.utcnow)
-    aantal = mapped_column(Integer, nullable=False, default=1)
+    aantal = mapped_column(Integer, nullable=False, default=1)  # Total copies
+    beschikbaar_aantal = mapped_column(Integer, nullable=False, default=1)  # Available copies
     aantal_bladzijden = mapped_column(Integer, nullable=True)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken', lazy="select")

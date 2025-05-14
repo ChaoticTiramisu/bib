@@ -42,6 +42,9 @@
                             {{ auteur.naam }}{% if not loop.last %}, {% endif %}
                         {% endfor %}
                     </p>
+                    <p class="card-text text-center text-muted">
+                        Beschikbare exemplaren: {{ boek.beschikbaar_aantal }}
+                    </p>
                     <div class="mt-auto">
                         <button class="btn btn-primary btn-sm w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#details{{ boek.ISBN }}" aria-expanded="false" aria-controls="details{{ boek.ISBN }}">
                             Meer Info

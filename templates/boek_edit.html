@@ -94,6 +94,12 @@
                             <label for="bvdm" class="form-check-label">Boek van de maand</label>
                         </div>
 
+                        <!-- Beschikbare exemplaren -->
+                        <div class="mb-3">
+                            <label for="beschikbaar_aantal" class="form-label">Beschikbare exemplaren</label>
+                            <input type="number" name="beschikbaar_aantal" class="form-control" value="{{ boek.beschikbaar_aantal }}" required>
+                        </div>
+
                         <!-- Submit Button -->
                         <button type="submit" class="btn btn-primary w-100">Wijzigingen Opslaan</button>
                     </form>

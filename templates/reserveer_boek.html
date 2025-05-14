@@ -5,6 +5,7 @@
 {% block body %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Reserveer Boek: {{ boek.titel }}</h1>
+    <h3 class="text-center">Beschikbare exemplaren: {{ boek.beschikbaar_aantal }}</h3>
     <form method="POST" class="mb-4">
         <div class="mb-3">
             <label for="start_date" class="form-label">Startdatum</label>

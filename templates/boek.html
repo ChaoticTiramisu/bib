@@ -35,6 +35,7 @@
                     </p>
                     <p class="card-text"><strong>ISBN:</strong> {{ boek.ISBN }}</p>
                     <p class="card-text"><strong>Beschrijving:</strong> {{ boek.beschrijving }}</p>
+                    <p class="card-text"><strong>Beschikbare exemplaren:</strong> {{ boek.beschikbaar_aantal }}</p>
                     <!-- Reserve Button -->
                     <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-primary btn-block mt-3">
                         Reserveer dit boek

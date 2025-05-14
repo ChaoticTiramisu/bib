@@ -721,6 +721,14 @@ def overdue_reservations():
 
     return render_template('overdue_reservations.html', overdue_reservations=overdue_reservations)
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    """
+    Ensures that the database session is properly closed after each request.
+    This prevents issues like stale connections or locked tables.
+    """
+    db.session.remove()
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
