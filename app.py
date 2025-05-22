@@ -388,7 +388,6 @@ def delete(table):
 # het effectief verwijderen van een boek 
 @app.route("/adminworkspace/tools/delete/<string:table>/<int:voorwerp_id>", methods=["POST","GET"])
 def delete_voorwerp(table, voorwerp_id):
-        
         if table not in ["boek", "genre", "auteur", "thema"]:
             abort(404)  
  
@@ -396,20 +395,33 @@ def delete_voorwerp(table, voorwerp_id):
             abort(400)  
     
         if table == "boek":
-            # als je een boek wilt verwijderen gaat hij zoeken op basis van tabel en ISBN, 
-            instance = db.session.query(globals()[table.capitalize()]).filter_by(ISBN = voorwerp_id).first()
+            # Check if the book has any reservations
+            instance = db.session.query(Boek).filter_by(ISBN=voorwerp_id).first()
+            if instance is None:
+                abort(404)
+                
+            # Check for active reservations
+            if instance.reservaties:
+                # Delete all reservations first
+                for reservatie in instance.reservaties:
+                    db.session.delete(reservatie)
+                db.session.commit()  # Commit the reservation deletions first
             
+            # Now delete the book
+            db.session.delete(instance)
         else:
-            instance = db.session.query(globals()[table.capitalize()]).filter_by(id = voorwerp_id).first()
-        print("test1")
-        if instance is None:
-            abort(404)  
-        print("test")
-        # het daadwerkelijk verwijderen van voorwerp en het opslaan van de database nadien
-        db.session.delete(instance)
-        db.session.commit()
-# weergeven van boek of auteur of genre of thema, en als de table een boek is dan geeft hij ISBN weer en als het niet zo is enkel het ID
-        flash(f"{table.capitalize()} with {'ISBN' if table == 'ISBN' else 'id'}  {voorwerp_id} succesvol verwijderd")
+            instance = db.session.query(globals()[table.capitalize()]).filter_by(id=voorwerp_id).first()
+            if instance is None:
+                abort(404)
+            db.session.delete(instance)
+
+        try:
+            db.session.commit()
+            flash(f"{table.capitalize()} with {'ISBN' if table == 'boek' else 'id'} {voorwerp_id} succesvol verwijderd", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Er is een fout opgetreden bij het verwijderen: {str(e)}", "error")
+            
         return redirect(url_for("delpage")) 
 
 # verandernde van boekn
@@ -424,6 +436,7 @@ def change(ISBN):
                     boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
                     new_ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
+                    aantal_exemplaren = request.form["aantal_exemplaren"]
                     status = request.form.get("status") == "Aanwezig"
                     bvdm = request.form.get("bvdm") == "Ja"
                     genre_names = request.form.getlist("genres")
@@ -449,6 +462,7 @@ def change(ISBN):
                     themas = [db.session.query(Thema).filter_by(naam=name).first() for name in thema_names]
                     auteurs = [db.session.query(Auteur).filter_by(naam=name).first() for name in auteur_names]
                     # nieuwe waardes toekennen om waardes aan te passen
+                    boek.beschikbaar_aantal = aantal_exemplaren
                     boek.ISBN = new_ISBN
                     boek.titel = titel
                     boek.genres = genres
