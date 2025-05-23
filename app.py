@@ -424,7 +424,7 @@ def delete_voorwerp(table, voorwerp_id):
             
         return redirect(url_for("delpage")) 
 
-# verandernde van boekn
+# verandernde van boeken
 @app.route("/adminworkspace/tools/change/<int:ISBN>", methods=["POST", "GET"])
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
