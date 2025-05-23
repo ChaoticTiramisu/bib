@@ -436,7 +436,7 @@ def change(ISBN):
                     boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
                     new_ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
-                    aantal_exemplaren = request.form["aantal_exemplaren"]
+                    aantal_exemplaren = request.form["beschikbaar_aantal"]
                     status = request.form.get("status") == "Aanwezig"
                     bvdm = request.form.get("bvdm") == "Ja"
                     genre_names = request.form.getlist("genres")
