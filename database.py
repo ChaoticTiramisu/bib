@@ -3,6 +3,7 @@ from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
 from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 from datetime import datetime
+import sys
 import click
 
 # Initialize the database engine
@@ -134,10 +135,14 @@ class Auteur(Base):
 # Create all tables
 Base.metadata.create_all(engine)
 
-@click.command("create-admin")
-def admin_account():
+@click.group()
+def cli():
+    pass
+
+@cli.command("create-admin")
+def create_admin():
     admin_email = "admin@example.com"
-    admin_password = "admin123"  # Default password
+    admin_password = "admin123"
     with Session(engine) as session:
         admin = session.query(Gebruiker).filter_by(email=admin_email).first()
         if not admin:
@@ -145,7 +150,7 @@ def admin_account():
                 naam="Admin",
                 achternaam="User",
                 email=admin_email,
-                paswoord=admin_password,  # Store password in plain text
+                paswoord=admin_password,
                 rol="admin",
                 actief=True
             )
@@ -155,9 +160,6 @@ def admin_account():
         else:
             print(f"Admin account already exists:\nEmail: {admin_email}")
 
-# Ensure the admin account is created
-
-
 if __name__ == "__main__":
-    admin_account()
+    cli()
 
