@@ -4,3 +4,5 @@
 *.pyc
 /static/upload
 /migrations
+gunicorn.pid
+backups/
