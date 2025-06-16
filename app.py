@@ -92,7 +92,7 @@ def index():
         user = db.session.query(Gebruiker).filter_by(email=email).first()
         if user is None:
             return redirect(url_for("login"))
-        if db.session.query(Boek).filter_by(bvdm=True).first():
+        if db.session.query(Boek).filter_by(bvdm=True).limit(3).all():
             boek = db.session.query(Boek).filter_by(bvdm=True).first()
             bvdm = boek.bvdm
             isbn = boek.ISBN
