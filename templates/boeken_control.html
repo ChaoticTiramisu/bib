@@ -21,18 +21,25 @@
               <label for="file" class="form-label">Boek Cover</label>
               <input type="file" name="file" class="form-control" required>
             </div>
+
             <div class="mb-3">
               <label for="ISBN" class="form-label">ISBN</label>
-              <input type="number" name="ISBN" class="form-control" placeholder="ISBN" required>
+              <input type="number" name="ISBN" class="form-control" id ="ISBN" placeholder="ISBN (13 cijfers)" required oninput="validateISBN()">
+              <div id="isbnFeedback" class="form-text" style="display: none;"></div>
             </div>
+
             <div class="mb-3">
               <label for="titel" class="form-label">Titel</label>
-              <input type="text" name="titel" class="form-control" placeholder="Titel" required>
+              <input type="text" name="titel" id="titel" class="form-control" placeholder="Titel" required oninput="validateTitel()">
+              <div id="titelFeedback" class="form-text" style="display: none;"></div>
             </div>
+
             <div class="mb-3">
               <label for="beschrijving" class="form-label">Beschrijving</label>
-              <textarea name="beschrijving" class="form-control" rows="3" placeholder="Beschrijving" required></textarea>
+              <textarea name="beschrijving" id="beschrijving" class="form-control" rows="3" placeholder="Beschrijving" required oninput="validateBeschrijving()"></textarea>
+              <div id="beschrijvingFeedback" class="form-text" style="display: none;"></div>
             </div>
+
             <div class="mb-3">
               <label for="aantal" class="form-label">Aantal Exemplaren</label>
               <input type="number" name="aantal" class="form-control" placeholder="Aantal Exemplaren" value="1" min="1" required>
@@ -88,7 +95,78 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Boek Toevoegen</button>
+            <!-- CONTROLE OP ALLE INVULVELDEN-->
+            <script>
+              function validateISBN() {
+                const isbn = document.getElementById('ISBN').value;
+                const feedback = document.getElementById('isbnFeedback');
+                const submitButton = document.getElementById('submitButton');
+
+                if(isbn.length !== 13 || isbn.length == 0) {
+                  feedback.textContent = "ISBN moet 13 tekens zijn"
+                  feedback.style.display = 'block';
+                  feedback.classList.remove('text-success');
+                  feedback.classList.add('text-danger');
+                  submitButton.disabled = true;
+                } 
+                else {
+                  feedback.textContent = 'ISBN is correct.';
+                  feedback.style.display = 'block';
+                  feedback.classList.remove('text-danger');
+                   feedback.classList.add('text-success');
+                  submitButton.disabled = false;
+                }
+              }
+
+              function validateTitel() {
+                const titel = document.getElementById('titel').value;
+                const feedback = document.getElementById('titelFeedback')
+                const submitButton = document.getElementById('submitButton');
+
+                const maxlength = 60;
+                const hasSpecialChar = /[@#$%^*(),.":{}|<>]/.test(titel);
+
+
+                if(titel.length > maxlength || hasSpecialChar) {
+                  feedback.textContent = "Titel mag geen speciale tekens bevatten ( ! en ? worden wel toegelaten) en maximaal 60 tekens lang zijn."
+                  feedback.style.display = 'block';
+                  feedback.classList.remove('text-success');
+                  feedback.classList.add('text-danger');
+                  submitButton.disabled = true;
+                } 
+                else {
+                  feedback.textContent = 'titel is correct.';
+                  feedback.style.display = 'block';
+                  feedback.classList.remove('text-danger');
+                   feedback.classList.add('text-success');
+                  submitButton.disabled = false;
+                }
+              }
+              function validateBeschrijving() {
+                const beschrijving = document.getElementById('beschrijving').value;
+                const feedback = document.getElementById('beschrijvingFeedback');
+                const submitButton = document.getElementById('submitButton');
+
+                const maxlength = 300;
+                // Speciale tekens die niet zijn toegestaan (behalve ! en ?)
+                const hasForbiddenChar = /[@#$%^*{}|<>]/.test(beschrijving);
+
+                if (beschrijving.length === 0 || beschrijving.length > maxlength || hasForbiddenChar) {
+                  feedback.textContent = "Beschrijving mag geen speciale tekens bevatten en maximaal 300 tekens lang zijn.";
+                  feedback.style.display = 'block';
+                  feedback.classList.remove('text-success');
+                  feedback.classList.add('text-danger');
+                  submitButton.disabled = true;
+                } else {
+                  feedback.textContent = 'Beschrijving is correct.';
+                  feedback.style.display = 'block';
+                  feedback.classList.remove('text-danger');
+                  feedback.classList.add('text-success');
+                  submitButton.disabled = false;
+                }
+              }
+            </script>
+            <button id="submitButton" class="btn btn-primary w-100" disabled>Boek Toevoegen</button>
           </form>
         </div>
       </div>
@@ -100,36 +178,118 @@
         <div class="card-body">
           <h5 class="card-title">Nieuw Genre Toevoegen</h5>
           <!-- Add Genre Form -->
-<form hx-post="{{ url_for('add') }}" hx-target="#genreContainer" hx-swap="innerHTML">
-    <div class="mb-3">
-        <input type="text" name="genre" class="form-control" placeholder="Nieuw Genre" required>
-    </div>
-    <button type="submit" class="btn btn-success w-100">Toevoegen</button>
-</form>
+          <form hx-post="{{ url_for('add') }}" hx-target="#genreContainer" hx-swap="innerHTML">
+            <div class="mb-3">
+              <input type="text" id="genreInput" name="genre" class="form-control" placeholder="Nieuw Genre" required oninput="validateGenre()">
+              <div id="genreFeedback" class="form-text" style="display: none;"></div>
+            </div>
+            <button type="submit" class="btn btn-success w-100" id="genreSubmit">Toevoegen</button>
+          </form>
+
+          <script>
+            function validateGenre() {
+              const genre = document.getElementById('genreInput').value.trim();
+              const feedback = document.getElementById('genreFeedback');
+              const submitBtn = document.getElementById('genreSubmit');
+          
+              const isValid = /^[A-Za-zÀ-ÿ\s'-]{2,30}$/.test(genre); // alleen letters, spaties, accenten, - en '
+          
+              if (!isValid) {
+                feedback.textContent = "Genre moet 2–30 letters bevatten, zonder speciale tekens.";
+                feedback.style.display = 'block';
+                feedback.classList.add('text-danger');
+                feedback.classList.remove('text-success');
+                submitBtn.disabled = true;
+              } else {
+                feedback.textContent = "Genre is geldig.";
+                feedback.style.display = 'block';
+                feedback.classList.remove('text-danger');
+                feedback.classList.add('text-success');
+                submitBtn.disabled = false;
+              }
+            }
+          </script>
+          
+
+          
         </div>
       </div>
       <div class="card shadow-sm mb-4">
         <div class="card-body">
           <h5 class="card-title">Nieuw Thema Toevoegen</h5>
           <!-- Add Thema Form -->
-<form hx-post="{{ url_for('add') }}" hx-target="#themaContainer" hx-swap="innerHTML">
-    <div class="mb-3">
-        <input type="text" name="thema" class="form-control" placeholder="Nieuw Thema" required>
-    </div>
-    <button type="submit" class="btn btn-success w-100">Toevoegen</button>
-</form>
+          <form hx-post="{{ url_for('add') }}" hx-target="#themaContainer" hx-swap="innerHTML">
+            <div class="mb-3">
+              <input type="text" id="themaInput" name="thema" class="form-control" placeholder="Nieuw Thema" required oninput="validateThema()">
+              <div id="themaFeedback" class="form-text" style="display: none;"></div>
+            </div>
+            <button type="submit" class="btn btn-success w-100" id="themaSubmit">Toevoegen</button>
+          </form>
+
+          <script>
+            function validateThema() {
+              const thema = document.getElementById('themaInput').value.trim();
+              const feedback = document.getElementById('themaFeedback');
+              const submitBtn = document.getElementById('themaSubmit');
+          
+              const isValid = /^[A-Za-zÀ-ÿ\s'-]{2,30}$/.test(thema);
+          
+              if (!isValid) {
+                feedback.textContent = "Thema moet 2–30 letters bevatten, zonder speciale tekens.";
+                feedback.style.display = 'block';
+                feedback.classList.add('text-danger');
+                feedback.classList.remove('text-success');
+                submitBtn.disabled = true;
+              } else {
+                feedback.textContent = "Thema is geldig.";
+                feedback.style.display = 'block';
+                feedback.classList.remove('text-danger');
+                feedback.classList.add('text-success');
+                submitBtn.disabled = false;
+              }
+            }
+          </script>
+          
+          
         </div>
       </div>
       <div class="card shadow-sm">
         <div class="card-body">
           <h5 class="card-title">Nieuwe Auteur Toevoegen</h5>
           <!-- Add Auteur Form -->
-<form hx-post="{{ url_for('add') }}" hx-target="#auteurContainer" hx-swap="innerHTML">
-    <div class="mb-3">
-        <input type="text" name="auteur" class="form-control" placeholder="Nieuwe Auteur" required>
-    </div>
-    <button type="submit" class="btn btn-success w-100">Toevoegen</button>
-</form>
+          <form hx-post="{{ url_for('add') }}" hx-target="#auteurContainer" hx-swap="innerHTML">
+            <div class="mb-3">
+              <input type="text" id="auteurInput" name="auteur" class="form-control" placeholder="Nieuwe Auteur" required oninput="validateAuteur()">
+              <div id="auteurFeedback" class="form-text" style="display: none;"></div>
+            </div>
+            <button type="submit" class="btn btn-success w-100" id="auteurSubmit">Toevoegen</button>
+          </form>
+
+          <script>
+            function validateAuteur() {
+              const auteur = document.getElementById('auteurInput').value.trim();
+              const feedback = document.getElementById('auteurFeedback');
+              const submitBtn = document.getElementById('auteurSubmit');
+          
+              // Regex: letters (inclusief accenten), spaties, koppelteken, apostrof, max 50 tekens
+              const isValid = /^[A-Za-zÀ-ÿ\s'-]{2,50}$/.test(auteur);
+          
+              if (!isValid) {
+                feedback.textContent = "Auteur moet 2–50 letters bevatten. Geen cijfers of vreemde tekens.";
+                feedback.style.display = 'block';
+                feedback.classList.add('text-danger');
+                feedback.classList.remove('text-success');
+                submitBtn.disabled = true;
+              } else {
+                feedback.textContent = "Auteur is geldig.";
+                feedback.style.display = 'block';
+                feedback.classList.remove('text-danger');
+                feedback.classList.add('text-success');
+                submitBtn.disabled = false;
+              }
+            }
+          </script>
+          
         </div>
       </div>
     </div>
