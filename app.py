@@ -1,9 +1,14 @@
+import os
+
+# Ensure required folders exist
+os.makedirs(os.path.join(os.path.dirname(__file__), 'instance'), exist_ok=True)
+os.makedirs(os.path.join(os.path.dirname(__file__), 'static/upload'), exist_ok=True)
+
 # de nodige zaken importeren
 from flask import Flask, render_template, redirect, url_for, request, flash, session, abort, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, Column, Integer, String, ForeignKey, DateTime  # Add DateTime here
 from sqlalchemy.sql.expression import or_
-import os
 from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
@@ -31,7 +36,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'instance', 'bib.db')}"
 app.config['UPLOAD_FOLDER'] = 'static/upload'
 
-# de beveillingssleutel voor rededenen
+# de beveillingssleutel voor redenen
 app.secret_key = "Arno_augu_Cairo"
 # een variabel weer korter maken voor sneller gebruik
 db = SQLAlchemy(app)
