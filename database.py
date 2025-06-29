@@ -16,6 +16,8 @@ if not database_exists(engine.url):
 # Base class for all models
 Base = declarative_base()
 
+
+
 # Association tables for many-to-many relationships
 boek_thema_association = Table(
     'boek_thema_association', Base.metadata,
@@ -51,7 +53,7 @@ class Gebruiker(Base):
         ('ontlener', 'Ontlener')
     ]
     rol = mapped_column(ChoiceType(rol_list, impl=String()), nullable=False)
-
+    deleted = mapped_column(Boolean, default=False)
     reservaties = relationship("Reservatie", back_populates="gebruiker", lazy="select")
 
     def __repr__(self):
@@ -71,6 +73,7 @@ class Boek(Base):
     aantal = mapped_column(Integer, nullable=False, default=1)  # Total copies
     beschikbaar_aantal = mapped_column(Integer, nullable=False, default=1)  # Available copies
     aantal_bladzijden = mapped_column(Integer, nullable=True)
+    deleted = mapped_column(Boolean, default=False)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken', lazy="select")
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken', lazy="select")
@@ -89,6 +92,7 @@ class Reservatie(Base):
     gebruiker_id = mapped_column(Integer, ForeignKey("gebruikers.id"), nullable=False)
     start_date = mapped_column(Date, nullable=False)
     end_date = mapped_column(Date, nullable=False)
+    deleted = mapped_column(Boolean, default=False)
 
     boek = relationship("Boek", back_populates="reservaties", lazy="joined")
     gebruiker = relationship("Gebruiker", back_populates="reservaties", lazy="joined")
@@ -102,6 +106,7 @@ class Genre(Base):
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     naam = mapped_column(String, nullable=False, unique=True)
+    deleted = mapped_column(Boolean, default=False)
 
     boeken = relationship('Boek', secondary=boek_genre_association, back_populates='genres', lazy="select")
 
@@ -114,7 +119,7 @@ class Thema(Base):
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     naam = mapped_column(String, nullable=False, unique=True)
-
+    deleted = mapped_column(Boolean, default=False)
     boeken = relationship('Boek', secondary=boek_thema_association, back_populates='themas', lazy="select")
 
     def __repr__(self):
@@ -126,7 +131,7 @@ class Auteur(Base):
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     naam = mapped_column(String, nullable=False, unique=True)
-
+    deleted = mapped_column(Boolean, default=False)
     boeken = relationship('Boek', secondary=boek_auteur_association, back_populates='auteurs', lazy="select")
 
     def __repr__(self):

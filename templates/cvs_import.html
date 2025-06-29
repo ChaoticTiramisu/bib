@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Boek Beheer{% endblock title %}
+
+{% block body %}
+<div class="container mt-5">
+  <!-- Titel en Beschrijving -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold text-primary">Boek Beheer</h1>
+    <p class="text-muted fs-5">Voeg nieuwe boeken toe en beheer genres, thema's en auteurs.</p>
+  </div>
+
+  <div class="row">
+ 
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h3 class="card-title text-center">CVS importeren</h3>
+          <form action="{{ url_for('cvs_import') }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              
+              <input type="file" name="file" class="form-control" required>
+              <button id="submitButton" class="btn btn-primary w-100">cvs toevoegen</button>
+            </div>
+
+            
+
+            
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+<script>
+  function filterItems(inputId, containerId) {
+    const input = document.getElementById(inputId);
+    const filter = input.value.toLowerCase();
+    const container = document.getElementById(containerId);
+    const items = container.getElementsByClassName('form-check');
+
+    for (let i = 0; i < items.length; i++) {
+      const label = items[i].getElementsByTagName('label')[0];
+      if (label.innerText.toLowerCase().includes(filter)) {
+        items[i].style.display = '';
+      } else {
+        items[i].style.display = 'none';
+      }
+    }
+  }
+
+  document.getElementById('genreSearch').addEventListener('input', () => filterItems('genreSearch', 'genreContainer'));
+  document.getElementById('themaSearch').addEventListener('input', () => filterItems('themaSearch', 'themaContainer'));
+  document.getElementById('auteurSearch').addEventListener('input', () => filterItems('auteurSearch', 'auteurContainer'));
+</script>
+
+<!-- CSS for Scrollable Boxes -->
+<style>
+  .scrollable-box {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+</style>
+{% endblock body %}

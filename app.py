@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from sqlalchemy.orm import relationship, mapped_column
 from datetime import datetime, timedelta
+import pandas as pd
 
 from sqlalchemy_utils import ChoiceType
 from flask import jsonify, make_response
@@ -93,7 +94,7 @@ def index():
         if user is None:
             return redirect(url_for("login"))
         if db.session.query(Boek).filter_by(bvdm=True).limit(3).all():
-            boek = db.session.query(Boek).filter_by(bvdm=True).first()
+            boek = db.session.query(Boek).filter_by(bvdm=True,deleted = False).first()
             bvdm = boek.bvdm
             isbn = boek.ISBN
         else:
@@ -108,15 +109,15 @@ def login():
     if request.method == "POST":
         email = request.form["login_email"]
         password = request.form["login_paswoord"]
-        user = db.session.query(Gebruiker).filter_by(email=email).first()
-        
-        if user and user.paswoord == password:
-            session['gebruiker_id'] = user.id
-            session['email'] = user.email
-            flash("Login succesvol", "success")  # Add a category
-            return redirect(url_for("index"))
-        else:
-            flash("Paswoord incorrect of de gebruiker bestaat nog niet.", "error")  # Add a category
+        user = db.session.query(Gebruiker).filter_by(email=email,deleted = False).first()
+        if "@glorieuxsecundair.be" in email:
+            if user and user.paswoord == password:
+                session['gebruiker_id'] = user.id
+                session['email'] = user.email
+                flash("Login succesvol", "success")  
+                return redirect(url_for("index"))
+            else:
+                flash("Paswoord incorrect of de gebruiker bestaat nog niet.", "error")
             return redirect(url_for("login"))
     
     # Only flash this message if it's a GET request and not a redirect
@@ -184,7 +185,7 @@ def boeken():
         return redirect(url_for("login"))
     else:
         # functie die alle boeken weergeeft
-        boeken = db.session.query(Boek).all() # haalt alle boeken uit database en kent hen toe aan variabelle
+        boeken = db.session.query(Boek).filter_by(deleted = False).all() # haalt alle boeken uit database en kent hen toe aan variabelle
         # de gebruiker van de persoon zelf opzoeken, die momenteel is ingelod en geeft hem nadien mee in de render template
         user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
         return render_template("boeken.html", user = user)
@@ -209,7 +210,7 @@ def search():
         ).limit(20).all()
     else:
         # als er geen argumenten worden meegegeven, zal hij enkel de eerste 20 items van de database eruit halen
-        results = db.session.query(Boek).limit(20).all()
+        results = db.session.query(Boek).filter_by(deleted = False).limit(20).all()
         
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
     # geeft gebruiker en resultaten weer terug
@@ -225,9 +226,9 @@ def adminworkspace():
     gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
     if gebruiker and gebruiker.rol in ["bibliothecaris", "admin"]:
         # Haal alle genres, themas en auteurs uit de database
-        genres = db.session.query(Genre.naam).all()
-        themas = db.session.query(Thema.naam).all()
-        auteurs = db.session.query(Auteur.naam).all()
+        genres = db.session.query(Genre.naam).filter_by(deleted = False).all()
+        themas = db.session.query(Thema.naam).filter_by(deleted = False).all()
+        auteurs = db.session.query(Auteur.naam).filter_by(deleted = False).all()
         
         return render_template("boeken_control.html", genres=genres, themas=themas, auteurs=auteurs)
     else:
@@ -353,10 +354,10 @@ def add():
 @app.route("/delpage", methods=["GET"])
 def delpage():
     # Fetch all items from the database
-    boeken = db.session.query(Boek).all()
-    genres = db.session.query(Genre).all()
-    themas = db.session.query(Thema).all()
-    auteurs = db.session.query(Auteur).all()
+    boeken = db.session.query(Boek).filter_by(deleted = False).all()
+    genres = db.session.query(Genre).filter_by(deleted = False).all()
+    themas = db.session.query(Thema).filter_by(deleted = False).all()
+    auteurs = db.session.query(Auteur).filter_by(deleted = False).all()
 
     # Pass the items to the template
     return render_template("deletepage.html", boeken=boeken, genres=genres, themas=themas, auteurs=auteurs)
@@ -374,10 +375,10 @@ def searchdelete(table):
     if q:
         if table == "boek":
             # als je tabel gelijk is aan de boek, zal hij op boek zoeken aan de hand van de titel.
-            results = db.session.query(table_temp).filter(table_temp.titel.ilike(f"%{q}%")).all()
+            results = db.session.query(table_temp).filter(table_temp.titel.ilike(f"%{q}%"),deleted = False).all()
         else:
             # zoeken op de andere argumenten
-            results = db.session.query(table_temp).filter(table_temp.naam.ilike(f"%{q}%")).all()
+            results = db.session.query(table_temp).filter(table_temp.naam.ilike(f"%{q}%"),deleted = False).all()
     else:
         results = db.session.query(table_temp).all()
 
@@ -401,7 +402,7 @@ def delete_voorwerp(table, voorwerp_id):
     
         if table == "boek":
             # Check if the book has any reservations
-            instance = db.session.query(Boek).filter_by(ISBN=voorwerp_id).first()
+            instance = db.session.query(Boek).filter_by(ISBN=voorwerp_id,deleted = False).first()
             if instance is None:
                 abort(404)
                 
@@ -409,16 +410,16 @@ def delete_voorwerp(table, voorwerp_id):
             if instance.reservaties:
                 # Delete all reservations first
                 for reservatie in instance.reservaties:
-                    db.session.delete(reservatie)
+                    reservatie.deleted = True  
                 db.session.commit()  # Commit the reservation deletions first
             
             # Now delete the book
-            db.session.delete(instance)
+            instance.deleted = True  
         else:
             instance = db.session.query(globals()[table.capitalize()]).filter_by(id=voorwerp_id).first()
             if instance is None:
                 abort(404)
-            db.session.delete(instance)
+            instance.deleted = True 
 
         try:
             db.session.commit()
@@ -486,11 +487,11 @@ def change(ISBN):
                 flash("Er is een fout opgetreden.")
                 return redirect(url_for("index"))
         else:
-            genres = db.session.query(Genre.naam).all()
-            themas = db.session.query(Thema.naam).all()
-            auteurs = db.session.query(Auteur.naam).all()
+            genres = db.session.query(Genre.naam).filter_by(deleted = False).all()
+            themas = db.session.query(Thema.naam).filter_by(deleted = False).all()
+            auteurs = db.session.query(Auteur.naam).filter_by(deleted = False).all()
 
-            boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
+            boek = db.session.query(Boek).filter_by(ISBN=ISBN,deleted = False).first()
             return render_template(
                 "boek_edit.html",
                 boek=boek,  # Pass the boek object to the template
@@ -510,7 +511,7 @@ def change(ISBN):
 
 @app.route("/boek/<int:ISBN>")
 def boek(ISBN):
-    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN,deleted = False).first_or_404()
 
     # Fetch reserved dates for the book
     reserved_dates = [
@@ -540,23 +541,36 @@ def reserveer_boek(ISBN):
             start_date_str = request.form.get('start_date')
             end_date_str = request.form.get('end_date')
 
-            # Check if the dates are valid
+           
             if not start_date_str or not end_date_str:
                 flash("Startdatum en einddatum zijn verplicht.", "error")
                 return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
             try:
-                # Convert strings to Python date objects
+                
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
             except ValueError:
                 flash("Ongeldige datumindeling. Gebruik het formaat JJJJ-MM-DD.", "error")
                 return redirect(url_for('reserveer_boek', ISBN=ISBN))
 
-            # Check if the reservation exceeds 3 months
-            if (end_date - start_date).days > 90:
-                flash("Een reservering kan niet langer dan 3 maanden duren.", "error")
+            
+            if (end_date - start_date).days > 21:
+                flash("Een reservering kan niet langer dan 3 weken duren.", "error")
                 return redirect(url_for('reserveer_boek', ISBN=ISBN))
+            
+            if start_date < datetime.now().date():
+                flash("De startdatum moet in de toekomst liggen.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+            
+            if datetime.now().date() + timedelta(days=90) < end_date:
+                flash("De einddatum mag niet verder dan 3 maanden in de toekomst liggen.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+
+            if end_date <= start_date:
+                flash("De einddatum moet na de startdatum liggen.", "error")
+                return redirect(url_for('reserveer_boek', ISBN=ISBN))
+            
 
             # Check for overlapping reservations
             overlapping = db.session.query(Reservatie).filter(
@@ -616,7 +630,7 @@ def admin():
     if 'email' not in session:
         return redirect(url_for("login"))
 
-    gebruiker = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session["email"],deleted = False).first()
     if gebruiker and gebruiker.rol in ["bibliothecaris", "admin"]:
         return render_template("admin.html")
 
@@ -626,7 +640,7 @@ def admin():
 @app.route("/admin/gebruikers", methods=["GET"])
 def gebruikers():
     # Haal alle gebruikers op uit de database
-    gebruikers = db.session.query(Gebruiker).all()
+    gebruikers = db.session.query(Gebruiker).filter_by(deleted = False).all()
     if not gebruikers:
         flash("Geen gebruikers gevonden.")
         return redirect(url_for("admin"))
@@ -663,7 +677,7 @@ def verwijder_gebruiker(gebruiker_id):
 
     try:
         # Delete the user
-        db.session.delete(gebruiker)
+        gebruiker.deleted = True  
         db.session.commit()
         flash(f"Gebruiker '{gebruiker.naam} {gebruiker.achternaam}' succesvol verwijderd.", "success")
     except Exception as e:
@@ -702,7 +716,7 @@ def verwijder_reservatie(reservatie_id):
 
     try:
         # Delete the reservation
-        db.session.delete(reservatie)
+        reservatie.deleted = True  # Mark as deleted instead of actually deleting
         db.session.commit()
         flash("Reservatie succesvol verwijderd.", "success")
     except Exception as e:
@@ -736,9 +750,34 @@ def overdue_reservations():
         ).all()
     else:
         # Fetch all overdue reservations if no query is provided
-        overdue_reservations = db.session.query(Reservatie).filter(Reservatie.end_date < today).all()
+        overdue_reservations = db.session.query(Reservatie).filter(Reservatie.end_date < today,deleted = False).all()
 
     return render_template('overdue_reservations.html', overdue_reservations=overdue_reservations)
+
+@app.route('/admin/cvs_import', methods=['GET', 'POST'])
+def cvs_import():
+    if 'email' not in session:
+        return redirect(url_for("login"))
+
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
+    if gebruiker and gebruiker.rol in ["bibliothecaris", "admin"]:
+        if request.method == 'POST':
+            file = request.files['file']
+            if file and file.filename.endswith('.csv'):
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(file_path)
+                pdf_data = pd.read_csv(file_path)
+                pdf_data.to_sql('test', con=db.engine, if_exists='append', index=False)
+                    
+
+                flash("CSV-bestand succesvol geïmporteerd.", "success")
+                return redirect(url_for("admin"))
+            else:
+                flash("Ongeldig bestandstype. Alleen CSV-bestanden zijn toegestaan.", "error")
+        return render_template("cvs_import.html")
+    else:
+        flash("Je hebt geen toegang tot deze pagina.", "error")
+        return redirect(url_for("index"))
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
