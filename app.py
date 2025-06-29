@@ -34,7 +34,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
 basedir = os.path.abspath(os.path.dirname(__file__)) 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'instance', 'bib.db')}"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://glorieuxsecundair:wweasyhost_ubuntu_mila_6ICW!@localhost/bibdb"
 app.config['UPLOAD_FOLDER'] = 'static/upload'
 
 # de beveillingssleutel voor redenen

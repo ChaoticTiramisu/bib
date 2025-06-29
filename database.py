@@ -7,7 +7,7 @@ import sys
 import click
 
 # Initialize the database engine
-engine = create_engine("sqlite:///instance/bib.db", echo=True)
+engine = create_engine("postgresql+psycopg2://glorieuxsecundair:wweasyhost_ubuntu_mila_6ICW!@localhost/bibdb", echo=True)
 
 # Create the database if it doesn't exist
 if not database_exists(engine.url):
