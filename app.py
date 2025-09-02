@@ -186,7 +186,7 @@ def boeken():
         boeken = db.session.query(Boek).filter_by(deleted = False).all() # haalt alle boeken uit database en kent hen toe aan variabelle
         # de gebruiker van de persoon zelf opzoeken, die momenteel is ingelod en geeft hem nadien mee in de render template
         user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-        return render_template("boeken.html", user = user)
+        return render_template("boeken.html", user = user, boeken =boeken)
 
 
 @app.route("/search")
