@@ -17,13 +17,13 @@
             <form class="input-group shadow-sm"
                   hx-get="{{ url_for('search_partial') }}"
                   hx-target="#boeken-grid"
-                  hx-trigger="keyup changed delay:200ms from:input"
+                  hx-trigger="input changed delay:200ms"
                   autocomplete="off">
                 <input type="text" class="form-control form-control-lg"
                        placeholder="Zoek op titel, auteur, genre of locatie..."
                        name="q" aria-label="Zoek boeken...">
-                <button class="btn btn-primary btn-lg" type="submit">
-                    <i class="bi bi-search"></i> Zoek
+                <button class="btn btn-primary btn-lg" type="button" tabindex="-1" disabled>
+                    <i class="bi bi-search"></i>
                 </button>
             </form>
         </div>
