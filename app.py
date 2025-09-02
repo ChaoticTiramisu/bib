@@ -507,7 +507,7 @@ def change(ISBN):
     else:
         abort(404)
 
-@app.route("/boek/<int:ISBN>")
+@app.route("/boek/<str:ISBN>")
 def boek(ISBN):
     boek = db.session.query(Boek).filter_by(ISBN=ISBN,deleted = False).first_or_404()
 
