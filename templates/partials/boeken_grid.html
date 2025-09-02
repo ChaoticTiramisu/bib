@@ -11,7 +11,7 @@
                         <span class="badge bg-danger">Uitgeleend</span>
                     {% endif %}
                 </div>
-                <img src="/static/upload/{{ boek.ISBN }}.jpg" class="card-img-top rounded-top" alt="Boek Cover" style="height: 220px; object-fit: cover;">
+                <img src="/static/upload/{{ boek.cover_path }}" class="card-img-top rounded-top" alt="Boek Cover" style="height: 220px; object-fit: cover;">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-primary fw-bold">{{ boek.titel }}</h5>
                     <p class="mb-1 text-muted small">

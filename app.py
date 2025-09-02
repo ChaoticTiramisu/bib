@@ -178,16 +178,20 @@ def logout():
 @app.route("/boeken")
 def boeken():
     email = session.get('email')
-    #indien er geen email is, wordt je terug gestuurd naar de inlog pagina
-    if email == None:
+    if email is None:
         return redirect(url_for("login"))
-    else:
-        # functie die alle boeken weergeeft
-        boeken = db.session.query(Boek).filter_by(deleted = False).all() # haalt alle boeken uit database en kent hen toe aan variabelle
-        # de gebruiker van de persoon zelf opzoeken, die momenteel is ingelod en geeft hem nadien mee in de render template
-        user = db.session.query(Gebruiker).filter_by(email = session.get('email')).first()
-        return render_template("boeken.html", user = user, boeken =boeken)
-
+    boeken = db.session.query(Boek).filter_by(deleted=False).all()
+    user = db.session.query(Gebruiker).filter_by(email=email).first()
+    # Voeg cover_path toe aan elk boek
+    for boek in boeken:
+        base = os.path.join("static", "upload", boek.ISBN)
+        if os.path.exists(os.path.join(base + ".jpg")):
+            boek.cover_path = f"/static/upload/{boek.ISBN}.jpg"
+        elif os.path.exists(os.path.join(base + ".png")):
+            boek.cover_path = f"/static/upload/{boek.ISBN}.png"
+        else:
+            boek.cover_path = "/static/upload/default_cover.png"
+    return render_template("boeken.html", boeken=boeken, user=user)
 
 @app.route("/search_partial")
 def search_partial():
