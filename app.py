@@ -672,10 +672,19 @@ def reserveer_boek(ISBN):
             for r in reservations
         ]
 
+        # Voeg reserved_dates_flat toe:
+        reserved_dates_flat = []
+        for r in reservations:
+            current = r.start_date
+            while current <= r.end_date:
+                reserved_dates_flat.append(current.strftime('%Y-%m-%d'))
+                current += timedelta(days=1)
+
         return render_template(
             'reserveer_boek.html',
             boek=boek,
-            reserved_dates=reserved_dates
+            reserved_dates=reserved_dates,
+            reserved_dates_flat=reserved_dates_flat
         )
 
 

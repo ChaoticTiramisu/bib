@@ -1,14 +1,13 @@
-
-<div class="container mt-5">
-  <h2>Select a Reservation Date</h2>
+<div class="container mt-4">
+  <h4 class="mb-3">Kies een reserveringsperiode</h4>
   <div class="row">
     <div class="col-md-8">
       <div class="input-group input-daterange" id="reservationDatepicker">
-        <input type="text" class="form-control" name="start" placeholder="Start Date" readonly>
+        <input type="text" class="form-control" name="start" placeholder="Startdatum" readonly>
         <div class="input-group-append input-group-prepend">
-          <span class="input-group-text">to</span>
+          <span class="input-group-text">tot</span>
         </div>
-        <input type="text" class="form-control" name="end" placeholder="End Date" readonly>
+        <input type="text" class="form-control" name="end" placeholder="Einddatum" readonly>
         <div class="input-group-append">
           <span class="input-group-text">
             <i class="fa fa-calendar"></i>
@@ -20,7 +19,7 @@
   </div>
 </div>
 
-
+<!-- Bootstrap Datepicker & dependencies -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -30,14 +29,15 @@
 
 <script>
   function initializeDatepicker() {
-    const reservedDates = ["2025-04-01", "2025-04-02", "2025-04-03"];
+    // Vul deze array met gereserveerde datums vanuit Flask
+    const reservedDates = {{ reserved_dates_flat | tojson | safe }};
     
     $('#reservationDatepicker').datepicker({
       format: 'yyyy-mm-dd',
       autoclose: true,
       todayHighlight: true,
       datesDisabled: reservedDates,
-      endDate: '+1y' // Limit selection to 1 year ahead
+      endDate: '+1y'
     }).on('changeDate', function(e) {
       const start = $('input[name="start"]').val();
       const end = $('input[name="end"]').val();
@@ -48,7 +48,6 @@
         let currentDate = new Date(startDate);
         let hasReservedDate = false;
 
-        // Check all dates in range
         while (currentDate <= endDate && !hasReservedDate) {
           const dateString = currentDate.toISOString().split('T')[0];
           if (reservedDates.includes(dateString)) {
@@ -58,23 +57,21 @@
         }
 
         if (hasReservedDate) {
-          alert("Selected range contains unavailable dates. Please choose different dates.");
+          alert("De geselecteerde periode bevat niet-beschikbare dagen. Kies een andere periode.");
           $('input[name="start"]').val('');
           $('input[name="end"]').val('');
           $('#selectedDateDisplay').html('');
         } else {
           $('#selectedDateDisplay').html(`
-            <strong>Selected Period:</strong> ${start} to ${end}
+            <strong>Geselecteerde periode:</strong> ${start} tot ${end}
           `);
         }
       }
     });
   }
 
-  // Initialize on page load
   $(document).ready(initializeDatepicker);
 
-  // Reinitialize if new content loaded (for HTMX compatibility)
   document.body.addEventListener('htmx:afterSwap', function(evt) {
     if (evt.detail.elt.querySelector('#reservationDatepicker')) {
       initializeDatepicker();

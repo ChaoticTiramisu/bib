@@ -1,49 +1,92 @@
 {% extends "base.html" %}
 
-{% block title %} Reserveer Boek {% endblock title %}
+{% block title %}Reserveer Boek - {{ boek.titel }}{% endblock title %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Reserveer Boek: {{ boek.titel }}</h1>
-    <h3 class="text-center">Beschikbare exemplaren: {{ boek.beschikbaar_aantal }}</h3>
-    <form method="POST" class="mb-4">
-        <div class="mb-3">
-            <label for="start_date" class="form-label">Startdatum</label>
-            <input type="date" id="start_date" name="start_date" class="form-control" required>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <!-- Book Cover and Info -->
+        <div class="col-lg-4 mb-4 text-center">
+            <img src="{{ boek.cover_path }}" alt="Boek Cover" class="img-fluid rounded shadow" style="max-height: 320px; object-fit: contain;">
+            <h2 class="mt-3 fw-bold text-primary">{{ boek.titel }}</h2>
+            <p class="mb-1">
+                <strong>Auteur(s):</strong>
+                {% if boek.auteurs %}
+                    {% for auteur in boek.auteurs %}
+                        {{ auteur.naam }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span class="text-danger">Onbekend</span>
+                {% endif %}
+            </p>
+            <p class="mb-1"><strong>Beschikbare exemplaren:</strong> {{ boek.beschikbaar_aantal }}</p>
+            {% if boek.beschikbaar_aantal == 0 %}
+                <div class="alert alert-danger mt-2">Geen exemplaren beschikbaar</div>
+            {% endif %}
         </div>
-        <div class="mb-3">
-            <label for="end_date" class="form-label">Einddatum</label>
-            <input type="date" id="end_date" name="end_date" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Reserveer</button>
-    </form>
 
-    <h2 class="text-center">Beschikbaarheid</h2>
-    <div id="calendar" class="mt-4 border rounded shadow-sm p-3 bg-white"></div>
+        <!-- Reservation Form -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-calendar-plus"></i> Reserveer dit boek
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Startdatum</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">Einddatum</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100"
+                            {% if boek.beschikbaar_aantal == 0 %}disabled{% endif %}>
+                            Reserveer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservation Calendar -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-calendar-event"></i> Beschikbaarheid Kalender
+                </div>
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- FullCalendar Script -->
+<!-- FullCalendar CSS & JS (CDN) -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            locale: 'nl', // Dutch locale
+            locale: 'nl',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: {{ reserved_dates | tojson | safe }}, // Reserved dates passed from Flask
-            eventColor: '#dc3545', // Red color for reserved dates
-            eventTextColor: '#ffffff', // White text for better contrast
+            events: {{ reserved_dates | tojson | safe }},
+            eventColor: '#dc3545',
+            eventTextColor: '#ffffff',
             height: 'auto'
         });
         calendar.render();
     });
 </script>
-
-<!-- FullCalendar CSS and JS -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 {% endblock body %}
