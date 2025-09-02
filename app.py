@@ -203,9 +203,9 @@ def search():
         ).limit(20).all()
     else:
         # Laat standaard de eerste 20 boeken zien als er niet gezocht wordt
-        results = db.session.query(Boek).filter_by(deleted=False).limit(20).all()
+        boeken = db.session.query(Boek).filter_by(deleted=False).limit(20).all()
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-    return render_template("search_result.html", results=results, user=user)
+    return render_template("search_result.html", boeken=boeken, user=user)
 
 # de werkplaats waar de bibliothecaris kan bewerekn en toevoegen
 @app.route("/adminworkspace", methods=["GET"])
