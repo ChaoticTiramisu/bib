@@ -109,17 +109,15 @@ def login():
     if request.method == "POST":
         email = request.form["login_email"]
         password = request.form["login_paswoord"]
-        user = db.session.query(Gebruiker).filter_by(email=email,deleted = False).first()
-        if "@glorieuxsecundair.be" in email:
-            if user and user.paswoord == password:
-                session['gebruiker_id'] = user.id
-                session['email'] = user.email
-                flash("Login succesvol", "success")  
-                return redirect(url_for("index"))
-            else:
-                flash("Paswoord incorrect of de gebruiker bestaat nog niet.", "error")
+        user = db.session.query(Gebruiker).filter_by(email=email, deleted=False).first()
+        if user and user.paswoord == password:
+            session['gebruiker_id'] = user.id
+            session['email'] = user.email
+            flash("Login succesvol", "success")
+            return redirect(url_for("index"))
+        else:
+            flash("Paswoord incorrect of de gebruiker bestaat nog niet.", "error")
             return redirect(url_for("login"))
-    
     # Only flash this message if it's a GET request and not a redirect
     return render_template("login.html", messages=get_flashed_messages(with_categories=True))
 
