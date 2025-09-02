@@ -43,7 +43,16 @@ app.secret_key = "Arno_augu_Cairo"
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 # hier worden alle tabellen aangemaakt
-
+from functools import wraps
+def actief_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+        if not gebruiker or gebruiker.actief == 0:
+            flash("Je account is geblokkeerd, vraag je leerkracht voor meer info.", "error")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 # definitie om te checken als een bepaalde waarde in een tabel zit in een bepaalde kolom
 def checkContains(table_naam,column_naam,item):
  # getattr een string waarde omvormen naar een databasesyntax
@@ -176,6 +185,7 @@ def logout():
 
 # boekenpagina
 @app.route("/boeken")
+@actief_required
 def boeken():
     email = session.get('email')
     if email is None:
@@ -205,6 +215,7 @@ def boeken():
     )
 
 @app.route("/search_partial")
+@actief_required
 def search_partial():
     q = request.args.get("q", "").strip()
     genre = request.args.get("genre", "")
@@ -249,6 +260,7 @@ def search_partial():
 
 # de werkplaats waar de bibliothecaris kan bewerekn en toevoegen
 @app.route("/adminworkspace", methods=["GET"])
+@actief_required
 def adminworkspace():
     if session.get('email') is None:
         return redirect(url_for("login"))
@@ -270,6 +282,7 @@ def adminworkspace():
 
 #boeken toevoegen url
 @app.route("/adminworkspace/tools/add", methods=["POST", "GET"])
+@actief_required
 def add():
     locaties = db.session.query(Locatie).order_by(Locatie.naam).all()
     if request.method == "POST":
@@ -382,6 +395,7 @@ def add():
 
 
 @app.route("/delpage", methods=["GET"])
+@actief_required
 def delpage():
     # Fetch all items from the database
     boeken = db.session.query(Boek).filter_by(deleted = False).all()
@@ -417,12 +431,14 @@ def searchdelete(table):
  
 
 @app.route("/adminworkspace/tools/delete/<string:table>", methods=["GET"])
+@actief_required
 # geeft weer welke je kan verwijderen
 def delete(table):
     return render_template("delete.html",table=table)
 
 # het effectief verwijderen van een boek 
 @app.route("/adminworkspace/tools/delete/<string:table>/<int:voorwerp_id>", methods=["POST","GET"])
+@actief_required
 def delete_voorwerp(table, voorwerp_id):
         if table not in ["boek", "genre", "auteur", "thema"]:
             abort(404)  
@@ -462,6 +478,7 @@ def delete_voorwerp(table, voorwerp_id):
 
 # verandernde van boeken
 @app.route("/adminworkspace/tools/change/<string:ISBN>", methods=["POST", "GET"])
+@actief_required
 def change(ISBN):
     test = db.session.query(Gebruiker).filter_by(email=session["email"]).first()
     if str(test.rol).lower() in ["bibliothecaris", "admin"]:
@@ -540,6 +557,7 @@ def change(ISBN):
         abort(404)
 
 @app.route("/boek/<string:ISBN>")
+@actief_required
 def boek(ISBN):
     boek = db.session.query(Boek).filter_by(ISBN=ISBN, deleted=False).first_or_404()
 
@@ -558,6 +576,7 @@ def boek(ISBN):
 
 
 @app.route('/boek/<string:ISBN>/reserveer', methods=['GET', 'POST'])
+@actief_required
 def reserveer_boek(ISBN):
     if 'email' not in session:
         return redirect(url_for('login'))
@@ -665,6 +684,7 @@ def overons():
 
 #admin page
 @app.route("/admin", methods=["GET"])
+@actief_required
 def admin():
     if 'email' not in session:
         return redirect(url_for("login"))
@@ -677,6 +697,7 @@ def admin():
     return redirect(url_for("index"))
 
 @app.route("/admin/gebruikers", methods=["GET"])
+@actief_required
 def gebruikers():
     # Haal alle gebruikers op uit de database
     gebruikers = db.session.query(Gebruiker).filter_by(deleted = False).all()
@@ -686,6 +707,7 @@ def gebruikers():
     return render_template("gebruikers.html", gebruikers=gebruikers)
 
 @app.route('/bewerk_gebruiker/<int:gebruiker_id>', methods=['GET', 'POST'])
+@actief_required
 def bewerk_gebruiker(gebruiker_id):
     gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
     rol_choices = [
@@ -706,6 +728,7 @@ def bewerk_gebruiker(gebruiker_id):
     return render_template('bewerk_gebruiker.html', gebruiker=gebruiker, rol_choices=rol_choices, def_actief=gebruiker.actief)
 
 @app.route('/verwijder_gebruiker/<int:gebruiker_id>', methods=['POST'])
+@actief_required
 def verwijder_gebruiker(gebruiker_id):
     # Fetch the user from the database
     gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
@@ -725,6 +748,7 @@ def verwijder_gebruiker(gebruiker_id):
     return redirect(url_for('gebruikers'))  # Redirect back to the users list
 
 @app.route('/gebruiker/<int:gebruiker_id>', methods=['GET'])
+@actief_required
 def gebruiker_info(gebruiker_id):
     # Fetch the user from the database
     gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
@@ -738,6 +762,7 @@ def gebruiker_info(gebruiker_id):
     return render_template('gebruiker_info.html', gebruiker=gebruiker, reserveringen=reserveringen)
 
 @app.route('/verwijder_reservatie/<int:reservatie_id>', methods=['POST'])
+@actief_required
 def verwijder_reservatie(reservatie_id):
     if 'email' not in session:
         return redirect(url_for("login"))
@@ -764,6 +789,7 @@ def verwijder_reservatie(reservatie_id):
     return redirect(url_for('gebruikers'))
 
 @app.route('/admin/overdue', methods=['GET'])
+@actief_required
 def overdue_reservations():
     if 'email' not in session:
         return redirect(url_for("login"))
@@ -794,6 +820,7 @@ def overdue_reservations():
     return render_template('overdue_reservations.html', overdue_reservations=overdue_reservations)
 
 @app.route('/admin/cvs_import', methods=['GET', 'POST'])
+@actief_required
 def cvs_import():
     if 'email' not in session:
         return redirect(url_for("login"))
