@@ -11,7 +11,7 @@
                         <span class="badge bg-danger">Uitgeleend</span>
                     {% endif %}
                 </div>
-                <img src="/static/upload/{{ boek.cover_path }}" class="card-img-top rounded-top" alt="Boek Cover" style="height: 220px; object-fit: cover;">
+                <img src="{{ boek.cover_path }}" class="card-img-top rounded-top" alt="Boek Cover" style="height: 220px; object-fit: cover;">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-primary fw-bold">{{ boek.titel }}</h5>
                     <p class="mb-1 text-muted small">
@@ -69,7 +69,7 @@
               </div>
               <div class="modal-body row">
                 <div class="col-md-4 text-center mb-3 mb-md-0">
-                  <img src="/static/upload/{{ boek.ISBN }}.jpg" class="img-fluid rounded shadow" alt="Boek Cover">
+                  <img src="{{ boek.ISBN }}.jpg" class="img-fluid rounded shadow" alt="Boek Cover">
                 </div>
                 <div class="col-md-8">
                   <ul class="list-group list-group-flush mb-3">
