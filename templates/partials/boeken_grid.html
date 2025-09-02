@@ -1,0 +1,10 @@
+<div class="row g-4">
+    {% for boek in boeken %}
+    <!-- ...jouw bestaande boek-card code... -->
+    {% endfor %}
+</div>
+{% if boeken|length == 0 %}
+<div class="alert alert-info text-center mt-5">
+    Geen boeken gevonden. Probeer een andere zoekterm!
+</div>
+{% endif %}

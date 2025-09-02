@@ -189,6 +189,23 @@ def boeken():
         return render_template("boeken.html", user = user, boeken =boeken)
 
 
+@app.route("/search_partial")
+def search_partial():
+    q = request.args.get("q", "").strip()
+    if q:
+        boeken = db.session.query(Boek).join(Boek.auteurs).filter(
+            or_(
+                Boek.titel.ilike(f"%{q}%"),
+                Auteur.naam.ilike(f"%{q}%"),
+                Boek.ISBN.ilike(f"%{q}%"),
+                # Voeg eventueel genre/thema/locatie toe
+            )
+        ).limit(20).all()
+    else:
+        boeken = db.session.query(Boek).filter_by(deleted=False).limit(20).all()
+    user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    return render_template("partials/boeken_grid.html", boeken=boeken, user=user)
+
 @app.route("/search")
 def search():
     q = request.args.get("q", "").strip()
