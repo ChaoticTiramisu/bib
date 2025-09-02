@@ -11,6 +11,13 @@
                         <span class="badge bg-danger">Uitgeleend</span>
                     {% endif %}
                 </div>
+                <div class="position-absolute top-0 start-0 m-2">
+                    {% if boek.status %}
+                        <span class="badge bg-secondary">Status: Afwezig</span>
+                    {% else %}
+                        <span class="badge bg-info">Status: Aanwezig</span>
+                    {% endif %}
+                </div>
                 <img src="{{ boek.cover_path }}" class="card-img-top rounded-top" alt="Boek Cover" style="height: 220px; object-fit: cover;">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-primary fw-bold">{{ boek.titel }}</h5>
@@ -46,7 +53,14 @@
                         <button class="btn btn-outline-primary btn-sm w-100" type="button" data-bs-toggle="modal" data-bs-target="#modal{{ boek.ISBN }}">
                             Meer info
                         </button>
-                        <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-success btn-sm w-100 {% if boek.beschikbaar_aantal == 0 %}disabled{% endif %}">
+                        <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}"
+                           class="btn btn-success btn-sm w-100
+                           {% if boek.beschikbaar_aantal == 0 or boek.status %}disabled{% endif %}"
+                           {% if boek.beschikbaar_aantal == 0 %}
+                               title="Geen exemplaren beschikbaar"
+                           {% elif boek.status %}
+                               title="Boek is afwezig en kan niet uitgeleend worden"
+                           {% endif %}>
                             Reserveer
                         </a>
                         {% if user and user.rol in ['admin', 'bibliothecaris'] %}

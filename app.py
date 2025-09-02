@@ -538,7 +538,16 @@ def boek(ISBN):
 
 @app.route('/boek/<string:ISBN>/reserveer', methods=['GET', 'POST'])
 def reserveer_boek(ISBN):
+    if 'email' not in session:
+        return redirect(url_for('login'))
     gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN).first_or_404()
+    if boek.status:
+        flash("Dit boek is momenteel afwezig en kan niet uitgeleend worden.", "error")
+        return redirect(url_for('boeken'))
+    if boek.beschikbaar_aantal == 0:
+        flash("Er zijn geen exemplaren beschikbaar.", "error")
+        return redirect(url_for('boeken'))
     if gebruiker.actief == 0:
         flash("Je account is geblokkeerd, vraag je leerkracht voor meer info.", "error")
         return render_template('index.html')
