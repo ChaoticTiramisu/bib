@@ -560,8 +560,15 @@ def change(ISBN):
 @actief_required
 def boek(ISBN):
     boek = db.session.query(Boek).filter_by(ISBN=ISBN, deleted=False).first_or_404()
-
-    # Fetch reserved dates for the book
+    # Cover path bepalen
+    base = os.path.join("static", "upload", boek.ISBN)
+    if os.path.exists(os.path.join(base + ".jpg")):
+        boek.cover_path = f"/static/upload/{boek.ISBN}.jpg"
+    elif os.path.exists(os.path.join(base + ".png")):
+        boek.cover_path = f"/static/upload/{boek.ISBN}.png"
+    else:
+        boek.cover_path = "/static/upload/default_cover.png"
+    # reserved_dates en andere context zoals je al had
     reserved_dates = [
         {
             "title": "Gereserveerd",
@@ -570,9 +577,11 @@ def boek(ISBN):
         }
         for reservatie in boek.reservaties
     ]
-
-    return render_template('boek.html', boek=boek, reserved_dates=reserved_dates)
-
+    return render_template(
+        "boek.html",
+        boek=boek,
+        reserved_dates=reserved_dates
+    )
 
 
 @app.route('/boek/<string:ISBN>/reserveer', methods=['GET', 'POST'])
