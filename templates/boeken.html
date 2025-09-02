@@ -10,7 +10,60 @@
             <p class="lead text-secondary">Ontdek, zoek en reserveer boeken voor jouw schoolprojecten, leesplezier of opdrachten!</p>
         </div>
     </div>
-
+    <div class="row justify-content-center mb-3">
+    <div class="col-md-10">
+        <form class="row g-2 align-items-end"
+              id="boeken-filters"
+              hx-get="{{ url_for('search_partial') }}"
+              hx-target="#boeken-grid"
+              hx-trigger="change, keyup delay:200ms from:input, change from:select"
+              autocomplete="off">
+            <div class="col-md-2">
+                <label for="genre" class="form-label mb-0">Genre</label>
+                <select class="form-select" name="genre" id="genre">
+                    <option value="">Alle</option>
+                    {% for genre in genres %}
+                        <option value="{{ genre.naam }}">{{ genre.naam }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="auteur" class="form-label mb-0">Auteur</label>
+                <select class="form-select" name="auteur" id="auteur">
+                    <option value="">Alle</option>
+                    {% for auteur in auteurs %}
+                        <option value="{{ auteur.naam }}">{{ auteur.naam }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="thema" class="form-label mb-0">Thema</label>
+                <select class="form-select" name="thema" id="thema">
+                    <option value="">Alle</option>
+                    {% for thema in themas %}
+                        <option value="{{ thema.naam }}">{{ thema.naam }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="locatie" class="form-label mb-0">Locatie</label>
+                <select class="form-select" name="locatie" id="locatie">
+                    <option value="">Alle</option>
+                    {% for locatie in locaties %}
+                        <option value="{{ locatie.naam }}">{{ locatie.naam }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="beschikbaar" class="form-label mb-0">Beschikbaarheid</label>
+                <select class="form-select" name="beschikbaar" id="beschikbaar">
+                    <option value="">Alles</option>
+                    <option value="1">Alleen beschikbaar</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
     <!-- Zoekbalk -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8">

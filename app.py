@@ -182,7 +182,10 @@ def boeken():
         return redirect(url_for("login"))
     boeken = db.session.query(Boek).filter_by(deleted=False).all()
     user = db.session.query(Gebruiker).filter_by(email=email).first()
-    # Voeg cover_path toe aan elk boek
+    genres = db.session.query(Genre).filter_by(deleted=False).all()
+    auteurs = db.session.query(Auteur).filter_by(deleted=False).all()
+    themas = db.session.query(Thema).filter_by(deleted=False).all()
+    locaties = db.session.query(Locatie).all()
     for boek in boeken:
         base = os.path.join("static", "upload", boek.ISBN)
         if os.path.exists(os.path.join(base + ".jpg")):
@@ -191,12 +194,27 @@ def boeken():
             boek.cover_path = f"/static/upload/{boek.ISBN}.png"
         else:
             boek.cover_path = "/static/upload/default_cover.png"
-    return render_template("boeken.html", boeken=boeken, user=user)
+    return render_template(
+        "boeken.html",
+        boeken=boeken,
+        user=user,
+        genres=genres,
+        auteurs=auteurs,
+        themas=themas,
+        locaties=locaties
+    )
 
 @app.route("/search_partial")
 def search_partial():
     q = request.args.get("q", "").strip()
-    boeken_query = db.session.query(Boek).outerjoin(Boek.auteurs).filter(Boek.deleted == False)
+    genre = request.args.get("genre", "")
+    auteur = request.args.get("auteur", "")
+    thema = request.args.get("thema", "")
+    locatie = request.args.get("locatie", "")
+    beschikbaar = request.args.get("beschikbaar", "")
+
+    boeken_query = db.session.query(Boek).outerjoin(Boek.auteurs).outerjoin(Boek.genres).outerjoin(Boek.themas).outerjoin(Boek.locatie).filter(Boek.deleted == False)
+
     if q:
         boeken_query = boeken_query.filter(
             or_(
@@ -205,9 +223,19 @@ def search_partial():
                 Boek.ISBN.ilike(f"%{q}%"),
             )
         )
-    boeken = boeken_query.limit(20).all()
+    if genre:
+        boeken_query = boeken_query.filter(Genre.naam == genre)
+    if auteur:
+        boeken_query = boeken_query.filter(Auteur.naam == auteur)
+    if thema:
+        boeken_query = boeken_query.filter(Thema.naam == thema)
+    if locatie:
+        boeken_query = boeken_query.filter(Locatie.naam == locatie)
+    if beschikbaar == "1":
+        boeken_query = boeken_query.filter(Boek.beschikbaar_aantal > 0, Boek.status == False)
+
+    boeken = boeken_query.distinct().limit(20).all()
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-    # Voeg cover_path toe aan elk boek (zoals in je /boeken route)
     for boek in boeken:
         base = os.path.join("static", "upload", boek.ISBN)
         if os.path.exists(os.path.join(base + ".jpg")):
