@@ -196,36 +196,29 @@ def boeken():
 @app.route("/search_partial")
 def search_partial():
     q = request.args.get("q", "").strip()
+    boeken_query = db.session.query(Boek).outerjoin(Boek.auteurs).filter(Boek.deleted == False)
     if q:
-        boeken = db.session.query(Boek).join(Boek.auteurs).filter(
+        boeken_query = boeken_query.filter(
             or_(
                 Boek.titel.ilike(f"%{q}%"),
                 Auteur.naam.ilike(f"%{q}%"),
                 Boek.ISBN.ilike(f"%{q}%"),
-                # Voeg eventueel genre/thema/locatie toe
             )
-        ).limit(20).all()
-    else:
-        boeken = db.session.query(Boek).filter_by(deleted=False).limit(20).all()
+        )
+    boeken = boeken_query.limit(20).all()
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    # Voeg cover_path toe aan elk boek (zoals in je /boeken route)
+    for boek in boeken:
+        base = os.path.join("static", "upload", boek.ISBN)
+        if os.path.exists(os.path.join(base + ".jpg")):
+            boek.cover_path = f"/static/upload/{boek.ISBN}.jpg"
+        elif os.path.exists(os.path.join(base + ".png")):
+            boek.cover_path = f"/static/upload/{boek.ISBN}.png"
+        else:
+            boek.cover_path = "/static/upload/default_cover.png"
     return render_template("partials/boeken_grid.html", boeken=boeken, user=user)
 
-@app.route("/search")
-def search():
-    q = request.args.get("q", "").strip()
-    if q:
-        boeken = db.session.query(Boek).join(Boek.auteurs).filter(
-            or_(
-                Boek.titel.ilike(f"%{q}%"),
-                Auteur.naam.ilike(f"%{q}%"),
-                Boek.ISBN.ilike(f"%{q}%"),
-                # Voeg eventueel genre/thema/locatie toe
-            )
-        ).limit(20).all()
-    else:
-        boeken = db.session.query(Boek).filter_by(deleted=False).limit(20).all()
-    user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-    return render_template("boeken.html", boeken=boeken, user=user)
+
 # de werkplaats waar de bibliothecaris kan bewerekn en toevoegen
 @app.route("/adminworkspace", methods=["GET"])
 def adminworkspace():
