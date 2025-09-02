@@ -14,14 +14,13 @@
     <!-- Zoekbalk -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8">
-            <form class="input-group shadow-sm"
-                  hx-get="{{ url_for('search_partial') }}"
-                  hx-target="#boeken-grid"
-                  hx-trigger="input changed delay:200ms"
-                  autocomplete="off">
+            <form class="input-group shadow-sm" autocomplete="off" onsubmit="return false;">
                 <input type="text" class="form-control form-control-lg"
                        placeholder="Zoek op titel, auteur, genre of locatie..."
-                       name="q" aria-label="Zoek boeken...">
+                       name="q" aria-label="Zoek boeken..."
+                       hx-get="{{ url_for('search_partial') }}"
+                       hx-target="#boeken-grid"
+                       hx-trigger="input changed delay:200ms">
                 <button class="btn btn-primary btn-lg" type="button" tabindex="-1" disabled>
                     <i class="bi bi-search"></i>
                 </button>
