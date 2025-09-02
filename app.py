@@ -191,27 +191,20 @@ def boeken():
 
 @app.route("/search")
 def search():
-    # je kan argumenten in de url plaatsen en die q haalt de argumenten uit de url
-    # checkt als q wel argumenten heeft
     q = request.args.get("q")
     if q:
-        # haalt alle resultaten uit de database, join betekent dat ze er allebei moeten worden uitgehaald. 
-        # De filter zorgt ervoor dat alles dat erop lijkt van de input wordt weergegeven
         results = db.session.query(Boek).join(Boek.auteurs).filter(
             or_(
                 Boek.titel.ilike(f"%{q}%"),
                 Auteur.naam.ilike(f"%{q}%"),
-                Boek.ISBN.ilike(f"%{q}%")
-                
+                Boek.ISBN.ilike(f"%{q}%"),
+                # Voeg eventueel genre/thema/locatie toe
             )
-            # er is een limit van max 2O items uit de database te halen (max 20 prints)
         ).limit(20).all()
     else:
-        # als er geen argumenten worden meegegeven, zal hij enkel de eerste 20 items van de database eruit halen
-        results = db.session.query(Boek).filter_by(deleted = False).limit(20).all()
-        
+        # Laat standaard de eerste 20 boeken zien als er niet gezocht wordt
+        results = db.session.query(Boek).filter_by(deleted=False).limit(20).all()
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-    # geeft gebruiker en resultaten weer terug
     return render_template("search_result.html", results=results, user=user)
 
 # de werkplaats waar de bibliothecaris kan bewerekn en toevoegen
