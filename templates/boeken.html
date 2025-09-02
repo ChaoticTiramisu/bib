@@ -38,31 +38,74 @@
                     <h5 class="card-title text-center">{{ boek.titel }}</h5>
                     <p class="card-text text-center text-muted">
                         Auteur: 
-                        {% for auteur in boek.auteurs %}
-                            {{ auteur.naam }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
+                        {% if boek.auteurs %}
+                            {% for auteur in boek.auteurs %}
+                                {{ auteur.naam }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-danger">Onbekend</span>
+                        {% endif %}
                     </p>
                     <p class="card-text text-center text-muted">
                         Beschikbare exemplaren: {{ boek.beschikbaar_aantal }}
                     </p>
                     <div class="mt-auto">
-                        <button class="btn btn-primary btn-sm w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#details{{ boek.ISBN }}" aria-expanded="false" aria-controls="details{{ boek.ISBN }}">
+                        <!-- Meer Info triggers modal -->
+                        <button class="btn btn-primary btn-sm w-100 mb-2" type="button" data-bs-toggle="modal" data-bs-target="#modal{{ boek.ISBN }}">
                             Meer Info
                         </button>
                         <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-success btn-sm w-100">Reserveer</a>
                     </div>
                 </div>
-                <div class="collapse mt-3" id="details{{ boek.ISBN }}">
-                    <div class="card-footer">
-                        <p><strong>Genre:</strong> 
-                            {% for genre in boek.genres %}
-                                {{ genre.naam }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                        </p>
-                        <p><strong>Beschrijving:</strong> {{ boek.beschrijving }}</p>
-                    </div>
-                </div>
             </div>
+        </div>
+
+        <!-- Modal for book details -->
+        <div class="modal fade" id="modal{{ boek.ISBN }}" tabindex="-1" aria-labelledby="modalLabel{{ boek.ISBN }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel{{ boek.ISBN }}">{{ boek.titel }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+              </div>
+              <div class="modal-body row">
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                  <img src="/static/upload/{{ boek.ISBN }}.jpg" class="img-fluid rounded shadow" alt="Boek Cover">
+                </div>
+                <div class="col-md-8">
+                  <p><strong>Auteur:</strong>
+                    {% if boek.auteurs %}
+                        {% for auteur in boek.auteurs %}
+                            {{ auteur.naam }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-danger">Onbekend</span>
+                    {% endif %}
+                  </p>
+                  <p><strong>Genre:</strong>
+                    {% if boek.genres %}
+                        {% for genre in boek.genres %}
+                            {{ genre.naam }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-danger">Onbekend</span>
+                    {% endif %}
+                  </p>
+                  <p><strong>Locatie:</strong>
+                    {{ boek.locatie.naam if boek.locatie else 'Onbekend' }}
+                  </p>
+                  <p><strong>Beschrijving:</strong><br>
+                    {{ boek.beschrijving or 'Geen beschrijving beschikbaar.' }}
+                  </p>
+                  <p><strong>Beschikbare exemplaren:</strong> {{ boek.beschikbaar_aantal }}</p>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-success">Reserveer</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+              </div>
+            </div>
+          </div>
         </div>
         {% endfor %}
     </div>
