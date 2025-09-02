@@ -507,16 +507,16 @@ def change(ISBN):
     else:
         abort(404)
 
-@app.route("/boek/<ISBN>")
+@app.route("/boek/<string:ISBN>")
 def boek(ISBN):
-    boek = db.session.query(Boek).filter_by(ISBN=int(ISBN),deleted = False).first_or_404()
+    boek = db.session.query(Boek).filter_by(ISBN=ISBN, deleted=False).first_or_404()
 
     # Fetch reserved dates for the book
     reserved_dates = [
         {
             "title": "Gereserveerd",
             "start": reservatie.start_date.strftime('%Y-%m-%d'),
-            "end": (reservatie.end_date + timedelta(days=1)).strftime('%Y-%m-%d')  # Add 1 day to include the end date
+            "end": (reservatie.end_date + timedelta(days=1)).strftime('%Y-%m-%d')
         }
         for reservatie in boek.reservaties
     ]
