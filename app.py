@@ -525,7 +525,7 @@ def boek(ISBN):
 
 
 
-@app.route('/boek/<str:ISBN>/reserveer', methods=['GET', 'POST'])
+@app.route('/boek/<string:ISBN>/reserveer', methods=['GET', 'POST'])
 def reserveer_boek(ISBN):
     gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
     if gebruiker.actief == 0:
