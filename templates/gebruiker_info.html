@@ -40,7 +40,7 @@
                         </button>
                     </form>
                     {% endif %}
-                    {% if gebruiker.rol in ['admin', 'bibliothecaris'] and reservering.afgehaald and reservering.end_date < now().date() %}
+                    {% if gebruiker.rol in ['admin', 'bibliothecaris'] and reservering.afgehaald and if reservering.end_date < now().date()  %}
                     <form action="{{ url_for('boek_terug_inleveren', reservatie_id=reservering.id) }}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-warning btn-sm mt-2"
                             onclick="return confirm('Bevestig dat het boek is teruggebracht?')">

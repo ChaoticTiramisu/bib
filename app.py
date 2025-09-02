@@ -823,7 +823,12 @@ def gebruiker_info(gebruiker_id):
     # Fetch the books reserved by the user
     reserveringen = db.session.query(Reservatie).filter_by(gebruiker_id=gebruiker_id).all()
 
-    return render_template('gebruiker_info.html', gebruiker=gebruiker, reserveringen=reserveringen)
+    return render_template(
+    'gebruiker_info.html',
+    gebruiker=gebruiker,
+    reserveringen=reserveringen,
+    now=datetime.now  
+)
 
 @app.route('/verwijder_reservatie/<int:reservatie_id>', methods=['POST'])
 @actief_required
