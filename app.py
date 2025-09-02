@@ -13,7 +13,7 @@ from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie, Locatie
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from sqlalchemy.orm import relationship, mapped_column
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import pandas as pd
 
 from sqlalchemy_utils import ChoiceType
@@ -827,7 +827,7 @@ def gebruiker_info(gebruiker_id):
     'gebruiker_info.html',
     gebruiker=gebruiker,
     reserveringen=reserveringen,
-    now=datetime.now  
+    now=date.today()
 )
 
 @app.route('/verwijder_reservatie/<int:reservatie_id>', methods=['POST'])
