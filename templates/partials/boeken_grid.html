@@ -1,7 +1,124 @@
 <div class="row g-4">
-    {% for boek in boeken %}
+    
     <!-- ...jouw bestaande boek-card code... -->
-    {% endfor %}
+     {% for boek in boeken %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100 border-0 shadow book-card position-relative">
+                <div class="position-absolute top-0 end-0 m-2">
+                    {% if boek.beschikbaar_aantal > 0 %}
+                        <span class="badge bg-success">Beschikbaar</span>
+                    {% else %}
+                        <span class="badge bg-danger">Uitgeleend</span>
+                    {% endif %}
+                </div>
+                <img src="/static/upload/{{ boek.ISBN }}.jpg" class="card-img-top rounded-top" alt="Boek Cover" style="height: 220px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-primary fw-bold">{{ boek.titel }}</h5>
+                    <p class="mb-1 text-muted small">
+                        <i class="bi bi-person"></i>
+                        {% if boek.auteurs %}
+                            {% for auteur in boek.auteurs %}
+                                {{ auteur.naam }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-danger">Onbekend</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-1 text-muted small">
+                        <i class="bi bi-tags"></i>
+                        {% if boek.genres %}
+                            {% for genre in boek.genres %}
+                                {{ genre.naam }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-danger">Onbekend</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-1 text-muted small">
+                        <i class="bi bi-geo-alt"></i>
+                        {{ boek.locatie.naam if boek.locatie else 'Onbekend' }}
+                    </p>
+                    <p class="mb-2 text-muted small">
+                        <i class="bi bi-collection"></i>
+                        Beschikbaar: {{ boek.beschikbaar_aantal }}
+                    </p>
+                    <div class="mt-auto d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm w-100" type="button" data-bs-toggle="modal" data-bs-target="#modal{{ boek.ISBN }}">
+                            Meer info
+                        </button>
+                        <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-success btn-sm w-100 {% if boek.beschikbaar_aantal == 0 %}disabled{% endif %}">
+                            Reserveer
+                        </a>
+                        {% if user and user.rol in ['admin', 'bibliothecaris'] %}
+                        <a href="{{ url_for('change', ISBN=boek.ISBN) }}" class="btn btn-warning btn-sm w-100">
+                            Bewerk
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for book details -->
+        <div class="modal fade" id="modal{{ boek.ISBN }}" tabindex="-1" aria-labelledby="modalLabel{{ boek.ISBN }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalLabel{{ boek.ISBN }}">{{ boek.titel }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+              </div>
+              <div class="modal-body row">
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                  <img src="/static/upload/{{ boek.ISBN }}.jpg" class="img-fluid rounded shadow" alt="Boek Cover">
+                </div>
+                <div class="col-md-8">
+                  <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item">
+                        <strong>Auteur:</strong>
+                        {% if boek.auteurs %}
+                            {% for auteur in boek.auteurs %}
+                                {{ auteur.naam }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-danger">Onbekend</span>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Genre:</strong>
+                        {% if boek.genres %}
+                            {% for genre in boek.genres %}
+                                {{ genre.naam }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-danger">Onbekend</span>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Locatie:</strong>
+                        {{ boek.locatie.naam if boek.locatie else 'Onbekend' }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>ISBN:</strong> {{ boek.ISBN }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Beschikbare exemplaren:</strong> {{ boek.beschikbaar_aantal }}
+                    </li>
+                  </ul>
+                  <div>
+                    <strong>Beschrijving:</strong><br>
+                    <span class="text-secondary">{{ boek.beschrijving or 'Geen beschrijving beschikbaar.' }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-success {% if boek.beschikbaar_aantal == 0 %}disabled{% endif %}">Reserveer</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+    
 </div>
 {% if boeken|length == 0 %}
 <div class="alert alert-info text-center mt-5">
