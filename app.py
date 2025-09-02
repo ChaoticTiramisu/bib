@@ -9,7 +9,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, Column, Integer, String, ForeignKey, DateTime  # Add DateTime here
 from sqlalchemy.sql.expression import or_
-from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie
+from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie, Locatie
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from sqlalchemy.orm import relationship, mapped_column
@@ -227,27 +227,19 @@ def adminworkspace():
         genres = db.session.query(Genre.naam).filter_by(deleted = False).all()
         themas = db.session.query(Thema.naam).filter_by(deleted = False).all()
         auteurs = db.session.query(Auteur.naam).filter_by(deleted = False).all()
+        locaties = db.session.query(Locatie).order_by(Locatie.naam).all()
         
-        return render_template("boeken_control.html", genres=genres, themas=themas, auteurs=auteurs)
+        return render_template("boeken_control.html", genres=genres, themas=themas, auteurs=auteurs, locaties=locaties)
     else:
         abort(404)
 
 
 
 #boeken toevoegen url
-@app.route("/adminworkspace/tools/add", methods=["POST"])
+@app.route("/adminworkspace/tools/add", methods=["POST", "GET"])
 def add():
-    if session.get('email') is None:
-        flash("Je moet ingelogd zijn om deze actie uit te voeren.", "error")
-        return redirect(url_for("login"))
-        
-    test = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
-    if str(test.rol).lower() not in ["bibliothecaris", "admin"]:
-        flash("Je hebt geen toestemming om deze actie uit te voeren.", "error")
-        abort(403)
-    
-    # Handle genre addition
-    if "genre" in request.form and "ISBN" not in request.form:
+    locaties = db.session.query(Locatie).order_by(Locatie.naam).all()
+    if request.method == "POST":
         genre_naam = request.form["genre"].lower()
         if not checkContains(Genre, "naam", genre_naam):
             new_genre = Genre(naam=genre_naam)
@@ -316,6 +308,12 @@ def add():
             selected_genres = request.form.getlist("genres")
             selected_auteurs = request.form.getlist("auteurs")
             selected_themas = request.form.getlist("themas")
+            locatie_naam = request.form.get("locatie")
+            locatie = db.session.query(Locatie).filter_by(naam=locatie_naam).first()
+            if not locatie and locatie_naam:
+                locatie = Locatie(naam=locatie_naam)
+                db.session.add(locatie)
+                db.session.commit()
 
             genres = [db.session.query(Genre).filter_by(naam=genre_name).first() or Genre(naam=genre_name) 
                       for genre_name in selected_genres]
@@ -329,7 +327,8 @@ def add():
                 ISBN=ISBN,
                 beschrijving=beschrijving,
                 status=status,
-                bvdm=bvdm
+                bvdm=bvdm,
+                locatie=locatie
             )
             
             boek.genres.extend(genres)

@@ -74,11 +74,13 @@ class Boek(Base):
     beschikbaar_aantal = mapped_column(Integer, nullable=False, default=1)  # Available copies
     aantal_bladzijden = mapped_column(Integer, nullable=True)
     deleted = mapped_column(Boolean, default=False)
+    locatie_id = mapped_column(Integer, ForeignKey("locaties.id"), nullable=True)
 
     themas = relationship('Thema', secondary=boek_thema_association, back_populates='boeken', lazy="select")
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken', lazy="select")
     auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken', lazy="select")
     reservaties = relationship("Reservatie", back_populates="boek", lazy="select")
+    locatie = relationship("Locatie", back_populates="boeken")
 
     def __repr__(self):
         return f"<Boek(ISBN={self.ISBN}, titel={self.titel})>"
@@ -136,6 +138,13 @@ class Auteur(Base):
 
     def __repr__(self):
         return f"<Auteur(id={self.id}, naam={self.naam})>"
+
+# Location model
+class Locatie(Base):
+    __tablename__ = "locaties"
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    naam = mapped_column(String, unique=True, nullable=False)
+    boeken = relationship("Boek", back_populates="locatie")
 
 # Create all tables
 Base.metadata.create_all(engine)

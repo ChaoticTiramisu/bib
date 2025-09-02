@@ -53,6 +53,16 @@
               <label for="bvdm" class="form-check-label">Boek van de maand</label>
             </div>
 
+            <div class="mb-3">
+              <label for="locatie" class="form-label">Locatie</label>
+              <input list="locatieLijst" name="locatie" id="locatie" class="form-control" placeholder="Typ of kies een locatie">
+              <datalist id="locatieLijst">
+                {% for locatie in locaties %}
+                  <option value="{{ locatie.naam }}">
+                {% endfor %}
+              </datalist>
+            </div>
+
             <!-- Genres Section -->
             <div class="mb-3">
               <h5>Genres</h5>
