@@ -73,6 +73,11 @@
                         <a href="{{ url_for('reserveer_boek', ISBN=boek.ISBN) }}" class="btn btn-success btn-sm w-100 {% if boek.beschikbaar_aantal == 0 %}disabled{% endif %}">
                             Reserveer
                         </a>
+                        {% if user and user.rol in ['admin', 'bibliothecaris'] %}
+                        <a href="{{ url_for('change', ISBN=boek.ISBN) }}" class="btn btn-warning btn-sm w-100">
+                            Bewerk
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
