@@ -509,7 +509,7 @@ def change(ISBN):
 
 @app.route("/boek/<ISBN>")
 def boek(ISBN):
-    boek = db.session.query(Boek).filter_by(ISBN=ISBN,deleted = False).first_or_404()
+    boek = db.session.query(Boek).filter_by(ISBN=int(ISBN),deleted = False).first_or_404()
 
     # Fetch reserved dates for the book
     reserved_dates = [
