@@ -95,6 +95,7 @@ class Reservatie(Base):
     start_date = mapped_column(Date, nullable=False)
     end_date = mapped_column(Date, nullable=False)
     deleted = mapped_column(Boolean, default=False)
+    afgehaald = mapped_column(Boolean, default=False)
 
     boek = relationship("Boek", back_populates="reservaties", lazy="joined")
     gebruiker = relationship("Gebruiker", back_populates="reservaties", lazy="joined")

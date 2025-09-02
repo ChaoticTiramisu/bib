@@ -765,6 +765,52 @@ def verwijder_gebruiker(gebruiker_id):
     
     return redirect(url_for('gebruikers'))  # Redirect back to the users list
 
+@app.route('/boek_terug_inleveren/<int:reservatie_id>', methods=['POST'])
+@actief_required
+def boek_terug_inleveren(reservatie_id):
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    if gebruiker.rol not in ['admin', 'bibliothecaris']:
+        flash("Geen rechten om deze actie uit te voeren.", "error")
+        return redirect(url_for('index'))
+
+    reservatie = db.session.query(Reservatie).get(reservatie_id)
+    if not reservatie or not reservatie.afgehaald:
+        flash("Reservatie niet gevonden of niet afgehaald.", "error")
+        return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
+
+    boek = db.session.query(Boek).filter_by(ISBN=reservatie.boek_isbn).first()
+    if boek:
+        boek.beschikbaar_aantal += 1
+        reservatie.afgehaald = False  # Of markeer als 'afgehandeld'
+        db.session.commit()
+        flash("Boek terug inleveren bevestigd en beschikbaar aantal aangepast.", "success")
+    else:
+        flash("Boek niet gevonden.", "error")
+    return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
+
+@app.route('/bevestig_afhaling/<int:reservatie_id>', methods=['POST'])
+@actief_required
+def bevestig_afhaling(reservatie_id):
+    gebruiker = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
+    if gebruiker.rol not in ['admin', 'bibliothecaris']:
+        flash("Geen rechten om deze actie uit te voeren.", "error")
+        return redirect(url_for('index'))
+
+    reservatie = db.session.query(Reservatie).get(reservatie_id)
+    if not reservatie or reservatie.afgehaald:
+        flash("Reservatie niet gevonden of al afgehaald.", "error")
+        return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
+
+    boek = db.session.query(Boek).filter_by(ISBN=reservatie.boek_isbn).first()
+    if boek and boek.beschikbaar_aantal > 0:
+        boek.beschikbaar_aantal -= 1
+        reservatie.afgehaald = True
+        db.session.commit()
+        flash("Afhaling bevestigd en beschikbaar aantal aangepast.", "success")
+    else:
+        flash("Boek niet gevonden of geen exemplaren beschikbaar.", "error")
+    return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
+
 @app.route('/gebruiker/<int:gebruiker_id>', methods=['GET'])
 @actief_required
 def gebruiker_info(gebruiker_id):

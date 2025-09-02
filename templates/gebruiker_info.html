@@ -32,6 +32,22 @@
                     <form action="{{ url_for('verwijder_reservatie', reservatie_id=reservering.id) }}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-danger btn-sm mt-2" onclick="return confirm('Weet je zeker dat je deze reservatie wilt verwijderen?')">Verwijder</button>
                     </form>
+                    {% if gebruiker.rol in ['admin', 'bibliothecaris'] and not reservering.afgehaald %}
+                    <form action="{{ url_for('bevestig_afhaling', reservatie_id=reservering.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-success btn-sm mt-2"
+                            onclick="return confirm('Bevestig dat het boek is afgehaald?')">
+                            Bevestig Afhaling
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% if gebruiker.rol in ['admin', 'bibliothecaris'] and reservering.afgehaald and reservering.end_date < now().date() %}
+                    <form action="{{ url_for('boek_terug_inleveren', reservatie_id=reservering.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-warning btn-sm mt-2"
+                            onclick="return confirm('Bevestig dat het boek is teruggebracht?')">
+                            Boek terug inleveren
+                        </button>
+                    </form>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
