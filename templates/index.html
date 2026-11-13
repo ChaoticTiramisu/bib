@@ -19,7 +19,7 @@
             <div class="swiper-slide">
               <a href="{{ url_for('boek', ISBN=isbn) }}">
                 <div class="card shadow-sm p-3" style="background-color: #f8f9fa;">
-                  <img src="../static/upload/{{ isbn }}.png" class="d-block mx-auto img-fluid" alt="Boek van de maand" style="height: 300px; object-fit: cover;">
+                  <img src="{{ bvdm_cover }}" class="d-block mx-auto img-fluid" alt="Boek van de maand" style="height: 300px; object-fit: cover;">
                 </div>
               </a>
             </div>
@@ -44,7 +44,7 @@
             <div class="swiper-slide">
               <a href="{{ url_for('boek', ISBN=boek.ISBN) }}">
                 <div class="card shadow-sm p-3" style="background-color: #f8f9fa;">
-                  <img src="{{ url_for('static', filename='upload/' ~ boek.ISBN ~ '.png') }}" class="d-block mx-auto img-fluid" alt="{{ boek.titel }}" style="height: 300px; object-fit: cover;">
+                  <img src="{{ boek.cover_path }}" class="d-block mx-auto img-fluid" alt="{{ boek.titel }}" style="height: 300px; object-fit: cover;">
                 </div>
               </a>
               <div class="text-center mt-2">

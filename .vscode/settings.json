@@ -1,0 +1,11 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/env/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.venvPath": "${workspaceFolder}",
+  "python.analysis.venv": "env",
+  "python.analysis.extraPaths": ["${workspaceFolder}"],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  }
+}

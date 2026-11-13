@@ -19,3 +19,6 @@ Flask-Bootstrap==3.3.7.1
 gunicorn==22.0.0
 psutil
 waitress
+
+pandas
+psycopg2-binary

@@ -21,6 +21,22 @@ def is_wsl():
     """Detecteer of het script draait in Windows Subsystem for Linux (WSL)."""
     return 'microsoft' in platform.uname().release.lower()
 
+def get_venv_python():
+    """
+    Kies een Python-versie die door de dependencies ondersteund wordt.
+    SQLAlchemy 2.0.25 werkt niet op Python 3.14, dus zoek dan een oudere versie.
+    """
+    if sys.version_info < (3, 14):
+        return sys.executable
+    for kandidaat in ("python3.12", "python3.13", "python3.11", "python3.10"):
+        pad = shutil.which(kandidaat)
+        if pad:
+            print(f"Python {sys.version.split()[0]} is te nieuw; de virtuele omgeving wordt gemaakt met {kandidaat}.")
+            return pad
+    print("Waarschuwing: Python 3.14 wordt niet ondersteund door SQLAlchemy 2.0.25.")
+    print("Installeer Python 3.12 of 3.13 en voer setup.py daarmee opnieuw uit.")
+    return sys.executable
+
 def create_venv(venv_name):
     """
     Maak een virtuele omgeving aan met de opgegeven naam.
@@ -39,7 +55,7 @@ def create_venv(venv_name):
             print(f"Gebruik bestaande virtuele omgeving '{venv_name}'.")
             return
     try:
-        subprocess.check_call([sys.executable, '-m', 'venv', venv_name])
+        subprocess.check_call([get_venv_python(), '-m', 'venv', venv_name])
         print(f"Virtuele omgeving '{venv_name}' succesvol aangemaakt.")
     except subprocess.CalledProcessError as e:
         print(f"Fout bij aanmaken virtuele omgeving '{venv_name}': {e}")
@@ -209,26 +225,28 @@ def start_server():
     Start de server in een nieuwe terminal of command prompt, afhankelijk van het platform.
     Op Windows wordt waitress gebruikt, op Linux gunicorn.
     """
+    project_dir = os.path.abspath(os.path.dirname(__file__))
+    python_path = os.path.abspath(get_python_path())
     if platform.system() == "Windows":
-        venv_activate = str(Path('env') / 'Scripts' / 'activate.bat')
-        waitress_cmd = f"python -m waitress --port=5000 app:app"
-        cmd = f'start "waitress_server" cmd.exe /K "call {venv_activate} && {waitress_cmd}"'
-        subprocess.Popen(cmd, shell=True)
-        print("Waitress gestart in een nieuw venster met geactiveerde virtuele omgeving.")
+        subprocess.Popen(
+            [python_path, '-m', 'waitress', '--port=5000', 'app:app'],
+            cwd=project_dir,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )
+        print("Waitress gestart in een nieuw venster met de virtuele omgeving.")
     else:
+        gunicorn_cmd = f'cd "{project_dir}" && "{python_path}" -m gunicorn -w 2 -b 0.0.0.0:5000 app:app'
         if is_wsl():
             print("Je draait in WSL. Automatisch openen van een Linux-terminal werkt hier niet. Start de server handmatig:")
-            print(f"source env/bin/activate && gunicorn -w 2 -b 0.0.0.0:5000 app:app")
+            print(gunicorn_cmd)
             return
-        venv_activate = str(Path('env') / 'bin' / 'activate')
-        gunicorn_cmd = f"gunicorn -w 2 -b 0.0.0.0:5000 app:app"
         # Probeer verschillende terminals te openen, afhankelijk van wat beschikbaar is
         terminals = [
-            ['gnome-terminal', '--', 'bash', '-c', f"source {venv_activate}; {gunicorn_cmd}; exec bash"],
-            ['konsole', '-e', f"bash -c 'source {venv_activate}; {gunicorn_cmd}; exec bash'"],
-            ['xfce4-terminal', '-e', f"bash -c 'source {venv_activate}; {gunicorn_cmd}; exec bash'"],
-            ['xterm', '-e', f"bash -c 'source {venv_activate}; {gunicorn_cmd}; exec bash'"],
-            ['x-terminal-emulator', '-e', f"bash -c 'source {venv_activate}; {gunicorn_cmd}; exec bash'"],
+            ['gnome-terminal', '--', 'bash', '-c', f"{gunicorn_cmd}; exec bash"],
+            ['konsole', '-e', f"bash -c '{gunicorn_cmd}; exec bash'"],
+            ['xfce4-terminal', '-e', f"bash -c '{gunicorn_cmd}; exec bash'"],
+            ['xterm', '-e', f"bash -c '{gunicorn_cmd}; exec bash'"],
+            ['x-terminal-emulator', '-e', f"bash -c '{gunicorn_cmd}; exec bash'"],
         ]
         opened = False
         for term in terminals:
@@ -241,7 +259,7 @@ def start_server():
                 continue
         if not opened:
             print("Kon geen geschikte terminal openen. Start de server handmatig:")
-            print(f"source env/bin/activate && gunicorn -w 2 -b 0.0.0.0:5000 app:app")
+            print(gunicorn_cmd)
 
 def stop_server():
     """

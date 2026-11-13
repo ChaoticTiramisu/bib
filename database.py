@@ -3,11 +3,15 @@ from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
 from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
 from sqlalchemy_utils import database_exists, create_database, ChoiceType
 from datetime import datetime
+import os
 import sys
 import click
 
 # Initialize the database engine
-engine = create_engine("postgresql+psycopg2://glorieuxsecundair:wweasyhost_ubuntu_mila_6ICW!@localhost/bibdb", echo=True)
+basedir = os.path.dirname(os.path.abspath(__file__))
+os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
+standaard_db = "sqlite:///" + os.path.join(basedir, "instance", "bib.db")
+engine = create_engine(os.environ.get("DATABASE_URL", standaard_db), echo=True)
 
 # Create the database if it doesn't exist
 if not database_exists(engine.url):

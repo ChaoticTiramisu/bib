@@ -33,8 +33,10 @@ app.config["SESSION_PERMANENT"] = False
 # je hebt verschillende soort databases dus vandaar het type nog eens toelichten.
 app.config["SESSION_TYPE"] = "sqlalchemy"
 # het pad configugeren van de route naar de database
-basedir = os.path.abspath(os.path.dirname(__file__)) 
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://glorieuxsecundair:wweasyhost_ubuntu_mila_6ICW!@localhost/bibdb"
+basedir = os.path.abspath(os.path.dirname(__file__))
+# standaard een lokale SQLite-database; zet DATABASE_URL om de Postgres-server te gebruiken
+standaard_db = "sqlite:///" + os.path.join(basedir, "instance", "bib.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", standaard_db)
 app.config['UPLOAD_FOLDER'] = 'static/upload'
 
 # de beveillingssleutel voor redenen
@@ -75,6 +77,15 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def cover_path(boek):
+    """Geef het pad naar de cover van een boek, of de standaardcover."""
+    base = os.path.join("static", "upload", boek.ISBN)
+    if os.path.exists(base + ".jpg"):
+        return f"/static/upload/{boek.ISBN}.jpg"
+    if os.path.exists(base + ".png"):
+        return f"/static/upload/{boek.ISBN}.png"
+    return "/static/upload/default_cover.png"
+
 @app.context_processor
 def inject_gebruiker():
     gebruiker = None
@@ -102,15 +113,30 @@ def index():
         user = db.session.query(Gebruiker).filter_by(email=email).first()
         if user is None:
             return redirect(url_for("login"))
-        if db.session.query(Boek).filter_by(bvdm=True).limit(3).all():
-            boek = db.session.query(Boek).filter_by(bvdm=True,deleted = False).first()
-            bvdm = boek.bvdm
-            isbn = boek.ISBN
-        else:
-            bvdm = None
-            isbn = None
-    laatste_boeken = db.session.query(Boek).order_by(Boek.toegevoegd_op.desc()).limit(3).all()
-    return render_template("index.html", bvdm = bvdm, isbn = isbn, boeken=laatste_boeken)
+        boek_van_de_maand = (
+            db.session.query(Boek)
+            .filter_by(bvdm=True, deleted=False)
+            .first()
+        )
+        bvdm = boek_van_de_maand is not None
+        isbn = boek_van_de_maand.ISBN if boek_van_de_maand else None
+        bvdm_cover = cover_path(boek_van_de_maand) if boek_van_de_maand else None
+    laatste_boeken = (
+        db.session.query(Boek)
+        .filter_by(deleted=False)
+        .order_by(Boek.toegevoegd_op.desc())
+        .limit(3)
+        .all()
+    )
+    for boek in laatste_boeken:
+        boek.cover_path = cover_path(boek)
+    return render_template(
+        "index.html",
+        bvdm=bvdm,
+        isbn=isbn,
+        bvdm_cover=bvdm_cover,
+        boeken=laatste_boeken,
+    )
 
 # 2 methodes POST en GET, POST= wanneer een gebruiker data naar jou verstuurd. Get is wanneer een gebruiker data vraagt.
 @app.route("/login", methods=["POST", "GET"])
@@ -197,13 +223,7 @@ def boeken():
     themas = db.session.query(Thema).filter_by(deleted=False).all()
     locaties = db.session.query(Locatie).all()
     for boek in boeken:
-        base = os.path.join("static", "upload", boek.ISBN)
-        if os.path.exists(os.path.join(base + ".jpg")):
-            boek.cover_path = f"/static/upload/{boek.ISBN}.jpg"
-        elif os.path.exists(os.path.join(base + ".png")):
-            boek.cover_path = f"/static/upload/{boek.ISBN}.png"
-        else:
-            boek.cover_path = "/static/upload/default_cover.png"
+        boek.cover_path = cover_path(boek)
     return render_template(
         "boeken.html",
         boeken=boeken,
@@ -248,13 +268,7 @@ def search_partial():
     boeken = boeken_query.distinct().limit(20).all()
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
     for boek in boeken:
-        base = os.path.join("static", "upload", boek.ISBN)
-        if os.path.exists(os.path.join(base + ".jpg")):
-            boek.cover_path = f"/static/upload/{boek.ISBN}.jpg"
-        elif os.path.exists(os.path.join(base + ".png")):
-            boek.cover_path = f"/static/upload/{boek.ISBN}.png"
-        else:
-            boek.cover_path = "/static/upload/default_cover.png"
+        boek.cover_path = cover_path(boek)
     return render_template("partials/boeken_grid.html", boeken=boeken, user=user)
 
 
@@ -561,13 +575,7 @@ def change(ISBN):
 def boek(ISBN):
     boek = db.session.query(Boek).filter_by(ISBN=ISBN, deleted=False).first_or_404()
     # Cover path bepalen
-    base = os.path.join("static", "upload", boek.ISBN)
-    if os.path.exists(os.path.join(base + ".jpg")):
-        boek.cover_path = f"/static/upload/{boek.ISBN}.jpg"
-    elif os.path.exists(os.path.join(base + ".png")):
-        boek.cover_path = f"/static/upload/{boek.ISBN}.png"
-    else:
-        boek.cover_path = "/static/upload/default_cover.png"
+    boek.cover_path = cover_path(boek)
     # reserved_dates en andere context zoals je al had
     reserved_dates = [
         {
@@ -876,6 +884,7 @@ def overdue_reservations():
         # Filter overdue reservations by user name or email
         overdue_reservations = db.session.query(Reservatie).join(Gebruiker).filter(
             Reservatie.end_date < today,
+            Reservatie.deleted == False,
             or_(
                 Gebruiker.naam.ilike(f"%{query}%"),
                 Gebruiker.achternaam.ilike(f"%{query}%"),
@@ -884,7 +893,10 @@ def overdue_reservations():
         ).all()
     else:
         # Fetch all overdue reservations if no query is provided
-        overdue_reservations = db.session.query(Reservatie).filter(Reservatie.end_date < today,deleted = False).all()
+        overdue_reservations = db.session.query(Reservatie).filter(
+            Reservatie.end_date < today,
+            Reservatie.deleted == False
+        ).all()
 
     return render_template('overdue_reservations.html', overdue_reservations=overdue_reservations)
 
