@@ -1,13 +1,12 @@
-from pathlib import Path
-import subprocess
-import sys
-import os
-import shutil
-import zipfile
 import datetime
 import glob
-import signal
+import os
 import platform
+import shutil
+import subprocess
+import sys
+import zipfile
+from pathlib import Path
 
 # Probeer psutil te importeren, installeer indien nodig automatisch
 try:
@@ -24,7 +23,7 @@ def is_wsl():
 def get_venv_python():
     """
     Kies een Python-versie die door de dependencies ondersteund wordt.
-    SQLAlchemy 2.0.25 werkt niet op Python 3.14, dus zoek dan een oudere versie.
+    De app is getest met Python 3.12/3.13; bij 3.14 wordt een oudere versie gezocht.
     """
     if sys.version_info < (3, 14):
         return sys.executable
@@ -33,7 +32,7 @@ def get_venv_python():
         if pad:
             print(f"Python {sys.version.split()[0]} is te nieuw; de virtuele omgeving wordt gemaakt met {kandidaat}.")
             return pad
-    print("Waarschuwing: Python 3.14 wordt niet ondersteund door SQLAlchemy 2.0.25.")
+    print("Waarschuwing: de app is getest met Python 3.12/3.13; Python 3.14 is nog niet gevalideerd.")
     print("Installeer Python 3.12 of 3.13 en voer setup.py daarmee opnieuw uit.")
     return sys.executable
 

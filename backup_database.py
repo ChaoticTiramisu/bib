@@ -1,8 +1,9 @@
 import os
 import shutil
-import schedule
 import time
 from datetime import datetime
+
+import schedule
 
 # Path to the database file
 db_path = os.path.join('instance', 'bib.db')

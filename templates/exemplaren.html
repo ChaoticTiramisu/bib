@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Exemplaren{% endblock title %}
+
+{% block body %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-1">Exemplaren</h1>
+      <p class="text-muted mb-0">Elk fysiek boek heeft een eigen barcode en status.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('inventaris') }}" class="btn btn-outline-primary">Inventaris scannen</a>
+      <a href="{{ url_for('adminworkspace') }}" class="btn btn-outline-secondary">Terug naar beheer</a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Titel</th>
+            <th>ISBN</th>
+            <th class="text-end">Totaal</th>
+            <th class="text-end">Beschikbaar</th>
+            <th class="text-end">Acties</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for boek in boeken %}
+          <tr>
+            <td>{{ boek.titel }}</td>
+            <td><code>{{ boek.ISBN }}</code></td>
+            <td class="text-end">{{ boek.aantal }}</td>
+            <td class="text-end">
+              <span class="badge {% if boek.beschikbaar_aantal %}bg-success{% else %}bg-secondary{% endif %}">
+                {{ boek.beschikbaar_aantal }}
+              </span>
+            </td>
+            <td class="text-end">
+              <a href="{{ url_for('labels', isbn=boek.ISBN) }}" class="btn btn-sm btn-outline-secondary">
+                Labels printen
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Nog geen boeken gevonden.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock body %}

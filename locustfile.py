@@ -1,6 +1,8 @@
-from locust import HttpUser, task, between
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+
+from locust import HttpUser, between, task
+
 
 class BibliotheekUser(HttpUser):
     wait_time = between(1, 3)  # Random wait between tasks

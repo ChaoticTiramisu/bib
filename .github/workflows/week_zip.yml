@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set school year week number for the previous week
         run: |
@@ -25,10 +25,11 @@ jobs:
       - name: Create zip file
         run: |
           ZIP_FILE="project-school-year-week-${SCHOOL_YEAR_WEEK}.zip"
-          zip -r $ZIP_FILE . # Create the zip file
+          zip -r "$ZIP_FILE" . \
+            -x 'env/*' '.git/*' '*.db' '__pycache__/*' '.pytest_cache/*' '.ruff_cache/*'
 
       - name: Upload zip file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: project-school-year-week-${{ env.SCHOOL_YEAR_WEEK }}.zip
           path: project-school-year-week-${{ env.SCHOOL_YEAR_WEEK }}.zip

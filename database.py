@@ -1,17 +1,36 @@
-from flask import app
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine, Boolean, Date, DateTime
-from sqlalchemy.orm import relationship, declarative_base, mapped_column, Session
-from sqlalchemy_utils import database_exists, create_database, ChoiceType
-from datetime import datetime
-import os
-import sys
+from datetime import UTC, datetime
+
 import click
+from flask_bcrypt import generate_password_hash
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    create_engine,
+    event,
+)
+from sqlalchemy.orm import Session, declarative_base, mapped_column, relationship
+from sqlalchemy_utils import ChoiceType, create_database, database_exists
+
+import config
 
 # Initialize the database engine
-basedir = os.path.dirname(os.path.abspath(__file__))
-os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
-standaard_db = "sqlite:///" + os.path.join(basedir, "instance", "bib.db")
-engine = create_engine(os.environ.get("DATABASE_URL", standaard_db), echo=True)
+engine = create_engine(config.DATABASE_URL, echo=config.SQL_ECHO, pool_pre_ping=True)
+
+# SQLite handhaaft foreign keys standaard niet; zet ze per connectie aan.
+if engine.url.get_backend_name() == "sqlite":
+
+    @event.listens_for(engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
 
 # Create the database if it doesn't exist
 if not database_exists(engine.url):
@@ -73,7 +92,7 @@ class Boek(Base):
     status = mapped_column(Boolean, nullable=True)
     beschrijving = mapped_column(String, nullable=False)
     bvdm = mapped_column(Boolean, nullable=True)
-    toegevoegd_op = mapped_column(DateTime, default=datetime.utcnow)
+    toegevoegd_op = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     aantal = mapped_column(Integer, nullable=False, default=1)  # Total copies
     beschikbaar_aantal = mapped_column(Integer, nullable=False, default=1)  # Available copies
     aantal_bladzijden = mapped_column(Integer, nullable=True)
@@ -84,10 +103,39 @@ class Boek(Base):
     genres = relationship('Genre', secondary=boek_genre_association, back_populates='boeken', lazy="select")
     auteurs = relationship('Auteur', secondary=boek_auteur_association, back_populates='boeken', lazy="select")
     reservaties = relationship("Reservatie", back_populates="boek", lazy="select")
+    exemplaren = relationship("Exemplaar", back_populates="boek", lazy="select")
     locatie = relationship("Locatie", back_populates="boeken")
 
     def __repr__(self):
         return f"<Boek(ISBN={self.ISBN}, titel={self.titel})>"
+
+# Copy model: elk fysiek boek heeft een eigen barcode en status.
+class Exemplaar(Base):
+    __tablename__ = "exemplaren"
+
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    boek_isbn = mapped_column(String, ForeignKey("boeken.ISBN"), nullable=False, index=True)
+    barcode = mapped_column(String, unique=True, nullable=False, index=True)
+    status_list = [
+        ("beschikbaar", "Beschikbaar"),
+        ("uitgeleend", "Uitgeleend"),
+        ("herstel", "In herstel"),
+        ("verloren", "Verloren"),
+    ]
+    status = mapped_column(
+        ChoiceType(status_list, impl=String()), nullable=False, default="beschikbaar"
+    )
+    locatie_id = mapped_column(Integer, ForeignKey("locaties.id"), nullable=True)
+    aankoopdatum = mapped_column(Date, nullable=True)
+    conditie = mapped_column(String, nullable=True)
+    laatst_gezien = mapped_column(DateTime, nullable=True)
+    deleted = mapped_column(Boolean, default=False)
+
+    boek = relationship("Boek", back_populates="exemplaren")
+    locatie = relationship("Locatie")
+
+    def __repr__(self):
+        return f"<Exemplaar(barcode={self.barcode}, isbn={self.boek_isbn}, status={self.status})>"
 
 # Reservation model
 class Reservatie(Base):
@@ -169,7 +217,7 @@ def create_admin():
                 naam="Admin",
                 achternaam="User",
                 email=admin_email,
-                paswoord=admin_password,
+                paswoord=generate_password_hash(admin_password).decode("utf-8"),
                 rol="admin",
                 actief=True
             )

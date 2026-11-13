@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Labels - {{ boek.titel }}{% endblock title %}
+
+{% block body %}
+<style>
+  .label-sheet {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6mm;
+  }
+  .label-card {
+    border: 1px dashed #adb5bd;
+    border-radius: 3mm;
+    padding: 3mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    min-height: 38mm;
+  }
+  .label-card .label-school {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6c757d;
+  }
+  .label-card .label-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.15;
+    max-height: 2.4em;
+    overflow: hidden;
+  }
+  .label-card .label-author {
+    font-size: 0.7rem;
+    color: #495057;
+  }
+  .label-card svg {
+    width: 100%;
+    height: auto;
+    max-height: 15mm;
+  }
+  .label-card .label-code {
+    font-family: monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+  }
+  @media print {
+    nav,
+    .no-print {
+      display: none !important;
+    }
+    main.container {
+      margin: 0 !important;
+      padding: 0 !important;
+      max-width: none !important;
+    }
+    .label-sheet {
+      gap: 4mm;
+    }
+    .label-card {
+      border: 1px solid #dee2e6;
+    }
+    @page {
+      size: A4;
+      margin: 10mm;
+    }
+  }
+</style>
+
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 no-print">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-1">Labels printen</h1>
+      <p class="text-muted mb-0">{{ boek.titel }} — {{ labels|length }} exemplaar/exemplaren</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" onclick="window.print()">Printen</button>
+      <a href="{{ url_for('exemplaren_overzicht') }}" class="btn btn-outline-secondary">Terug</a>
+    </div>
+  </div>
+
+  {% if labels %}
+  <div class="label-sheet">
+    {% for label in labels %}
+    <div class="label-card">
+      <div class="label-school">Schoolbibliotheek</div>
+      <div class="label-title">{{ boek.titel }}</div>
+      <div class="label-author">
+        {% for auteur in boek.auteurs %}{{ auteur.naam }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </div>
+      <div class="mt-1">
+        {{ label.svg|safe }}
+      </div>
+      <div class="label-code">{{ label.exemplaar.barcode }}</div>
+      <div class="label-author">
+        {{ label.exemplaar.locatie.naam if label.exemplaar.locatie else (boek.locatie.naam if boek.locatie else 'Geen locatie') }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning">
+    Dit boek heeft nog geen exemplaren. Voeg eerst exemplaren toe via het boek bewerken of
+    <a href="{{ url_for('scan_boek') }}">scan het boek opnieuw</a>.
+  </div>
+  {% endif %}
+</div>
+{% endblock body %}

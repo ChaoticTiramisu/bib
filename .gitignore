@@ -6,3 +6,6 @@
 /migrations
 gunicorn.pid
 backups/
+.env
+.pytest_cache/
+.ruff_cache/

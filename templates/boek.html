@@ -66,7 +66,12 @@
             <p><strong>Beschrijving:</strong><br>
                 {{ boek.beschrijving or 'Geen beschrijving beschikbaar.' }}
             </p>
-            <p><strong>Beschikbare exemplaren:</strong> {{ boek.beschikbaar_aantal }}</p>
+            <p><strong>Exemplaren:</strong> {{ boek.beschikbaar_aantal }} van {{ boek.aantal }} beschikbaar</p>
+            {% if rol in ['admin', 'bibliothecaris'] %}
+            <a href="{{ url_for('labels', isbn=boek.ISBN) }}" class="btn btn-outline-secondary btn-sm">
+                Labels printen
+            </a>
+            {% endif %}
         </div>
     </div>
 

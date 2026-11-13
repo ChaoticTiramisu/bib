@@ -9,17 +9,21 @@ Gebruik:
 
 from datetime import date, timedelta
 
+from flask_bcrypt import generate_password_hash
+
 from database import (
     Auteur,
     Boek,
-    Genre,
+    Exemplaar,
     Gebruiker,
+    Genre,
     Locatie,
     Reservatie,
     Session,
     Thema,
     engine,
 )
+from services.exemplaren import synchroniseer, zorg_voor_exemplaren
 
 
 def get_or_create(session, model, defaults=None, **filters):
@@ -323,7 +327,7 @@ def main():
                 defaults={
                     "naam": naam,
                     "achternaam": achternaam,
-                    "paswoord": paswoord,
+                    "paswoord": generate_password_hash(paswoord).decode("utf-8"),
                     "rol": rol,
                     "actief": actief,
                 },
@@ -425,6 +429,16 @@ def main():
                 .count()
                 > 0
             )
+
+            bestaande_exemplaren = (
+                session.query(Exemplaar)
+                .filter_by(boek_isbn=boek.ISBN, deleted=False)
+                .count()
+            )
+            if bestaande_exemplaren:
+                synchroniseer(session, boek)
+            else:
+                zorg_voor_exemplaren(session, boek)
 
         session.commit()
 

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Inventaris{% endblock title %}
+
+{% block body %}
+<div id="inventaris-app"
+     class="container py-4"
+     data-lookup-base="{{ url_for('api_exemplaar', barcode='__BARCODE__') }}"
+     data-aanwezig-base="{{ url_for('api_exemplaar_aanwezig', barcode='__BARCODE__') }}">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-1">Inventaris scannen</h1>
+      <p class="text-muted mb-0">Scan de barcode op het label van elk fysiek exemplaar.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('exemplaren_overzicht') }}" class="btn btn-outline-secondary">Terug</a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <label for="inventaris-input" class="form-label fw-bold">Exemplaar-barcode</label>
+      <div class="input-group input-group-lg">
+        <input id="inventaris-input"
+               class="form-control"
+               type="text"
+               autocomplete="off"
+               autofocus
+               placeholder="BIB-000123">
+        <button class="btn btn-outline-secondary" type="button" id="inventaris-focus">Scanveld focussen</button>
+      </div>
+      <div class="form-text">Scan de code en druk op Enter. Elk gescand exemplaar wordt als aanwezig geregistreerd.</div>
+      <div id="inventaris-status" class="mt-3 small text-muted" role="status" aria-live="polite"></div>
+      <div class="mt-2">
+        Unieke exemplaren gescand: <strong id="inventaris-count">0</strong>
+      </div>
+    </div>
+  </div>
+
+  <div id="inventaris-detail" class="card shadow-sm mb-4 d-none">
+    <div class="card-body">
+      <h2 class="h5" id="detail-title"></h2>
+      <p class="text-muted mb-2" id="detail-meta"></p>
+      <p class="mb-1"><strong>Barcode:</strong> <code id="detail-barcode"></code></p>
+      <p class="mb-1"><strong>Status:</strong> <span id="detail-status"></span></p>
+      <p class="mb-1"><strong>Locatie:</strong> <span id="detail-locatie"></span></p>
+      <p class="mb-0"><strong>Laatst gezien:</strong> <span id="detail-gezien"></span></p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h6 text-muted">Laatste scans</h2>
+      <ul id="inventaris-log" class="list-unstyled small mb-0"></ul>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/inventaris.js') }}"></script>
+{% endblock body %}

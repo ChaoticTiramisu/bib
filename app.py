@@ -1,51 +1,84 @@
+"""Schoolbibliotheek: Flask-applicatie.
+
+Start lokaal met `./run.sh` of `python app.py`. Configuratie staat in config.py
+en kan via omgevingsvariabelen of een .env-bestand overschreven worden.
+"""
+
 import os
+from datetime import UTC, date, datetime, timedelta
+from functools import wraps
 
-# Ensure required folders exist
-os.makedirs(os.path.join(os.path.dirname(__file__), 'instance'), exist_ok=True)
-os.makedirs(os.path.join(os.path.dirname(__file__), 'static/upload'), exist_ok=True)
-
-# de nodige zaken importeren
-from flask import Flask, render_template, redirect, url_for, request, flash, session, abort, get_flashed_messages
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, Column, Integer, String, ForeignKey, DateTime  # Add DateTime here
-from sqlalchemy.sql.expression import or_
-from database import Gebruiker, Boek, Genre, Auteur, Thema,Reservatie, Locatie
-from werkzeug.utils import secure_filename
-from flask_migrate import Migrate
-from sqlalchemy.orm import relationship, mapped_column
-from datetime import date, datetime, timedelta
 import pandas as pd
-
-from sqlalchemy_utils import ChoiceType
-from flask import jsonify, make_response
-
-
-# dirname, is de weg naar dit bestand. 
-dirname = os.path.abspath('instance')
-app = Flask(__name__, instance_path=dirname)
-
-# configugeren van de sessie
+from flask import (
+    Flask,
+    abort,
+    flash,
+    get_flashed_messages,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func, text
+from sqlalchemy.sql.expression import or_
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-app.wsgi_app = ProxyFix(app.wsgi_app)
+import config
+from database import Auteur, Boek, Exemplaar, Gebruiker, Genre, Locatie, Reservatie, Thema
+from services.exemplaren import (
+    barcode_svg,
+    kies_beschikbaar,
+    kies_uitgeleend,
+    maak_exemplaren,
+    markeer_aanwezig,
+    reconcileer_totaal,
+    synchroniseer,
+)
+from services.isbn_lookup import (
+    IsbnFout,
+    LookupFout,
+    download_cover,
+    normaliseer_isbn,
+    zoek_metadata,
+)
 
-app.config["SESSION_PERMANENT"] = False
-# je hebt verschillende soort databases dus vandaar het type nog eens toelichten.
-app.config["SESSION_TYPE"] = "sqlalchemy"
-# het pad configugeren van de route naar de database
-basedir = os.path.abspath(os.path.dirname(__file__))
-# standaard een lokale SQLite-database; zet DATABASE_URL om de Postgres-server te gebruiken
-standaard_db = "sqlite:///" + os.path.join(basedir, "instance", "bib.db")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", standaard_db)
-app.config['UPLOAD_FOLDER'] = 'static/upload'
+app = Flask(__name__, instance_path=str(config.INSTANCE_DIR))
+app.config.from_mapping(
+    SECRET_KEY=config.SECRET_KEY,
+    SQLALCHEMY_DATABASE_URI=config.DATABASE_URL,
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    UPLOAD_FOLDER=str(config.UPLOAD_DIR),
+    MAX_CONTENT_LENGTH=config.MAX_CONTENT_LENGTH,
+    SESSION_PERMANENT=False,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
-# de beveillingssleutel voor redenen
-app.secret_key = "Arno_augu_Cairo"
-# een variabel weer korter maken voor sneller gebruik
+# hier worden alle tabellen aangemaakt
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-# hier worden alle tabellen aangemaakt
-from functools import wraps
+bcrypt = Bcrypt(app)
+
+
+def controleer_wachtwoord(gebruiker, wachtwoord):
+    """Controleer een wachtwoord en upgrade oude platte tekst naar bcrypt."""
+    opgeslagen = gebruiker.paswoord or ""
+    if opgeslagen.startswith(("$2a$", "$2b$", "$2y$")):
+        return bcrypt.check_password_hash(opgeslagen, wachtwoord)
+    if opgeslagen == wachtwoord:
+        gebruiker.paswoord = bcrypt.generate_password_hash(wachtwoord).decode("utf-8")
+        db.session.commit()
+        return True
+    return False
+
+
 def actief_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -56,20 +89,10 @@ def actief_required(f):
         return f(*args, **kwargs)
     return decorated_function
 # definitie om te checken als een bepaalde waarde in een tabel zit in een bepaalde kolom
-def checkContains(table_naam,column_naam,item):
- # getattr een string waarde omvormen naar een databasesyntax
+def checkContains(table_naam, column_naam, item):
+    # getattr een string waarde omvormen naar een databasesyntax
     column = getattr(table_naam, column_naam)
-    # het resultaat, query is dat hij gaat zoeken in de database. scalar = voor output terug naar string terug te brengen anders wordt het niet leesbaar voor de mens
-    result = db.session.query(db.session.query(table_naam).filter(column == item).exists()).scalar()
-
-    print(result)
-    return result
-
-# haalt een waarde uit een kolom
-def getValue(table, column, item):
-    result = db.session.query(table).filter(column == item).first()
-
-    return result
+    return db.session.query(table_naam).filter(column == item).first() is not None
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
@@ -79,18 +102,62 @@ def allowed_file(filename):
 
 def cover_path(boek):
     """Geef het pad naar de cover van een boek, of de standaardcover."""
-    base = os.path.join("static", "upload", boek.ISBN)
-    if os.path.exists(base + ".jpg"):
-        return f"/static/upload/{boek.ISBN}.jpg"
-    if os.path.exists(base + ".png"):
-        return f"/static/upload/{boek.ISBN}.png"
+    base = config.UPLOAD_DIR / boek.ISBN
+    for extensie in (".jpg", ".jpeg", ".png"):
+        if base.with_suffix(extensie).exists():
+            return f"/static/upload/{boek.ISBN}{extensie}"
     return "/static/upload/default_cover.png"
+
+
+def huidige_gebruiker():
+    email = session.get("email")
+    if not email:
+        return None
+    return db.session.query(Gebruiker).filter_by(email=email).first()
+
+
+def is_bibliothecaris(gebruiker=None):
+    gebruiker = gebruiker or huidige_gebruiker()
+    return bool(gebruiker and str(gebruiker.rol).lower() in ("admin", "bibliothecaris"))
+
+
+def parse_aantal(waarde, standaard=1):
+    try:
+        return max(1, int(waarde))
+    except (TypeError, ValueError):
+        return standaard
+
+
+def parse_int(waarde):
+    try:
+        return int(waarde)
+    except (TypeError, ValueError):
+        return None
+
+
+def iso_utc(waarde):
+    """ISO-string met tijdzone, ook voor naïeve datetimes uit SQLite."""
+    if waarde is None:
+        return None
+    if waarde.tzinfo is None:
+        waarde = waarde.replace(tzinfo=UTC)
+    return waarde.isoformat()
+
+
+def als_lijst(waarde):
+    if not waarde:
+        return []
+    if isinstance(waarde, str):
+        items = waarde.split(",")
+    else:
+        items = waarde
+    return [str(item).strip() for item in items if str(item).strip()]
 
 @app.context_processor
 def inject_gebruiker():
     gebruiker = None
     if 'gebruiker_id' in session:
-        gebruiker = db.session.query(Gebruiker).get(session.get("gebruiker_id"))
+        gebruiker = db.session.get(Gebruiker,session.get("gebruiker_id"))
 
     return {
         'gebruiker': gebruiker,
@@ -106,7 +173,7 @@ def index():
     # hier word de email uit de sessie gehaald
     email = session.get('email')
     #indien er geen email is, wordt je terug gestuurd naar de inlog pagina
-    if email == None:
+    if email is None:
         return redirect(url_for("login"))
     else:
     # zoeken op basis van email, welke gebruikers naam je hebt om nadien op de hoofdpagina weer te geven.
@@ -145,7 +212,7 @@ def login():
         email = request.form["login_email"]
         password = request.form["login_paswoord"]
         user = db.session.query(Gebruiker).filter_by(email=email, deleted=False).first()
-        if user and user.paswoord == password:
+        if user and controleer_wachtwoord(user, password):
             session['gebruiker_id'] = user.id
             session['email'] = user.email
             flash("Login succesvol", "success")
@@ -163,7 +230,7 @@ def register():
     #als de methode post is runt hij onderstaande commando's
     if request.method == "POST":
         register_email = request.form["register_email"]
-        if checkContains(Gebruiker,"email",register_email) == False:
+        if not checkContains(Gebruiker,"email",register_email):
 
     # alle velden die de gebruiker heeft ingevuld eruit halen (post)
             register_name = request.form["name"]
@@ -179,7 +246,7 @@ def register():
             
             
             # een nieuwe gebruiker toevoegen aan de database met volgende velden.
-                new_gebruiker = Gebruiker(naam=register_name,achternaam = register_achternaam, email = register_email, paswoord = register_password, rol = rol)
+                new_gebruiker = Gebruiker(naam=register_name,achternaam = register_achternaam, email = register_email, rol = rol, paswoord = bcrypt.generate_password_hash(register_password).decode("utf-8"))
             #database voert dit uit
                 db.session.add(new_gebruiker)
             # het opslaan van de veranderingen
@@ -244,7 +311,7 @@ def search_partial():
     locatie = request.args.get("locatie", "")
     beschikbaar = request.args.get("beschikbaar", "")
 
-    boeken_query = db.session.query(Boek).outerjoin(Boek.auteurs).outerjoin(Boek.genres).outerjoin(Boek.themas).outerjoin(Boek.locatie).filter(Boek.deleted == False)
+    boeken_query = db.session.query(Boek).outerjoin(Boek.auteurs).outerjoin(Boek.genres).outerjoin(Boek.themas).outerjoin(Boek.locatie).filter(Boek.deleted.is_(False))
 
     if q:
         boeken_query = boeken_query.filter(
@@ -263,7 +330,7 @@ def search_partial():
     if locatie:
         boeken_query = boeken_query.filter(Locatie.naam == locatie)
     if beschikbaar == "1":
-        boeken_query = boeken_query.filter(Boek.beschikbaar_aantal > 0, Boek.status == False)
+        boeken_query = boeken_query.filter(Boek.beschikbaar_aantal > 0, Boek.status.is_(False))
 
     boeken = boeken_query.distinct().limit(20).all()
     user = db.session.query(Gebruiker).filter_by(email=session.get('email')).first()
@@ -298,8 +365,7 @@ def adminworkspace():
 @app.route("/adminworkspace/tools/add", methods=["POST", "GET"])
 @actief_required
 def add():
-    locaties = db.session.query(Locatie).order_by(Locatie.naam).all()
-    if request.method == "POST":
+    if request.method == "POST" and "genre" in request.form and "ISBN" not in request.form:
         genre_naam = request.form["genre"].lower()
         if not checkContains(Genre, "naam", genre_naam):
             new_genre = Genre(naam=genre_naam)
@@ -382,12 +448,16 @@ def add():
             themas = [db.session.query(Thema).filter_by(naam=thema_name).first() or Thema(naam=thema_name) 
                       for thema_name in selected_themas]
 
+            aantal = parse_aantal(request.form.get("aantal", 1))
+
             boek = Boek(
                 titel=titel,
                 ISBN=ISBN,
                 beschrijving=beschrijving,
                 status=status,
                 bvdm=bvdm,
+                aantal=aantal,
+                beschikbaar_aantal=aantal,
                 locatie=locatie
             )
             
@@ -396,8 +466,9 @@ def add():
             boek.themas.extend(themas)
 
             db.session.add(boek)
+            maak_exemplaren(db.session, boek, aantal)
             db.session.commit()
-            
+
             flash(f"Boek '{titel}' succesvol toegevoegd.", "success")
             return redirect(url_for("adminworkspace"))
         else:
@@ -406,6 +477,229 @@ def add():
     else:
         flash("Onbekende fout opgetreden.", "error")
         abort(404)
+
+
+@app.route("/adminworkspace/scan", methods=["GET", "POST"])
+@actief_required
+def scan_boek():
+    """Boek toevoegen door een ISBN te scannen of te typen."""
+    gebruiker = huidige_gebruiker()
+    if not is_bibliothecaris(gebruiker):
+        if request.method == "POST":
+            return jsonify(error="Geen rechten om boeken toe te voegen."), 403
+        flash("Je hebt geen toegang tot de scanpagina.", "error")
+        return redirect(url_for("index"))
+
+    if request.method == "GET":
+        locaties = db.session.query(Locatie).order_by(Locatie.naam).all()
+        return render_template("scan.html", locaties=locaties)
+
+    data = request.get_json(silent=True) or request.form
+    try:
+        isbn = normaliseer_isbn(data.get("isbn", ""))
+    except IsbnFout as fout:
+        return jsonify(error=str(fout)), 400
+
+    aantal = parse_aantal(data.get("aantal", 1))
+
+    bestaand = db.session.query(Boek).filter_by(ISBN=isbn, deleted=False).first()
+    if bestaand:
+        maak_exemplaren(db.session, bestaand, aantal)
+        db.session.commit()
+        return jsonify(
+            status="bestaat",
+            isbn=isbn,
+            titel=bestaand.titel,
+            aantal=bestaand.aantal,
+            beschikbaar=bestaand.beschikbaar_aantal,
+            bericht=(
+                f"'{bestaand.titel}' bestond al; {aantal} exemplaar/exemplaren toegevoegd."
+            ),
+        )
+
+    titel = (data.get("titel") or "").strip()
+    if not titel:
+        return jsonify(error="Titel is verplicht."), 400
+
+    beschrijving = (data.get("beschrijving") or "").strip() or "Geen beschrijving beschikbaar."
+
+    locatie_naam = (data.get("locatie") or "").strip()
+    locatie = None
+    if locatie_naam:
+        locatie = db.session.query(Locatie).filter_by(naam=locatie_naam).first()
+        if not locatie:
+            locatie = Locatie(naam=locatie_naam)
+            db.session.add(locatie)
+
+    boek = Boek(
+        ISBN=isbn,
+        titel=titel,
+        beschrijving=beschrijving,
+        status=False,
+        bvdm=False,
+        aantal=aantal,
+        beschikbaar_aantal=aantal,
+        aantal_bladzijden=parse_int(data.get("paginas")),
+        locatie=locatie,
+    )
+    db.session.add(boek)
+
+    for naam in als_lijst(data.get("auteurs")):
+        auteur = (
+            db.session.query(Auteur).filter(func.lower(Auteur.naam) == naam.lower()).first()
+            or Auteur(naam=naam)
+        )
+        boek.auteurs.append(auteur)
+
+    for naam in als_lijst(data.get("genres")):
+        genre = (
+            db.session.query(Genre).filter(func.lower(Genre.naam) == naam.lower()).first()
+            or Genre(naam=naam)
+        )
+        boek.genres.append(genre)
+
+    maak_exemplaren(db.session, boek, aantal)
+    db.session.commit()
+
+    cover = download_cover(data.get("cover_url"), isbn, config.UPLOAD_DIR)
+
+    return jsonify(
+        status="nieuw",
+        isbn=isbn,
+        titel=boek.titel,
+        aantal=aantal,
+        cover=cover,
+        bericht=f"'{boek.titel}' toegevoegd.",
+    )
+
+
+@app.get("/api/isbn/<string:isbn>")
+def api_isbn(isbn):
+    """Metadata voor een ISBN, of de bestaande boekgegevens."""
+    gebruiker = huidige_gebruiker()
+    if not gebruiker:
+        return jsonify(error="Niet ingelogd."), 401
+    if not is_bibliothecaris(gebruiker):
+        return jsonify(error="Geen rechten."), 403
+
+    try:
+        genormaliseerd = normaliseer_isbn(isbn)
+    except IsbnFout as fout:
+        return jsonify(error=str(fout)), 400
+
+    bestaand = db.session.query(Boek).filter_by(ISBN=genormaliseerd, deleted=False).first()
+    if bestaand:
+        return jsonify(
+            isbn=genormaliseerd,
+            bestaat=True,
+            titel=bestaand.titel,
+            auteurs=[auteur.naam for auteur in bestaand.auteurs],
+            aantal=bestaand.aantal,
+            beschikbaar=bestaand.beschikbaar_aantal,
+            beschrijving=bestaand.beschrijving,
+            paginas=bestaand.aantal_bladzijden,
+            bron="database",
+        )
+
+    try:
+        metadata = zoek_metadata(genormaliseerd)
+    except LookupFout as fout:
+        return jsonify(error=str(fout), isbn=genormaliseerd, bestaat=False), 404
+
+    metadata["bestaat"] = False
+    return jsonify(metadata)
+
+
+@app.route("/adminworkspace/exemplaren")
+@actief_required
+def exemplaren_overzicht():
+    gebruiker = huidige_gebruiker()
+    if not is_bibliothecaris(gebruiker):
+        flash("Je hebt geen toegang tot het exemplarenoverzicht.", "error")
+        return redirect(url_for("index"))
+
+    boeken = db.session.query(Boek).filter_by(deleted=False).order_by(Boek.titel).all()
+    for boek in boeken:
+        synchroniseer(db.session, boek)
+    db.session.commit()
+    return render_template("exemplaren.html", boeken=boeken)
+
+
+@app.route("/adminworkspace/boek/<string:isbn>/labels")
+@actief_required
+def labels(isbn):
+    gebruiker = huidige_gebruiker()
+    if not is_bibliothecaris(gebruiker):
+        flash("Je hebt geen toegang tot de labels.", "error")
+        return redirect(url_for("index"))
+
+    boek = db.session.query(Boek).filter_by(ISBN=isbn, deleted=False).first_or_404()
+    exemplaren = [e for e in boek.exemplaren if not e.deleted]
+    label_data = [
+        {"exemplaar": exemplaar, "svg": barcode_svg(exemplaar.barcode)}
+        for exemplaar in exemplaren
+    ]
+    return render_template("labels.html", boek=boek, labels=label_data)
+
+
+@app.route("/adminworkspace/inventaris")
+@actief_required
+def inventaris():
+    gebruiker = huidige_gebruiker()
+    if not is_bibliothecaris(gebruiker):
+        flash("Je hebt geen toegang tot de inventaris.", "error")
+        return redirect(url_for("index"))
+    return render_template("inventaris.html")
+
+
+@app.get("/api/exemplaar/<string:barcode>")
+def api_exemplaar(barcode):
+    gebruiker = huidige_gebruiker()
+    if not gebruiker:
+        return jsonify(error="Niet ingelogd."), 401
+    if not is_bibliothecaris(gebruiker):
+        return jsonify(error="Geen rechten."), 403
+
+    exemplaar = (
+        db.session.query(Exemplaar).filter_by(barcode=barcode, deleted=False).first()
+    )
+    if not exemplaar:
+        return jsonify(error=f"Exemplaar {barcode} niet gevonden."), 404
+
+    boek = exemplaar.boek
+    locatie = exemplaar.locatie or boek.locatie
+    return jsonify(
+        barcode=exemplaar.barcode,
+        status=str(exemplaar.status),
+        isbn=boek.ISBN,
+        titel=boek.titel,
+        locatie=locatie.naam if locatie else None,
+        laatst_gezien=iso_utc(exemplaar.laatst_gezien),
+    )
+
+
+@app.post("/api/exemplaar/<string:barcode>/aanwezig")
+def api_exemplaar_aanwezig(barcode):
+    gebruiker = huidige_gebruiker()
+    if not gebruiker:
+        return jsonify(error="Niet ingelogd."), 401
+    if not is_bibliothecaris(gebruiker):
+        return jsonify(error="Geen rechten."), 403
+
+    exemplaar = (
+        db.session.query(Exemplaar).filter_by(barcode=barcode, deleted=False).first()
+    )
+    if not exemplaar:
+        return jsonify(error=f"Exemplaar {barcode} niet gevonden."), 404
+
+    markeer_aanwezig(db.session, exemplaar)
+    db.session.commit()
+    return jsonify(
+        barcode=exemplaar.barcode,
+        status=str(exemplaar.status),
+        laatst_gezien=iso_utc(exemplaar.laatst_gezien),
+        bericht=f"{exemplaar.barcode} gemarkeerd als aanwezig.",
+    )
 
 
 @app.route("/delpage", methods=["GET"])
@@ -473,8 +767,10 @@ def delete_voorwerp(table, voorwerp_id):
                     reservatie.deleted = True  
                 db.session.commit()  # Commit the reservation deletions first
             
-            # Now delete the book
-            instance.deleted = True  
+            # Now delete the book and its physical copies
+            for exemplaar in instance.exemplaren:
+                exemplaar.deleted = True
+            instance.deleted = True
         else:
             instance = db.session.query(globals()[table.capitalize()]).filter_by(id=voorwerp_id).first()
             if instance is None:
@@ -503,7 +799,11 @@ def change(ISBN):
                     boek = db.session.query(Boek).filter_by(ISBN=ISBN).first()
                     new_ISBN = request.form["ISBN"]
                     titel = request.form["titel"]
-                    aantal_exemplaren = request.form["beschikbaar_aantal"]
+                    aantal_exemplaren = (
+                        request.form.get("aantal")
+                        or request.form.get("beschikbaar_aantal")
+                        or boek.aantal
+                    )
                     status = request.form.get("status") == "Aanwezig"
                     bvdm = request.form.get("bvdm") == "Ja"
                     genre_names = request.form.getlist("genres")
@@ -528,8 +828,21 @@ def change(ISBN):
                     genres = [db.session.query(Genre).filter_by(naam=name).first() for name in genre_names]
                     themas = [db.session.query(Thema).filter_by(naam=name).first() for name in thema_names]
                     auteurs = [db.session.query(Auteur).filter_by(naam=name).first() for name in auteur_names]
+                    if new_ISBN != ISBN and boek.exemplaren:
+                        flash(
+                            "Het ISBN kan niet gewijzigd worden zolang er exemplaren bestaan.",
+                            "error",
+                        )
+                        return redirect(url_for("change", ISBN=ISBN))
+
                     # nieuwe waardes toekennen om waardes aan te passen
-                    boek.beschikbaar_aantal = aantal_exemplaren
+                    try:
+                        reconcileer_totaal(db.session, boek, parse_aantal(aantal_exemplaren))
+                    except ValueError as fout:
+                        db.session.rollback()
+                        flash(str(fout), "error")
+                        return redirect(url_for("change", ISBN=ISBN))
+
                     boek.ISBN = new_ISBN
                     boek.titel = titel
                     boek.genres = genres
@@ -539,7 +852,7 @@ def change(ISBN):
                     boek.bvdm = bvdm
 
                     db.session.commit()
-                    flash("Boek succesvol veranderd")
+                    flash("Boek succesvol veranderd", "success")
                     return redirect(url_for("boeken"))
                 else:
                     flash("Boek zit niet in de database.")
@@ -735,7 +1048,7 @@ def gebruikers():
 @app.route('/bewerk_gebruiker/<int:gebruiker_id>', methods=['GET', 'POST'])
 @actief_required
 def bewerk_gebruiker(gebruiker_id):
-    gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
+    gebruiker = db.session.get(Gebruiker,gebruiker_id)
     rol_choices = [
         ('admin', 'Admin'),
         ('bibliothecaris', 'Bibliothecaris'),
@@ -757,7 +1070,7 @@ def bewerk_gebruiker(gebruiker_id):
 @actief_required
 def verwijder_gebruiker(gebruiker_id):
     # Fetch the user from the database
-    gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
+    gebruiker = db.session.get(Gebruiker,gebruiker_id)
     
     if not gebruiker:
         flash("Gebruiker niet gevonden.", "error")
@@ -781,17 +1094,29 @@ def boek_terug_inleveren(reservatie_id):
         flash("Geen rechten om deze actie uit te voeren.", "error")
         return redirect(url_for('index'))
 
-    reservatie = db.session.query(Reservatie).get(reservatie_id)
+    reservatie = db.session.get(Reservatie,reservatie_id)
     if not reservatie or not reservatie.afgehaald:
         flash("Reservatie niet gevonden of niet afgehaald.", "error")
         return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
 
     boek = db.session.query(Boek).filter_by(ISBN=reservatie.boek_isbn).first()
     if boek:
-        boek.beschikbaar_aantal += 1
-        reservatie.afgehaald = False  # Of markeer als 'afgehandeld'
+        exemplaar = kies_uitgeleend(db.session, boek)
+        if exemplaar:
+            exemplaar.status = "beschikbaar"
+        synchroniseer(db.session, boek)
+        reservatie.afgehaald = False
         db.session.commit()
-        flash("Boek terug inleveren bevestigd en beschikbaar aantal aangepast.", "success")
+        if exemplaar:
+            flash(
+                f"Boek terug in leveren bevestigd (exemplaar {exemplaar.barcode}).",
+                "success",
+            )
+        else:
+            flash(
+                "Reservatie afgesloten, maar er was geen uitgeleend exemplaar gevonden.",
+                "warning",
+            )
     else:
         flash("Boek niet gevonden.", "error")
     return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
@@ -804,26 +1129,34 @@ def bevestig_afhaling(reservatie_id):
         flash("Geen rechten om deze actie uit te voeren.", "error")
         return redirect(url_for('index'))
 
-    reservatie = db.session.query(Reservatie).get(reservatie_id)
+    reservatie = db.session.get(Reservatie,reservatie_id)
     if not reservatie or reservatie.afgehaald:
         flash("Reservatie niet gevonden of al afgehaald.", "error")
         return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
 
     boek = db.session.query(Boek).filter_by(ISBN=reservatie.boek_isbn).first()
-    if boek and boek.beschikbaar_aantal > 0:
-        boek.beschikbaar_aantal -= 1
-        reservatie.afgehaald = True
-        db.session.commit()
-        flash("Afhaling bevestigd en beschikbaar aantal aangepast.", "success")
+    if boek:
+        exemplaar = kies_beschikbaar(db.session, boek)
+        if exemplaar:
+            exemplaar.status = "uitgeleend"
+            synchroniseer(db.session, boek)
+            reservatie.afgehaald = True
+            db.session.commit()
+            flash(
+                f"Afhaling bevestigd (exemplaar {exemplaar.barcode}).",
+                "success",
+            )
+        else:
+            flash("Geen beschikbaar exemplaar gevonden.", "error")
     else:
-        flash("Boek niet gevonden of geen exemplaren beschikbaar.", "error")
+        flash("Boek niet gevonden.", "error")
     return redirect(url_for('gebruiker_info', gebruiker_id=reservatie.gebruiker_id))
 
 @app.route('/gebruiker/<int:gebruiker_id>', methods=['GET'])
 @actief_required
 def gebruiker_info(gebruiker_id):
     # Fetch the user from the database
-    gebruiker = db.session.query(Gebruiker).get(gebruiker_id)
+    gebruiker = db.session.get(Gebruiker,gebruiker_id)
     if not gebruiker:
         flash("Gebruiker niet gevonden.", "error")
         return redirect(url_for('gebruikers'))  # Redirect back to the users list
@@ -850,7 +1183,7 @@ def verwijder_reservatie(reservatie_id):
         return redirect(url_for("index"))
 
     # Fetch the reservation
-    reservatie = db.session.query(Reservatie).get(reservatie_id)
+    reservatie = db.session.get(Reservatie,reservatie_id)
     if not reservatie:
         flash("Reservatie niet gevonden.", "error")
         return redirect(url_for('gebruikers'))
@@ -884,7 +1217,7 @@ def overdue_reservations():
         # Filter overdue reservations by user name or email
         overdue_reservations = db.session.query(Reservatie).join(Gebruiker).filter(
             Reservatie.end_date < today,
-            Reservatie.deleted == False,
+            Reservatie.deleted.is_(False),
             or_(
                 Gebruiker.naam.ilike(f"%{query}%"),
                 Gebruiker.achternaam.ilike(f"%{query}%"),
@@ -895,7 +1228,7 @@ def overdue_reservations():
         # Fetch all overdue reservations if no query is provided
         overdue_reservations = db.session.query(Reservatie).filter(
             Reservatie.end_date < today,
-            Reservatie.deleted == False
+            Reservatie.deleted.is_(False)
         ).all()
 
     return render_template('overdue_reservations.html', overdue_reservations=overdue_reservations)
@@ -926,6 +1259,34 @@ def cvs_import():
         flash("Je hebt geen toegang tot deze pagina.", "error")
         return redirect(url_for("index"))
 
+@app.errorhandler(404)
+def pagina_niet_gevonden(error):
+    return render_template("errors/404.html"), 404
+
+
+@app.errorhandler(500)
+def interne_serverfout(error):
+    db.session.rollback()
+    return render_template("errors/500.html"), 500
+
+
+@app.errorhandler(413)
+def bestand_te_groot(error):
+    flash("Het bestand is te groot (maximaal 5 MB).", "error")
+    return redirect(request.referrer or url_for("index"))
+
+
+@app.get("/healthz")
+def healthz():
+    """Eenvoudige healthcheck voor de server en de database."""
+    try:
+        db.session.execute(text("SELECT 1"))
+    except Exception:
+        db.session.rollback()
+        return jsonify(status="degraded", database="error"), 503
+    return jsonify(status="ok", database="ok"), 200
+
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     """
@@ -937,6 +1298,6 @@ def shutdown_session(exception=None):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
 
 

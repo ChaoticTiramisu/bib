@@ -94,10 +94,14 @@
                             <label for="bvdm" class="form-check-label">Boek van de maand</label>
                         </div>
 
-                        <!-- Beschikbare exemplaren -->
+                        <!-- Exemplaren -->
                         <div class="mb-3">
-                            <label for="beschikbaar_aantal" class="form-label">Beschikbare exemplaren</label>
-                            <input type="number" name="beschikbaar_aantal" class="form-control" value="{{ boek.beschikbaar_aantal }}" required>
+                            <label for="aantal" class="form-label">Totaal aantal exemplaren</label>
+                            <input type="number" name="aantal" id="aantal" min="0" class="form-control" value="{{ boek.aantal }}" required>
+                            <div class="form-text">
+                                Nu beschikbaar: {{ boek.beschikbaar_aantal }}.
+                                Verlagen kan alleen als er genoeg beschikbare exemplaren zijn.
+                            </div>
                         </div>
 
                         <!-- Submit Button -->
